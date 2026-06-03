@@ -5,7 +5,44 @@
                 <h5 class="card-title">¡Bienvenido a Dulce Encanto! 🎂</h5>
             </div>
             <div class="card-body">
-                <p class="text-muted">Gestiona tus pedidos, productos y clientes desde aquí.</p>
+                <p class="text-muted">Bienvenido al sistema de gestión de la pastelería. Desde aquí podrás administrar tus pedidos, productos y clientes de manera fácil y rápida.</p>
+
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body text-center">
+                                <i class="bi bi-bag-heart fs-1"></i>
+                                <h6 class="card-title mt-2">Pedidos</h6>
+                                <p class="card-text text-muted">Gestiona los pedidos de tus clientes.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body text-center">
+                                <i class="bi bi-cake2 fs-1"></i>
+                                <h6 class="card-title mt-2">Productos</h6>
+                                <p class="card-text text-muted">Administra tu catálogo de pasteles.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body text-center">
+                                <i class="bi bi-people fs-1"></i>
+                                <h6 class="card-title mt-2">Clientes</h6>
+                                <p class="card-text text-muted">Consulta y gestiona tus clientes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-primary">
+                        <i class="bi bi-box-arrow-left"></i> Cerrar Sesión
+                    </a>
+                </div>
+
             </div>
         </div>
     </div>
