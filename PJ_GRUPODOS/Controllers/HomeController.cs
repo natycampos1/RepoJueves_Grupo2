@@ -12,8 +12,12 @@ namespace PJ_GRUPODOS.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(string CorreoElectronico, string Contrasenna)
+        public IActionResult Index(LoginModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
             return RedirectToAction("Principal", "Home");
         }
 
@@ -28,6 +32,10 @@ namespace PJ_GRUPODOS.Controllers
         [HttpPost]
         public IActionResult Registrar(UsuarioModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
             return RedirectToAction("Index", "Home");
         }
 
@@ -42,8 +50,12 @@ namespace PJ_GRUPODOS.Controllers
         }
 
         [HttpPost]
-        public IActionResult RecuperarAcceso(string CorreoElectronico)
+        public IActionResult RecuperarAcceso(RecuperarAccesoModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
             return RedirectToAction("Index", "Home");
         }
 

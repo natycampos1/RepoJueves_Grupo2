@@ -1,4 +1,5 @@
-﻿@{
+﻿@model LoginModel
+@{
     Layout = "_LayoutExterno";
 }
 
@@ -12,19 +13,21 @@
 
             <form asp-action="Index" asp-controller="Home" method="post">
                 <div class="form-group position-relative has-icon-left mb-4">
-                    <input type="text" name="CorreoElectronico" class="form-control form-control-xl" placeholder="Correo Electrónico">
+                    <input asp-for="CorreoElectronico" type="text" class="form-control form-control-xl" placeholder="Correo Electrónico">
                     <div class="form-control-icon">
                         <i class="bi bi-envelope"></i>
                     </div>
+                    <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
                 </div>
                 <div class="form-group position-relative has-icon-left mb-4">
-                    <input type="password" name="Contrasenna" class="form-control form-control-xl" placeholder="Contraseña">
+                    <input asp-for="Contrasenna" type="password" class="form-control form-control-xl" placeholder="Contraseña">
                     <div class="form-control-icon">
                         <i class="bi bi-shield-lock"></i>
                     </div>
+                    <span asp-validation-for="Contrasenna" class="text-danger"></span>
                 </div>
 
-                <button class="btn btn-primary btn-block btn-lg shadow-lg mt-1">Procesar</button>
+                <button type="submit" class="btn btn-primary btn-block btn-lg shadow-lg mt-1">Procesar</button>
             </form>
 
             <div class="text-center mt-5 text-lg fs-4">

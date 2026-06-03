@@ -2,20 +2,13 @@
 
 namespace PJ_GRUPODOS.Models
 {
-    public class UsuarioModel
+    public class LoginModel
     {
-        [Required(ErrorMessage = "Ingrese su identificación.")]
-        public string Identificacion { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Ingrese su nombre.")]
-        public string Nombre { get; set; } = string.Empty;
-
         [Required(ErrorMessage = "Ingrese su correo electrónico.")]
         [EmailAddress(ErrorMessage = "Ingrese un correo electrónico válido.")]
         public string CorreoElectronico { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Ingrese su contraseña.")]
-        [MinLength(6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres.")]
         public string Contrasenna { get; set; } = string.Empty;
     }
 }
