@@ -1,10 +1,15 @@
 using PJ_GRUPODOS.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace PJ_GRUPODOS.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController(
+        IHttpClientFactory _http,
+        IConfiguration _config) : Controller
     {
+        #region Iniciar Sesión
+
         [HttpGet]
         public IActionResult Index()
         {
@@ -14,12 +19,24 @@ namespace PJ_GRUPODOS.Controllers
         [HttpPost]
         public IActionResult Index(LoginModel model)
         {
-            if (!ModelState.IsValid)
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + "Home/IniciarSesionAPI";
+            var response = client.PostAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.OK)
             {
-                return View(model);
+                return RedirectToAction("Principal", "Home");
             }
-            return RedirectToAction("Principal", "Home");
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                //Mensaje
+                return View();
+            }
+
+            throw new Exception("Error al iniciar sesión");
         }
+
+        #endregion
 
         #region Registrar
 
@@ -32,11 +49,11 @@ namespace PJ_GRUPODOS.Controllers
         [HttpPost]
         public IActionResult Registrar(UsuarioModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-            return RedirectToAction("Index", "Home");
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + "Home/RegistrarAPI";
+            var response = client.PostAsJsonAsync(url, model).Result;
+
+            return View();
         }
 
         #endregion
@@ -52,10 +69,6 @@ namespace PJ_GRUPODOS.Controllers
         [HttpPost]
         public IActionResult RecuperarAcceso(RecuperarAccesoModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
             return RedirectToAction("Index", "Home");
         }
 
@@ -65,6 +78,5 @@ namespace PJ_GRUPODOS.Controllers
         {
             return View();
         }
-
     }
 }
