@@ -74,24 +74,6 @@
                             </div>
                             <div class="auth-card-body">
 
-                                <!-- Social Register -->
-                                <div class="row g-3 mb-4">
-                                    <div class="col-6">
-                                        <button class="btn btn-social btn-social-google">
-                                            <i class="fab fa-google me-2"></i>Google
-                                        </button>
-                                    </div>
-                                    <div class="col-6">
-                                        <button class="btn btn-social btn-social-facebook">
-                                            <i class="fab fa-facebook-f me-2"></i>Facebook
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="auth-divider">
-                                    <span>O REGÍSTRATE CON EMAIL</span>
-                                </div>
-
                                 <!-- Success message (hidden by default) -->
                                 <div id="registerSuccess" class="alert alert-success d-none" role="alert">
                                     <i class="bi bi-check-circle me-2"></i>
@@ -107,20 +89,48 @@
                                             <div class="input-wrapper">
                                                 <input type="text" class="form-control form-control-auth" id="firstName"
                                                        placeholder="Tu nombre" required minlength="2">
-                                                <i class="bi bi-person input-icon"></i>
                                             </div>
                                             <div class="invalid-feedback">Por favor ingresa tu nombre (mín. 2 caracteres).</div>
                                         </div>
 
-                                        <!-- Apellido -->
+                                        <!-- 1 Apellido -->
                                         <div class="col-md-6">
-                                            <label class="label-auth" for="lastName">Apellido</label>
+                                            <label class="label-auth" for="lastName">Primer Apellido</label>
                                             <div class="input-wrapper">
                                                 <input type="text" class="form-control form-control-auth" id="lastName"
                                                        placeholder="Tu apellido" required minlength="2">
-                                                <i class="bi bi-person input-icon"></i>
                                             </div>
                                             <div class="invalid-feedback">Por favor ingresa tu apellido (mín. 2 caracteres).</div>
+                                        </div>
+
+                                        <!-- 2 Apellido -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="lastName">Segundo Apellido</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" class="form-control form-control-auth" id="lastName"
+                                                       placeholder="Tu apellido" required minlength="2">
+                                            </div>
+                                            <div class="invalid-feedback">Por favor ingresa tu apellido (mín. 2 caracteres).</div>
+                                        </div>
+
+                                        <!-- Identificacion -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="lastName">Identificación</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" class="form-control form-control-auth" id="lastName"
+                                                       placeholder="Tu identificación" required minlength="5">
+                                            </div>
+                                            <div class="invalid-feedback">Por favor ingresa tu identificación.</div>
+                                        </div>
+
+                                        <!-- Genero -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="lastName">Genero</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" class="form-control form-control-auth" id="lastName"
+                                                       placeholder="Tu genero" required minlength="2">
+                                            </div>
+                                            <div class="invalid-feedback">Por favor ingresa tu genero (mín. 2 caracteres).</div>
                                         </div>
 
                                         <!-- Correo -->
@@ -129,7 +139,6 @@
                                             <div class="input-wrapper">
                                                 <input type="email" class="form-control form-control-auth" id="regEmail"
                                                        placeholder="tucorreo@ejemplo.com" required>
-                                                <i class="bi bi-envelope input-icon"></i>
                                             </div>
                                             <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
                                         </div>
@@ -140,8 +149,17 @@
                                             <div class="input-wrapper">
                                                 <input type="tel" class="form-control form-control-auth" id="phone"
                                                        placeholder="+506 8888-8888">
-                                                <i class="bi bi-telephone input-icon"></i>
                                             </div>
+                                        </div>
+
+                                        <!-- Dirección -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="lastName">Dirección</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" class="form-control form-control-auth" id="lastName"
+                                                       placeholder="Tu dirección" required minlength="5">
+                                            </div>
+                                            <div class="invalid-feedback">Por favor ingresa tu Dirección.</div>
                                         </div>
 
                                         <!-- Contraseña -->
@@ -170,50 +188,6 @@
                                             <div class="invalid-feedback" id="confirmError">Las contraseñas no coinciden.</div>
                                         </div>
 
-                                        <!-- Fecha de nacimiento -->
-                                        <div class="col-md-6">
-                                            <label class="label-auth" for="birthdate">Fecha de Nacimiento <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span></label>
-                                            <div class="input-wrapper">
-                                                <input type="date" class="form-control form-control-auth" id="birthdate">
-                                                <i class="bi bi-calendar input-icon" style="pointer-events:none;"></i>
-                                            </div>
-                                        </div>
-
-                                        <!-- Cómo nos conociste -->
-                                        <div class="col-md-6">
-                                            <label class="label-auth" for="howFound">¿Cómo nos conociste?</label>
-                                            <select class="form-control form-control-auth" id="howFound">
-                                                <option value="" disabled selected>Selecciona una opción</option>
-                                                <option value="google">Google / Buscador</option>
-                                                <option value="social">Redes Sociales</option>
-                                                <option value="friend">Recomendación de amigo</option>
-                                                <option value="ad">Publicidad</option>
-                                                <option value="other">Otro</option>
-                                            </select>
-                                        </div>
-
-                                        <!-- Términos y condiciones -->
-                                        <div class="col-12">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="acceptTerms" required>
-                                                <label class="form-check-label" for="acceptTerms" style="font-size:14px;color:#555;">
-                                                    Acepto los <a href="#" class="auth-link">Términos y Condiciones</a> y la
-                                                    <a href="#" class="auth-link">Política de Privacidad</a> de CakeZone.
-                                                </label>
-                                                <div class="invalid-feedback">Debes aceptar los términos y condiciones.</div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Newsletter opt-in -->
-                                        <div class="col-12">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="newsletter" checked>
-                                                <label class="form-check-label" for="newsletter" style="font-size:14px;color:#555;">
-                                                    Quiero recibir ofertas exclusivas y novedades por correo electrónico.
-                                                </label>
-                                            </div>
-                                        </div>
-
                                         <!-- Submit -->
                                         <div class="col-12">
                                             <button type="submit" class="btn btn-auth btn-auth-primary" id="registerBtn">
@@ -224,7 +198,7 @@
                                         <div class="col-12 text-center d-lg-none">
                                             <p class="mb-0" style="font-size:14px;color:#888;">
                                                 ¿Ya tienes cuenta?
-                                                <a href="login.html" class="auth-link">Inicia sesión aquí</a>
+                                                <a asp-action="IniciarSesion" asp-controller="Home" class="auth-link">Inicia sesión aquí</a>
                                             </p>
                                         </div>
                                     </div>
