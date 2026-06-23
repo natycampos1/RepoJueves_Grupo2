@@ -1,0 +1,109 @@
+﻿@model LoginModel
+@{
+    Layout = "_LayoutExterno";
+}
+
+<!-- Login Section Start -->
+<div class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-11">
+                <div class="auth-card">
+                    <div class="row g-0">
+                        <!-- Image Side -->
+                        <div class="col-lg-5 d-none d-lg-flex">
+                            <div class="auth-image-side w-100">
+                                <i class="fa fa-birthday-cake auth-cake-icon"></i>
+                                <h2 class="font-secondary text-primary mb-3">Dulce Encanto</h2>
+                                <p class="text-secondary mb-4">Las mejores creaciones de repostería artesanal, elaboradas con amor y los ingredientes más frescos.</p>
+                                <div class="d-flex align-items-center justify-content-center gap-3 mt-3">
+                                    <div class="text-center">
+                                        <h4 class="text-white mb-0">500+</h4>
+                                        <small class="text-secondary" style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:11px;">PRODUCTOS</small>
+                                    </div>
+                                    <div class="border-start border-secondary" style="height:40px;"></div>
+                                    <div class="text-center">
+                                        <h4 class="text-white mb-0">10k+</h4>
+                                        <small class="text-secondary" style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:11px;">CLIENTES</small>
+                                    </div>
+                                    <div class="border-start border-secondary" style="height:40px;"></div>
+                                    <div class="text-center">
+                                        <h4 class="text-white mb-0">15</h4>
+                                        <small class="text-secondary" style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:11px;">AÑOS</small>
+                                    </div>
+                                </div>
+                                <div class="mt-5">
+                                    <p class="text-secondary mb-2" style="font-size:13px;">¿Aún no tienes cuenta?</p>
+                                    <a asp-action="Registrar" asp-controller="Home" class="btn btn-primary border-inner px-4 py-2" style="font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:1px;">
+                                        <i class="bi bi-person-plus me-1"></i> Crear Cuenta
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Side -->
+                        <div class="col-lg-7">
+                            <div class="auth-card-header">
+                                <i class="fa fa-lock text-primary fs-1 mb-2"></i>
+                                <h3 class="text-white text-uppercase mb-1" style="font-family:'Oswald',sans-serif;letter-spacing:2px;">Iniciar Sesión</h3>
+                                <p class="text-secondary mb-0" style="font-size:14px;">Ingresa tus credenciales para acceder a tu cuenta</p>
+                            </div>
+                            <div class="auth-card-body">
+
+                                <!-- Login Form -->
+                                <div id="loginAlert" class="alert alert-danger d-none" role="alert">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Correo o contraseña incorrectos. Por favor verifica tus datos.
+                                </div>
+
+                                <form id="loginForm" novalidate>
+                                    <div class="mb-4">
+                                        <label class="label-auth" for="loginEmail">Correo Electrónico</label>
+                                        <div class="input-wrapper">
+                                            <input type="email" class="form-control form-control-auth" id="loginEmail"
+                                                   placeholder="tucorreo@ejemplo.com" required>
+                                            <i class="bi bi-envelope input-icon"></i>
+                                        </div>
+                                        <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <label class="label-auth" for="loginPassword">Contraseña</label>
+                                            <a href="forgot-password.html" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                                        </div>
+                                        <div class="input-wrapper">
+                                            <input type="password" class="form-control form-control-auth" id="loginPassword"
+                                                   placeholder="Ingresa tu contraseña" required minlength="6">
+                                            <i class="bi bi-eye input-icon" id="togglePassword" title="Mostrar/ocultar contraseña"></i>
+                                        </div>
+                                        <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="rememberMe">
+                                            <label class="form-check-label" for="rememberMe" style="font-size:14px;color:#666;">
+                                                Recordarme en este dispositivo
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-auth btn-auth-primary mb-4" id="loginBtn">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                                    </button>
+
+                                    <p class="text-center mb-0 d-lg-none" style="font-size:14px;color:#888;">
+                                        ¿No tienes cuenta?
+                                        <a asp-action="Registrar" asp-controller="Home" class="auth-link">Regístrate aquí</a>
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Login Section End -->

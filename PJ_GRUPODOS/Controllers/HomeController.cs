@@ -16,6 +16,12 @@ namespace PJ_GRUPODOS.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult IniciarSesion()
+        {
+            return View();
+        }
+
         [HttpPost]
         public IActionResult Index(LoginModel model)
         {

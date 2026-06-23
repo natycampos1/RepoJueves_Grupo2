@@ -3,61 +3,238 @@
     Layout = "_LayoutExterno";
 }
 
-<div class="row h-100">
-    <div class="col-lg-6 col-12">
-        <div id="auth-left">
-            <div class="auth-logo">
-                <a asp-action="Index" asp-controller="Home"><img src="~/images/logo-pasteleria.png" alt="Logo"></a>
+<!-- Register Section Start -->
+<div class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-11 col-lg-12">
+                <div class="auth-card">
+                    <div class="row g-0">
+                        <!-- Image Side -->
+                        <div class="col-lg-4 d-none d-lg-flex">
+                            <div class="auth-image-side w-100">
+                                <i class="fa fa-birthday-cake auth-cake-icon"></i>
+                                <h3 class="font-secondary text-primary mb-4">¿Por qué unirte?</h3>
+
+                                <div class="benefit-item">
+                                    <div class="benefit-icon">
+                                        <i class="bi bi-tag-fill text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-white mb-0" style="font-size:14px;font-weight:600;">Descuentos Exclusivos</p>
+                                        <p class="text-secondary mb-0" style="font-size:12px;">Accede a ofertas solo para miembros</p>
+                                    </div>
+                                </div>
+
+                                <div class="benefit-item">
+                                    <div class="benefit-icon">
+                                        <i class="bi bi-truck text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-white mb-0" style="font-size:14px;font-weight:600;">Pedidos en Línea</p>
+                                        <p class="text-secondary mb-0" style="font-size:12px;">Ordena y rastrea tus pedidos fácilmente</p>
+                                    </div>
+                                </div>
+
+                                <div class="benefit-item">
+                                    <div class="benefit-icon">
+                                        <i class="bi bi-heart-fill text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-white mb-0" style="font-size:14px;font-weight:600;">Lista de Favoritos</p>
+                                        <p class="text-secondary mb-0" style="font-size:12px;">Guarda tus pasteles preferidos</p>
+                                    </div>
+                                </div>
+
+                                <div class="benefit-item">
+                                    <div class="benefit-icon">
+                                        <i class="bi bi-gift-fill text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-white mb-0" style="font-size:14px;font-weight:600;">Programa de Puntos</p>
+                                        <p class="text-secondary mb-0" style="font-size:12px;">Acumula y canjea puntos en cada compra</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <p class="text-secondary mb-2" style="font-size:13px;">¿Ya tienes cuenta?</p>
+                                    <a href="login.html" class="btn btn-primary border-inner px-4 py-2" style="font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:1px;">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Side -->
+                        <div class="col-lg-8">
+                            <div class="auth-card-header">
+                                <i class="bi bi-person-plus-fill text-primary fs-1 mb-2"></i>
+                                <h3 class="text-white text-uppercase mb-1" style="font-family:'Oswald',sans-serif;letter-spacing:2px;">Crear Nueva Cuenta</h3>
+                                <p class="text-secondary mb-0" style="font-size:14px;">Completa el formulario para unirte a la familia CakeZone</p>
+                            </div>
+                            <div class="auth-card-body">
+
+                                <!-- Social Register -->
+                                <div class="row g-3 mb-4">
+                                    <div class="col-6">
+                                        <button class="btn btn-social btn-social-google">
+                                            <i class="fab fa-google me-2"></i>Google
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-social btn-social-facebook">
+                                            <i class="fab fa-facebook-f me-2"></i>Facebook
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="auth-divider">
+                                    <span>O REGÍSTRATE CON EMAIL</span>
+                                </div>
+
+                                <!-- Success message (hidden by default) -->
+                                <div id="registerSuccess" class="alert alert-success d-none" role="alert">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    <strong>¡Cuenta creada con éxito!</strong> Revisa tu correo para verificar tu cuenta.
+                                </div>
+
+                                <!-- Register Form -->
+                                <form id="registerForm" novalidate>
+                                    <div class="row g-4">
+                                        <!-- Nombre -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="firstName">Nombre</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" class="form-control form-control-auth" id="firstName"
+                                                       placeholder="Tu nombre" required minlength="2">
+                                                <i class="bi bi-person input-icon"></i>
+                                            </div>
+                                            <div class="invalid-feedback">Por favor ingresa tu nombre (mín. 2 caracteres).</div>
+                                        </div>
+
+                                        <!-- Apellido -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="lastName">Apellido</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" class="form-control form-control-auth" id="lastName"
+                                                       placeholder="Tu apellido" required minlength="2">
+                                                <i class="bi bi-person input-icon"></i>
+                                            </div>
+                                            <div class="invalid-feedback">Por favor ingresa tu apellido (mín. 2 caracteres).</div>
+                                        </div>
+
+                                        <!-- Correo -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="regEmail">Correo Electrónico</label>
+                                            <div class="input-wrapper">
+                                                <input type="email" class="form-control form-control-auth" id="regEmail"
+                                                       placeholder="tucorreo@ejemplo.com" required>
+                                                <i class="bi bi-envelope input-icon"></i>
+                                            </div>
+                                            <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
+                                        </div>
+
+                                        <!-- Teléfono -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="phone">Teléfono <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span></label>
+                                            <div class="input-wrapper">
+                                                <input type="tel" class="form-control form-control-auth" id="phone"
+                                                       placeholder="+506 8888-8888">
+                                                <i class="bi bi-telephone input-icon"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Contraseña -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="regPassword">Contraseña</label>
+                                            <div class="input-wrapper">
+                                                <input type="password" class="form-control form-control-auth" id="regPassword"
+                                                       placeholder="Mínimo 8 caracteres" required minlength="8">
+                                                <i class="bi bi-eye input-icon" id="toggleRegPassword"></i>
+                                            </div>
+                                            <div class="strength-bar">
+                                                <div class="strength-fill" id="strengthFill"></div>
+                                            </div>
+                                            <div class="strength-text" id="strengthText" style="color:#aaa;">Ingresa una contraseña</div>
+                                            <div class="invalid-feedback">La contraseña debe tener al menos 8 caracteres.</div>
+                                        </div>
+
+                                        <!-- Confirmar Contraseña -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="confirmPassword">Confirmar Contraseña</label>
+                                            <div class="input-wrapper">
+                                                <input type="password" class="form-control form-control-auth" id="confirmPassword"
+                                                       placeholder="Repite tu contraseña" required>
+                                                <i class="bi bi-eye input-icon" id="toggleConfirmPassword"></i>
+                                            </div>
+                                            <div class="invalid-feedback" id="confirmError">Las contraseñas no coinciden.</div>
+                                        </div>
+
+                                        <!-- Fecha de nacimiento -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="birthdate">Fecha de Nacimiento <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span></label>
+                                            <div class="input-wrapper">
+                                                <input type="date" class="form-control form-control-auth" id="birthdate">
+                                                <i class="bi bi-calendar input-icon" style="pointer-events:none;"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Cómo nos conociste -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth" for="howFound">¿Cómo nos conociste?</label>
+                                            <select class="form-control form-control-auth" id="howFound">
+                                                <option value="" disabled selected>Selecciona una opción</option>
+                                                <option value="google">Google / Buscador</option>
+                                                <option value="social">Redes Sociales</option>
+                                                <option value="friend">Recomendación de amigo</option>
+                                                <option value="ad">Publicidad</option>
+                                                <option value="other">Otro</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Términos y condiciones -->
+                                        <div class="col-12">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="acceptTerms" required>
+                                                <label class="form-check-label" for="acceptTerms" style="font-size:14px;color:#555;">
+                                                    Acepto los <a href="#" class="auth-link">Términos y Condiciones</a> y la
+                                                    <a href="#" class="auth-link">Política de Privacidad</a> de CakeZone.
+                                                </label>
+                                                <div class="invalid-feedback">Debes aceptar los términos y condiciones.</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Newsletter opt-in -->
+                                        <div class="col-12">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="newsletter" checked>
+                                                <label class="form-check-label" for="newsletter" style="font-size:14px;color:#555;">
+                                                    Quiero recibir ofertas exclusivas y novedades por correo electrónico.
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Submit -->
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-auth btn-auth-primary" id="registerBtn">
+                                                <i class="bi bi-person-check me-2"></i>Crear Mi Cuenta
+                                            </button>
+                                        </div>
+
+                                        <div class="col-12 text-center d-lg-none">
+                                            <p class="mb-0" style="font-size:14px;color:#888;">
+                                                ¿Ya tienes cuenta?
+                                                <a href="login.html" class="auth-link">Inicia sesión aquí</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <h1 class="auth-title">Crear Cuenta</h1>
-
-            <form asp-action="Registrar" asp-controller="Home" method="post">
-
-                <div class="form-group position-relative has-icon-left mb-4">
-                    <input asp-for="Identificacion" type="text" class="form-control form-control-xl" placeholder="Identificación">
-                    <div class="form-control-icon">
-                        <i class="bi bi-person-badge"></i>
-                    </div>
-                    <span asp-validation-for="Identificacion" class="text-danger"></span>
-                </div>
-
-                <div class="form-group position-relative has-icon-left mb-4">
-                    <input asp-for="Nombre" type="text" class="form-control form-control-xl" placeholder="Nombre">
-                    <div class="form-control-icon">
-                        <i class="bi bi-person"></i>
-                    </div>
-                    <span asp-validation-for="Nombre" class="text-danger"></span>
-                </div>
-
-                <div class="form-group position-relative has-icon-left mb-4">
-                    <input asp-for="CorreoElectronico" type="text" class="form-control form-control-xl" placeholder="Correo Electrónico">
-                    <div class="form-control-icon">
-                        <i class="bi bi-envelope"></i>
-                    </div>
-                    <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
-                </div>
-
-                <div class="form-group position-relative has-icon-left mb-4">
-                    <input asp-for="Contrasenna" type="password" class="form-control form-control-xl" placeholder="Contraseña">
-                    <div class="form-control-icon">
-                        <i class="bi bi-shield-lock"></i>
-                    </div>
-                    <span asp-validation-for="Contrasenna" class="text-danger"></span>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block btn-lg shadow-lg mt-1">Procesar</button>
-            </form>
-
-            <div class="text-center mt-5 text-lg fs-4">
-                <p class='text-gray-600'>
-                    ¿Ya tienes una cuenta? <a asp-action="Index" asp-controller="Home" class="font-bold"> Inicia Sesión
-                </a>
-            </p>
         </div>
     </div>
 </div>
-<div class="col-lg-6 d-none d-lg-block">
-    <div id="auth-right">
-    </div>
-</div>
-</div>
+<!-- Register Section End -->
