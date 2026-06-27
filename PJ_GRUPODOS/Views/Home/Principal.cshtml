@@ -1,49 +1,309 @@
-﻿<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">¡Bienvenido a Dulce Encanto! 🎂</h5>
-            </div>
-            <div class="card-body">
-                <p class="text-muted">Bienvenido al sistema de gestión de la pastelería. Desde aquí podrás administrar tus pedidos, productos y clientes de manera fácil y rápida.</p>
+﻿@model LoginModel
+@{
+    Layout = "_Layout";
+}
 
-                <div class="row mt-4">
-                    <div class="col-md-4">
-                        <div class="card bg-light mb-3">
-                            <div class="card-body text-center">
-                                <i class="bi bi-bag-heart fs-1"></i>
-                                <h6 class="card-title mt-2">Pedidos</h6>
-                                <p class="card-text text-muted">Gestiona los pedidos de tus clientes.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-light mb-3">
-                            <div class="card-body text-center">
-                                <i class="bi bi-cake2 fs-1"></i>
-                                <h6 class="card-title mt-2">Productos</h6>
-                                <p class="card-text text-muted">Administra tu catálogo de pasteles.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-light mb-3">
-                            <div class="card-body text-center">
-                                <i class="bi bi-people fs-1"></i>
-                                <h6 class="card-title mt-2">Clientes</h6>
-                                <p class="card-text text-muted">Consulta y gestiona tus clientes.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-3">
-                    <a asp-action="Index" asp-controller="Home" class="btn btn-primary">
-                        <i class="bi bi-box-arrow-left"></i> Cerrar Sesión
-                    </a>
-                </div>
-
+<!-- Hero Start -->
+<div class="container-fluid bg-primary py-5 mb-5 hero-header">
+    <div class="container py-5">
+        <div class="row justify-content-start">
+            <div class="col-lg-8 text-center text-lg-start">
+                <h1 class="font-secondary text-primary mb-4">Pasteleria</h1>
+                <h1 class="display-1 text-uppercase text-white mb-4">RF Bakery</h1>
+                <h1 class="text-uppercase text-white">Lo mejor desde Perú</h1>
             </div>
         </div>
     </div>
 </div>
+<!-- Hero End -->
+<!-- About Start -->
+<div class="container-fluid pt-5">
+    <div class="container">
+        <div class="section-title position-relative text-center mx-auto mb-5 pb-3" style="max-width: 600px;">
+            <h2 class="text-primary font-secondary">About Us</h2>
+            <h1 class="display-4 text-uppercase">Welcome To CakeZone</h1>
+        </div>
+        <div class="row gx-5">
+            <div class="col-lg-5 mb-5 mb-lg-0" style="min-height: 400px;">
+                <div class="position-relative h-100">
+                    <img class="position-absolute w-100 h-100" src="~/images/about.jpg" style="object-fit: cover;">
+                </div>
+            </div>
+            <div class="col-lg-6 pb-5">
+                <h4 class="mb-4">Tempor erat elitr rebum clita. Diam dolor diam ipsum erat lorem sed stet labore lorem sit clita duo</h4>
+                <p class="mb-5">Tempor erat elitr at rebum at at clita. Diam dolor diam ipsum et tempor sit. Clita erat ipsum et lorem et sit, sed stet no labore lorem sit. Sanctus clita duo justo et tempor eirmod magna dolore erat amet magna</p>
+                <div class="row g-5">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center justify-content-center bg-primary border-inner mb-4" style="width: 90px; height: 90px;">
+                            <i class="fa fa-heartbeat fa-2x text-white"></i>
+                        </div>
+                        <h4 class="text-uppercase">100% Healthy</h4>
+                        <p class="mb-0">Labore justo vero ipsum sit clita erat lorem magna clita nonumy dolor magna dolor vero</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center justify-content-center bg-primary border-inner mb-4" style="width: 90px; height: 90px;">
+                            <i class="fa fa-award fa-2x text-white"></i>
+                        </div>
+                        <h4 class="text-uppercase">Award Winning</h4>
+                        <p class="mb-0">Labore justo vero ipsum sit clita erat lorem magna clita nonumy dolor magna dolor vero</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- About End -->
+
+<!-- Products Start -->
+<div class="container-fluid about py-5">
+    <div class="container">
+        <div class="section-title position-relative text-center mx-auto mb-5 pb-3" style="max-width: 600px;">
+            <h2 class="text-primary font-secondary">Menu & Pricing</h2>
+            <h1 class="display-4 text-uppercase">Explore Our Cakes</h1>
+        </div>
+        <div class="tab-class text-center">
+            <ul class="nav nav-pills d-inline-flex justify-content-center bg-dark text-uppercase border-inner p-4 mb-5">
+                <li class="nav-item">
+                    <a class="nav-link text-white active" data-bs-toggle="pill" href="#tab-1">Birthday</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" data-bs-toggle="pill" href="#tab-2">Wedding</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" data-bs-toggle="pill" href="#tab-3">Custom</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div id="tab-1" class="tab-pane fade show p-0 active">
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-1.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Birthday Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-1.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Birthday Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-1.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Birthday Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-1.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Birthday Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-1.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Birthday Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-1.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Birthday Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="tab-2" class="tab-pane fade show p-0">
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-2.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Wedding Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-2.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Wedding Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-2.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Wedding Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-2.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Wedding Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-2.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Wedding Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-2.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Wedding Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="tab-3" class="tab-pane fade show p-0">
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-3.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Custom Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-3.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Custom Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-3.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Custom Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-3.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Custom Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-3.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Custom Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex h-100">
+                                <div class="flex-shrink-0">
+                                    <img class="img-fluid" src="~/images/cake-3.jpg" alt="" style="width: 150px; height: 85px;">
+                                    <h4 class="bg-dark text-primary p-2 m-0">$99.00</h4>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center text-start bg-secondary border-inner px-4">
+                                    <h5 class="text-uppercase">Custom Cake</h5>
+                                    <span>Ipsum ipsum clita erat amet dolor sit justo sea eirmod diam stet sit justo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Products End -->

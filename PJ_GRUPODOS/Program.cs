@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 //Espacio de dependencias
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient(); //Dependencia para consumir servicios web
 
 var app = builder.Build();
 

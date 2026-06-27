@@ -1,4 +1,4 @@
-﻿@model UsuarioModel
+﻿@model UsuarioRegistroModel
 @{
     Layout = "_LayoutExterno";
 }
@@ -65,6 +65,8 @@
                             </div>
                         </div>
 
+                        
+
                         <!-- Form Side -->
                         <div class="col-lg-8">
                             <div class="auth-card-header">
@@ -74,118 +76,159 @@
                             </div>
                             <div class="auth-card-body">
 
-                                <!-- Success message (hidden by default) -->
-                                <div id="registerSuccess" class="alert alert-success d-none" role="alert">
-                                    <i class="bi bi-check-circle me-2"></i>
-                                    <strong>¡Cuenta creada con éxito!</strong> Revisa tu correo para verificar tu cuenta.
-                                </div>
+                                <!-- Mensaje -->
+                                @if (ViewBag.Mensaje != null)
+                                {
+                                    <div class="alert alert-danger alert-dismissible show fade text-center mb-1">
+                                        @ViewBag.Mensaje
+                                    </div>
+                                }
 
-                                <!-- Register Form -->
-                                <form id="registerForm" novalidate>
+                                <form id="RegistrarUsuarioForm" asp-action="RegistrarUsuario" asp-controller="Home" method="post" novalidate>
+                                    @Html.AntiForgeryToken()
                                     <div class="row g-4">
-                                        <!-- Nombre -->
+
+                                        <!-- Tipo de Identificación -->
                                         <div class="col-md-6">
-                                            <label class="label-auth" for="firstName">Nombre</label>
+                                            <label asp-for="IdTipoIdentificacion" class="label-auth">Tipo de Identificación</label>
                                             <div class="input-wrapper">
-                                                <input type="text" class="form-control form-control-auth" id="firstName"
-                                                       placeholder="Tu nombre" required minlength="2">
+                                                <select asp-for="IdTipoIdentificacion" class="form-control form-control-auth">
+                                                    <option value="">-- Seleccione --</option>
+                                                    @foreach (var item in ViewBag.TiposDeIdentificacion)
+                                                    {
+                                                        <option value="@item.IdTipoIdentificacion">@item.Descripcion</option>
+                                                    }
+                                                </select>
                                             </div>
-                                            <div class="invalid-feedback">Por favor ingresa tu nombre (mín. 2 caracteres).</div>
+                                            <span asp-validation-for="IdTipoIdentificacion" class="text-danger" style="font-size:12px;"></span>
                                         </div>
 
-                                        <!-- 1 Apellido -->
+                                        <!-- Identificación -->
                                         <div class="col-md-6">
-                                            <label class="label-auth" for="lastName">Primer Apellido</label>
+                                            <label asp-for="Identificacion" class="label-auth">Identificación</label>
                                             <div class="input-wrapper">
-                                                <input type="text" class="form-control form-control-auth" id="lastName"
-                                                       placeholder="Tu apellido" required minlength="2">
+                                                <input asp-for="Identificacion" class="form-control form-control-auth"
+                                                       placeholder="Tu número de identificación" />
                                             </div>
-                                            <div class="invalid-feedback">Por favor ingresa tu apellido (mín. 2 caracteres).</div>
+                                            <span asp-validation-for="Identificacion" class="text-danger" style="font-size:12px;"></span>
                                         </div>
 
-                                        <!-- 2 Apellido -->
+                                        <!-- Nombre Completo -->
                                         <div class="col-md-6">
-                                            <label class="label-auth" for="lastName">Segundo Apellido</label>
+                                            <label asp-for="NombreCompleto" class="label-auth">Nombre Completo</label>
                                             <div class="input-wrapper">
-                                                <input type="text" class="form-control form-control-auth" id="lastName"
-                                                       placeholder="Tu apellido" required minlength="2">
+                                                <input asp-for="NombreCompleto" class="form-control form-control-auth"
+                                                       placeholder="Tu nombre completo" />
                                             </div>
-                                            <div class="invalid-feedback">Por favor ingresa tu apellido (mín. 2 caracteres).</div>
+                                            <span asp-validation-for="NombreCompleto" class="text-danger" style="font-size:12px;"></span>
                                         </div>
 
-                                        <!-- Identificacion -->
+                                        <!-- Primer Apellido -->
                                         <div class="col-md-6">
-                                            <label class="label-auth" for="lastName">Identificación</label>
+                                            <label asp-for="PrimerApellido" class="label-auth">Primer Apellido</label>
                                             <div class="input-wrapper">
-                                                <input type="text" class="form-control form-control-auth" id="lastName"
-                                                       placeholder="Tu identificación" required minlength="5">
+                                                <input asp-for="PrimerApellido" class="form-control form-control-auth"
+                                                       placeholder="Tu primer apellido" />
                                             </div>
-                                            <div class="invalid-feedback">Por favor ingresa tu identificación.</div>
+                                            <span asp-validation-for="PrimerApellido" class="text-danger" style="font-size:12px;"></span>
                                         </div>
 
-                                        <!-- Genero -->
+                                        <!-- Segundo Apellido -->
                                         <div class="col-md-6">
-                                            <label class="label-auth" for="lastName">Genero</label>
+                                            <label asp-for="SegundoApellido" class="label-auth">
+                                                Segundo Apellido <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
                                             <div class="input-wrapper">
-                                                <input type="text" class="form-control form-control-auth" id="lastName"
-                                                       placeholder="Tu genero" required minlength="2">
+                                                <input asp-for="SegundoApellido" class="form-control form-control-auth"
+                                                       placeholder="Tu segundo apellido" />
                                             </div>
-                                            <div class="invalid-feedback">Por favor ingresa tu genero (mín. 2 caracteres).</div>
+                                            <span asp-validation-for="SegundoApellido" class="text-danger" style="font-size:12px;"></span>
                                         </div>
 
-                                        <!-- Correo -->
+                                        <!-- Género -->
                                         <div class="col-md-6">
-                                            <label class="label-auth" for="regEmail">Correo Electrónico</label>
+                                            <label asp-for="Genero" class="label-auth">
+                                                Género <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
                                             <div class="input-wrapper">
-                                                <input type="email" class="form-control form-control-auth" id="regEmail"
-                                                       placeholder="tucorreo@ejemplo.com" required>
+                                                <select asp-for="Genero" class="form-control form-control-auth">
+                                                    <option value="">-- Seleccione --</option>
+                                                    <option value="Masculino">Masculino</option>
+                                                    <option value="Femenino">Femenino</option>
+                                                    <option value="Otro">Otro</option>
+                                                </select>
                                             </div>
-                                            <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
-                                        </div>
-
-                                        <!-- Teléfono -->
-                                        <div class="col-md-6">
-                                            <label class="label-auth" for="phone">Teléfono <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span></label>
-                                            <div class="input-wrapper">
-                                                <input type="tel" class="form-control form-control-auth" id="phone"
-                                                       placeholder="+506 8888-8888">
-                                            </div>
+                                            <span asp-validation-for="Genero" class="text-danger" style="font-size:12px;"></span>
                                         </div>
 
                                         <!-- Dirección -->
                                         <div class="col-md-6">
-                                            <label class="label-auth" for="lastName">Dirección</label>
+                                            <label asp-for="Direccion" class="label-auth">
+                                                Dirección <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
                                             <div class="input-wrapper">
-                                                <input type="text" class="form-control form-control-auth" id="lastName"
-                                                       placeholder="Tu dirección" required minlength="5">
+                                                <input asp-for="Direccion" class="form-control form-control-auth"
+                                                       placeholder="Tu dirección" />
                                             </div>
-                                            <div class="invalid-feedback">Por favor ingresa tu Dirección.</div>
+                                            <span asp-validation-for="Direccion" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Nacionalidad -->
+                                        <div class="col-md-6">
+                                            <label asp-for="Nacionalidad" class="label-auth">
+                                                Nacionalidad <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="Nacionalidad" class="form-control form-control-auth"
+                                                       placeholder="Tu nacionalidad" />
+                                            </div>
+                                            <span asp-validation-for="Nacionalidad" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Teléfono -->
+                                        <div class="col-md-6">
+                                            <label asp-for="NumTelefono" class="label-auth">Teléfono</label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="NumTelefono" class="form-control form-control-auth"
+                                                       placeholder="+506 8888-8888" />
+                                            </div>
+                                            <span asp-validation-for="NumTelefono" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Correo -->
+                                        <div class="col-md-6">
+                                            <label asp-for="Email" class="label-auth">Correo Electrónico</label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="Email" class="form-control form-control-auth"
+                                                       placeholder="tucorreo@ejemplo.com" />
+                                            </div>
+                                            <span asp-validation-for="Email" class="text-danger" style="font-size:12px;"></span>
                                         </div>
 
                                         <!-- Contraseña -->
                                         <div class="col-md-6">
-                                            <label class="label-auth" for="regPassword">Contraseña</label>
+                                            <label asp-for="Contrasena" class="label-auth">Contraseña</label>
                                             <div class="input-wrapper">
-                                                <input type="password" class="form-control form-control-auth" id="regPassword"
-                                                       placeholder="Mínimo 8 caracteres" required minlength="8">
+                                                <input asp-for="Contrasena" class="form-control form-control-auth"
+                                                       placeholder="Mínimo 8 caracteres" id="regPassword" />
                                                 <i class="bi bi-eye input-icon" id="toggleRegPassword"></i>
                                             </div>
                                             <div class="strength-bar">
                                                 <div class="strength-fill" id="strengthFill"></div>
                                             </div>
                                             <div class="strength-text" id="strengthText" style="color:#aaa;">Ingresa una contraseña</div>
-                                            <div class="invalid-feedback">La contraseña debe tener al menos 8 caracteres.</div>
+                                            <span asp-validation-for="Contrasena" class="text-danger" style="font-size:12px;"></span>
                                         </div>
 
                                         <!-- Confirmar Contraseña -->
                                         <div class="col-md-6">
-                                            <label class="label-auth" for="confirmPassword">Confirmar Contraseña</label>
+                                            <label asp-for="ConfirmarContrasena" class="label-auth">Confirmar Contraseña</label>
                                             <div class="input-wrapper">
-                                                <input type="password" class="form-control form-control-auth" id="confirmPassword"
-                                                       placeholder="Repite tu contraseña" required>
+                                                <input asp-for="ConfirmarContrasena" class="form-control form-control-auth"
+                                                       placeholder="Repite tu contraseña" id="confirmPassword" />
                                                 <i class="bi bi-eye input-icon" id="toggleConfirmPassword"></i>
                                             </div>
-                                            <div class="invalid-feedback" id="confirmError">Las contraseñas no coinciden.</div>
+                                            <span asp-validation-for="ConfirmarContrasena" class="text-danger" style="font-size:12px;"></span>
                                         </div>
 
                                         <!-- Submit -->
@@ -201,6 +244,7 @@
                                                 <a asp-action="IniciarSesion" asp-controller="Home" class="auth-link">Inicia sesión aquí</a>
                                             </p>
                                         </div>
+
                                     </div>
                                 </form>
                             </div>
@@ -211,4 +255,4 @@
         </div>
     </div>
 </div>
-<!-- Register Section End -->
+<script src="~/js/RegistrarUsuario.js"></script>

@@ -47,19 +47,59 @@ namespace PJ_GRUPODOS.Controllers
         #region Registrar
 
         [HttpGet]
-        public IActionResult Registrar()
+        public IActionResult RegistrarUsuario()
         {
+            ConsultarTiposDeIdentificacion();
             return View();
         }
 
         [HttpPost]
-        public IActionResult Registrar(UsuarioModel model)
+        public IActionResult RegistrarUsuario(UsuarioRegistroModel model)
         {
+            //Creo el cliente http
             using var client = _http.CreateClient();
-            var url = _config["Valores:UrlApi"] + "Home/RegistrarAPI";
+            //Obtengo la url del api
+            var url = _config["Valores:UrlApi"] + "Home/RegistrarUsuarioAPI";
+            //Envio el modelo al api y tomo la respuesta
             var response = client.PostAsJsonAsync(url, model).Result;
 
+            //Manejo la respeuesta recibida del api
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                ViewBag.Mensaje = "Cliente ingresado correctamente";
+                return RedirectToAction("Principal", "Home");
+            }
+            else if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                ConsultarTiposDeIdentificacion();
+                ViewBag.Mensaje = response.Content.ReadAsStringAsync().Result;
+                return View();
+            }
+            throw new Exception("Error al registrar cliente");
+
             return View();
+        }
+
+
+        //Funciones internas para traer datos de tablas catalogo y presentar en el formulario de registro con dropdowns
+        private void ConsultarTiposDeIdentificacion()
+        {
+            using var client = _http.CreateClient();
+
+            var url = _config["Valores:UrlApi"] + "Home/ConsultarTiposDeIdentificacionAPI";
+
+            var response = client.GetAsync(url).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                ViewBag.TiposDeIdentificacion = response.Content
+                    .ReadFromJsonAsync<List<TipoIdentificacionModel>>()
+                    .Result;
+            }
+            else
+            {
+                ViewBag.TiposDeIdentificacion = new List<TipoIdentificacionModel>();
+            }
         }
 
         #endregion
