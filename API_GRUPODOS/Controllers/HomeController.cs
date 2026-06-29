@@ -83,8 +83,22 @@ namespace API_GRUPODOS.Controllers
             if (usuario == null || !BCrypt.Net.BCrypt.Verify(model.Contrasena, usuario.Contrasena))
                 return NotFound("Credenciales incorrectas");
 
-            // Login exitoso — aquí va el JWT
-            return Ok(usuario);
+            // En caso de Login exitoso
+            // Mando InfoVariableSesionUsuarioModel para no mandar la contraseña
+            InfoVariableSesionUsuarioModel infoUsuario = new();
+            infoUsuario.Identificacion = usuario.Identificacion;
+            infoUsuario.IdTipoIdentificacion = usuario.IdTipoIdentificacion;
+            infoUsuario.NombreCompleto = usuario.NombreCompleto;
+            infoUsuario.PrimerApellido = usuario.PrimerApellido;
+            infoUsuario.SegundoApellido = usuario.SegundoApellido;
+            infoUsuario.Genero = usuario.Genero;
+            infoUsuario.Direccion = usuario.Direccion;
+            infoUsuario.Nacionalidad = usuario.Nacionalidad;
+            infoUsuario.FechaRegistro = usuario.FechaRegistro;
+            infoUsuario.NumTelefono = usuario.NumTelefono;
+            infoUsuario.Email = usuario.Email;
+
+            return Ok(infoUsuario);
         }
 
 

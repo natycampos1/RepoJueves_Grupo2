@@ -1,6 +1,7 @@
 using PJ_GRUPODOS.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Text.Json;
 
 namespace PJ_GRUPODOS.Controllers
 {
@@ -35,6 +36,15 @@ namespace PJ_GRUPODOS.Controllers
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
+                //Obtengo la info del usuario
+                UsuarioRegistroModel? usuario = response.Content.ReadFromJsonAsync<UsuarioRegistroModel>().Result;
+
+                HttpContext.Session.SetString("Autenticado", "1");
+
+                HttpContext.Session.SetString("Nombre", usuario!.NombreCompleto);
+                HttpContext.Session.SetString("Identificacion", usuario!.Identificacion);
+                HttpContext.Session.SetString("Email", usuario!.Email);
+
                 return RedirectToAction("Principal", "Home");
             }
             else if (response.StatusCode == HttpStatusCode.NotFound)
@@ -45,6 +55,17 @@ namespace PJ_GRUPODOS.Controllers
             }
 
             throw new Exception("Error al iniciar sesión");
+        }
+
+        #endregion
+
+        #region Cerrar Sesión
+
+        [HttpGet]
+        public IActionResult CerrarSesion()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index","Home");
         }
 
         #endregion
