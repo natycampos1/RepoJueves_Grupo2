@@ -35,6 +35,9 @@ namespace API_GRUPODOS.Controllers
 
             using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
 
+            
+
+
             // Hasheo la contraseña antes de enviarla al Procedimiento almacenado
             string contrasenaHash = BCrypt.Net.BCrypt.HashPassword(model.Contrasena);
 
@@ -78,6 +81,7 @@ namespace API_GRUPODOS.Controllers
                 new { Email = model.Email },
                 commandType: System.Data.CommandType.StoredProcedure
             );
+
 
             // Verifico que exista y que la contraseña coincida con el hash
             if (usuario == null || !BCrypt.Net.BCrypt.Verify(model.Contrasena, usuario.Contrasena))

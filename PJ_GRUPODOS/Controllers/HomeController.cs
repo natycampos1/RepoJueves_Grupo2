@@ -39,7 +39,7 @@ namespace PJ_GRUPODOS.Controllers
                 //Obtengo la info del usuario
                 UsuarioRegistroModel? usuario = response.Content.ReadFromJsonAsync<UsuarioRegistroModel>().Result;
 
-                HttpContext.Session.SetString("Autenticado", "1");
+                HttpContext.Session.SetInt32("Autenticado", 1);
 
                 HttpContext.Session.SetString("Nombre", usuario!.NombreCompleto);
                 HttpContext.Session.SetString("Identificacion", usuario!.Identificacion);
