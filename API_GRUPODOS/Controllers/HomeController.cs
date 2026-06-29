@@ -11,6 +11,7 @@ namespace API_GRUPODOS.Controllers
     public class HomeController(IConfiguration _config) : ControllerBase
     {
 
+        #region Registro
         [HttpGet("ConsultarTiposDeIdentificacionAPI")]
         public IActionResult ConsultarTiposDeIdentificacionAPI()
         {
@@ -61,6 +62,33 @@ namespace API_GRUPODOS.Controllers
 
             return BadRequest("No se pudo completar el registro, verifica si ya tienes una cuenta asociada");
         }
+
+        #endregion
+
+        #region Inicio de sesión
+
+        [HttpPost("IniciarSesionAPI")]
+        public IActionResult IniciarSesionAPI(InicioSesionUsuarioRequestModel model)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            // Busco usuario por email
+            var usuario = context.QueryFirstOrDefault<RegistroUsuarioRequestModel>(
+                "SP_IniciarSesion",
+                new { Email = model.Email },
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            // Verifico que exista y que la contraseña coincida con el hash
+            if (usuario == null || !BCrypt.Net.BCrypt.Verify(model.Contrasena, usuario.Contrasena))
+                return NotFound("Credenciales incorrectas");
+
+            // Login exitoso — aquí va el JWT
+            return Ok(usuario);
+        }
+
+
+        #endregion
     }
 }
 
