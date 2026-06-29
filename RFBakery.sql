@@ -218,6 +218,8 @@ END
 GO
 
 --Select para verificar que el usuario se haya registrado correctamente
+USE RFBakery;
+GO
 SELECT
     P.IDENTIFICACION_PK             AS Identificacion,
     TI.DESCRIPCION                  AS TipoIdentificacion,
@@ -235,3 +237,75 @@ FROM PERSONA_TB P
 INNER JOIN TIPO_IDENTIFICACION_TB TI ON P.ID_TIPO_IDENTIFICACION_FK = TI.ID_TIPO_IDENTIFICACION_PK
 INNER JOIN TELEFONO_TB T             ON P.IDENTIFICACION_PK         = T.IDENTIFICACION_FK
 INNER JOIN USUARIO_TB U              ON P.IDENTIFICACION_PK         = U.IDENTIFICACION_FK;
+
+
+--Procedimiento almacenado para iniciar sesión de usuario (consulto usuario por email y envio los datos de interes para la variable de sesion)
+USE RFBakery;
+GO
+
+CREATE PROCEDURE SP_IniciarSesion
+    @Email VARCHAR(100)
+AS
+BEGIN
+    SELECT
+        P.IDENTIFICACION_PK             AS Identificacion,
+        P.ID_TIPO_IDENTIFICACION_FK     AS IdTipoIdentificacion,
+        P.NOMBRE_COMPLETO               AS NombreCompleto,
+        P.PRIMER_APELLIDO               AS PrimerApellido,
+        P.SEGUNDO_APELLIDO              AS SegundoApellido,
+        P.GENERO                        AS Genero,
+        P.DIRECCION                     AS Direccion,
+        P.NACIONALIDAD                  AS Nacionalidad,
+        P.FECHA_REGISTRO                AS FechaRegistro,
+        T.NUM_TELEFONO                  AS NumTelefono,
+        U.EMAIL                         AS Email,
+        U.CONTRASENA                    AS Contrasena
+    FROM USUARIO_TB U
+    INNER JOIN PERSONA_TB P   ON U.IDENTIFICACION_FK  = P.IDENTIFICACION_PK
+    INNER JOIN TELEFONO_TB T  ON P.IDENTIFICACION_PK  = T.IDENTIFICACION_FK
+    WHERE U.EMAIL = @Email
+    AND U.ID_ESTADO_FK = 1
+END
+GO
+
+--CREACION DE TABLA PARA INSERTAR ERRORES
+
+USE RFBakery;
+GO
+
+CREATE TABLE [dbo].[tbError](
+	[Consecutivo] [int] IDENTITY(1,1) NOT NULL,
+	[Mensaje] [varchar](max) NOT NULL,
+	[Lugar] [varchar](50) NOT NULL,
+	[FechaHora] [datetime] NOT NULL,
+	[ConsecutivoUsuario] [int] NOT NULL,
+ CONSTRAINT [PK_tbError] PRIMARY KEY CLUSTERED 
+(
+	[Consecutivo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+--CREACIION DE PROCEDIMIENTO ALMACENADO PARA GUARDAR DATOS DE ERROR
+
+USE RFBakery;
+GO
+CREATE PROCEDURE [dbo].[SP_RegistrarError]
+    @Mensaje                varchar(max),
+    @Lugar                  varchar(50),
+    @FechaHora              datetime,
+    @ConsecutivoUsuario     int
+AS
+BEGIN
+
+
+    INSERT INTO dbo.tbError
+               (Mensaje
+               ,Lugar
+               ,FechaHora
+               ,ConsecutivoUsuario)
+         VALUES
+               (@Mensaje,@Lugar,@FechaHora,@ConsecutivoUsuario)
+
+END
+

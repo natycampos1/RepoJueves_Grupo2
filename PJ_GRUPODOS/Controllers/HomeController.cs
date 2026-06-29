@@ -42,7 +42,8 @@ namespace PJ_GRUPODOS.Controllers
                 HttpContext.Session.SetInt32("Autenticado", 1);
 
                 HttpContext.Session.SetString("Nombre", usuario!.NombreCompleto);
-                HttpContext.Session.SetString("Identificacion", usuario!.Identificacion);
+                HttpContext.Session.SetString("PrimerApellido", usuario!.PrimerApellido);
+                HttpContext.Session.SetString("SegundoApellido", usuario!.SegundoApellido);
                 HttpContext.Session.SetString("Email", usuario!.Email);
 
                 return RedirectToAction("Principal", "Home");
