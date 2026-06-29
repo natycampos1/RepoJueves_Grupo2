@@ -8,13 +8,17 @@ namespace PJ_GRUPODOS.Controllers
         IHttpClientFactory _http,
         IConfiguration _config) : Controller
     {
-        #region Iniciar Sesión
+        #region Index
 
         [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
+
+        #endregion
+
+        #region Iniciar Sesión
 
         [HttpGet]
         public IActionResult IniciarSesion()
@@ -23,7 +27,7 @@ namespace PJ_GRUPODOS.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(LoginModel model)
+        public IActionResult IniciarSesion(LoginModel model)
         {
             using var client = _http.CreateClient();
             var url = _config["Valores:UrlApi"] + "Home/IniciarSesionAPI";
@@ -36,6 +40,7 @@ namespace PJ_GRUPODOS.Controllers
             else if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 //Mensaje
+                ViewBag.Mensaje = response.Content.ReadAsStringAsync().Result;
                 return View();
             }
 
@@ -120,9 +125,11 @@ namespace PJ_GRUPODOS.Controllers
 
         #endregion
 
+        #region Principal
         public IActionResult Principal()
         {
             return View();
         }
+        #endregion
     }
 }
