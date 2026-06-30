@@ -25,5 +25,7 @@ namespace API_GRUPODOS.Models
         public string Email { get; set; }
         public string Contrasena { get; set; }
         public string ConfirmarContrasena { get; set; }
+
+        public int IdRol { get; set; }
     }
 }

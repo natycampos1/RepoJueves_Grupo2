@@ -1,7 +1,7 @@
 using PJ_GRUPODOS.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using System.Text.Json;
+
 
 namespace PJ_GRUPODOS.Controllers
 {
@@ -36,11 +36,11 @@ namespace PJ_GRUPODOS.Controllers
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                //Obtengo la info del usuario
                 UsuarioRegistroModel? usuario = response.Content.ReadFromJsonAsync<UsuarioRegistroModel>().Result;
 
                 HttpContext.Session.SetInt32("Autenticado", 1);
 
+                HttpContext.Session.SetString("Identificacion", usuario!.Identificacion);
                 HttpContext.Session.SetString("Nombre", usuario!.NombreCompleto);
                 HttpContext.Session.SetString("PrimerApellido", usuario!.PrimerApellido);
                 HttpContext.Session.SetString("SegundoApellido", usuario!.SegundoApellido);
@@ -152,6 +152,76 @@ namespace PJ_GRUPODOS.Controllers
         {
             return View();
         }
+        #endregion
+
+        #region Gestion de Perfil
+
+        [HttpGet]
+        public IActionResult GestionPerfil()
+        {
+            string identificacion = HttpContext.Session.GetString("Identificacion");
+
+            using var client = _http.CreateClient();
+
+            var url = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
+
+            var response = client.GetAsync(url).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                ViewBag.InfoUsuario = response.Content
+                    .ReadFromJsonAsync<UsuarioConsultaModel>()
+                    .Result;
+            }
+            else
+            {
+                ViewBag.Mensaje = "La información del usuario no pudo cargarse";
+                ViewBag.InfoUsuario = new UsuarioConsultaModel();
+            }
+
+            return View();
+        }
+
+
+        [HttpPost]
+        public IActionResult GestionPerfil(UsuarioEdicionRequestModel model)
+        {
+            using var client = _http.CreateClient();
+
+            var url = _config["Valores:UrlApi"] + "Home/ActualizarUsuarioAPI";
+
+            var response = client.PostAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                ViewBag.Mensaje = "Perfil actualizado correctamente";
+            }
+            else
+            {
+                ViewBag.Mensaje = response.Content.ReadAsStringAsync().Result;
+            }
+
+            // Volver a consultar la info actualizada para repoblar la vista
+            string identificacion = HttpContext.Session.GetString("Identificacion");
+
+            var urlConsulta = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
+            var responseConsulta = client.GetAsync(urlConsulta).Result;
+
+            if (responseConsulta.IsSuccessStatusCode)
+            {
+
+                ViewBag.InfoUsuario = responseConsulta.Content
+                    .ReadFromJsonAsync<UsuarioConsultaModel>()
+                    .Result;
+            }
+            else
+            {
+                ViewBag.InfoUsuario = new UsuarioConsultaModel();
+            }
+            HttpContext.Session.SetInt32("Autenticado", 1);
+            return View();
+        }
+
         #endregion
     }
 }

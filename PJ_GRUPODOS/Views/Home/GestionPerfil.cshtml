@@ -1,0 +1,195 @@
+﻿
+@{
+    Layout = "_Layout";
+    var info = ViewBag.InfoUsuario as UsuarioConsultaModel;
+}
+
+<!-- Gestion Perfil Section Start -->
+<div class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-11 col-lg-12">
+                <div class="auth-card">
+                    <div class="row g-0">
+
+                        <!-- Form Side -->
+                        <div class="col-lg-12">
+                            <div class="auth-card-header">
+                                <i class="bi bi-person-gear text-primary fs-1 mb-2"></i>
+                                <h3 class="text-white text-uppercase mb-1" style="font-family:'Oswald',sans-serif;letter-spacing:2px;">Información de usuario</h3>
+                                <p class="text-secondary mb-0" style="font-size:14px;">Ajusta tu información personal</p>
+                            </div>
+                            <div class="auth-card-body">
+
+                                <!-- Mensaje -->
+                                @if (ViewBag.Mensaje != null)
+                                {
+                                    <div class="alert alert-danger alert-dismissible show fade text-center mb-1">
+                                        @ViewBag.Mensaje
+                                    </div>
+                                }
+
+                                <form id="GestionPerfilForm" asp-action="GestionPerfil" asp-controller="Home" method="post" novalidate>
+                                    @Html.AntiForgeryToken()
+                                    <div class="row g-4">
+
+                                        <!-- Tipo de Identificación (solo lectura) -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">Tipo de Identificación</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" class="form-control form-control-auth"
+                                                       value="@info?.TipoIdentificacion" disabled />
+                                            </div>
+                                        </div>
+
+                                        <!-- Identificación (solo lectura) -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">Identificación</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" name="Identificacion" class="form-control form-control-auth"
+                                                       value="@info?.Identificacion" disabled />
+                                                <!-- Hidden para que el valor sí viaje al POST, ya que los inputs disabled no se envían -->
+                                                <input type="hidden" name="Identificacion" value="@info?.Identificacion" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Nombre Completo -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">Nombre Completo</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" name="NombreCompleto" class="form-control form-control-auth"
+                                                       value="@info?.NombreCompleto" placeholder="Tu nombre completo" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Primer Apellido -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">Primer Apellido</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" name="PrimerApellido" class="form-control form-control-auth"
+                                                       value="@info?.PrimerApellido" placeholder="Tu primer apellido" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Segundo Apellido -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">
+                                                Segundo Apellido <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <input type="text" name="SegundoApellido" class="form-control form-control-auth"
+                                                       value="@info?.SegundoApellido" placeholder="Tu segundo apellido" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Género -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">
+                                                Género <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <select name="Genero" class="form-control form-control-auth">
+                                                    <option value="">-- Seleccione --</option>
+                                                    <option value="Masculino" selected="@(info?.Genero == "Masculino")">Masculino</option>
+                                                    <option value="Femenino" selected="@(info?.Genero == "Femenino")">Femenino</option>
+                                                    <option value="Otro" selected="@(info?.Genero == "Otro")">Otro</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Dirección -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">
+                                                Dirección <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <input type="text" name="Direccion" class="form-control form-control-auth"
+                                                       value="@info?.Direccion" placeholder="Tu dirección" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Nacionalidad -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">
+                                                Nacionalidad <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <input type="text" name="Nacionalidad" class="form-control form-control-auth"
+                                                       value="@info?.Nacionalidad" placeholder="Tu nacionalidad" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Teléfono -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">Teléfono</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" name="NumTelefono" class="form-control form-control-auth"
+                                                       value="@info?.NumTelefono" placeholder="+506 8888-8888" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Correo -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">Correo Electrónico</label>
+                                            <div class="input-wrapper">
+                                                <input type="email" name="Email" class="form-control form-control-auth"
+                                                       value="@info?.Email" placeholder="tucorreo@ejemplo.com" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Rol (solo lectura) -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">Rol</label>
+                                            <div class="input-wrapper">
+                                                <input type="text" class="form-control form-control-auth"
+                                                       value="@info?.Rol" disabled />
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-2" style="border-color:rgba(255,255,255,0.1);" />
+
+                                        <div class="col-12">
+                                            <p class="text-secondary mb-0" style="font-size:13px;">
+                                                Si deseas cambiar tu contraseña, completa los siguientes campos. Si los dejas vacíos, tu contraseña actual se mantendrá.
+                                            </p>
+                                        </div>
+
+                                        <!-- Nueva Contraseña -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">Nueva Contraseña <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span></label>
+                                            <div class="input-wrapper">
+                                                <input type="password" name="NuevaContrasena" class="form-control form-control-auth"
+                                                       placeholder="Mínimo 8 caracteres" id="nuevaContrasena" />
+                                                <i class="bi bi-eye input-icon" id="toggleNuevaContrasena"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Confirmar Nueva Contraseña -->
+                                        <div class="col-md-6">
+                                            <label class="label-auth">Confirmar Nueva Contraseña <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span></label>
+                                            <div class="input-wrapper">
+                                                <input type="password" name="ConfirmarNuevaContrasena" class="form-control form-control-auth"
+                                                       placeholder="Repite la nueva contraseña" id="confirmarNuevaContrasena" />
+                                                <i class="bi bi-eye input-icon" id="toggleConfirmarNuevaContrasena"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Submit -->
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-auth btn-auth-primary" id="actualizarBtn">
+                                                <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Gestion Perfil Section End -->
+<script src="~/js/gestionperfil.js"></script>

@@ -18,10 +18,14 @@ namespace API_GRUPODOS.Models
         public string? Nacionalidad { get; set; }
         public DateTime FechaRegistro { get; set; } = DateTime.Now;
 
+        
+
         // --- Datos de tbTelefono ---
         public string NumTelefono { get; set; }
 
         // --- Datos de tbUsuario ---
         public string Email { get; set; } = string.Empty;
+
+        public int IdRol { get; set; }
     }
 }
