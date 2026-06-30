@@ -125,6 +125,7 @@ INSERT INTO TIPO_IDENTIFICACION_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Pasaport
 INSERT INTO TIPO_IDENTIFICACION_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('DIMEX', 1);
 GO
 
+
 --Procedimientos almacenados
 --Consulta de tipos de identificacion
 USE RFBakery;
@@ -237,12 +238,9 @@ FROM PERSONA_TB P
 INNER JOIN TIPO_IDENTIFICACION_TB TI ON P.ID_TIPO_IDENTIFICACION_FK = TI.ID_TIPO_IDENTIFICACION_PK
 INNER JOIN TELEFONO_TB T             ON P.IDENTIFICACION_PK         = T.IDENTIFICACION_FK
 INNER JOIN USUARIO_TB U              ON P.IDENTIFICACION_PK         = U.IDENTIFICACION_FK;
-
-
---Procedimiento almacenado para iniciar sesión de usuario (consulto usuario por email y envio los datos de interes para la variable de sesion)
-USE RFBakery;
 GO
 
+--Procedimiento almacenado para iniciar sesión de usuario (consulto usuario por email y envio los datos de interes para la variable de sesion)
 CREATE PROCEDURE SP_IniciarSesion
     @Email VARCHAR(100)
 AS
@@ -259,7 +257,8 @@ BEGIN
         P.FECHA_REGISTRO                AS FechaRegistro,
         T.NUM_TELEFONO                  AS NumTelefono,
         U.EMAIL                         AS Email,
-        U.CONTRASENA                    AS Contrasena
+        U.CONTRASENA                    AS Contrasena,
+        U.ID_ROL_FK                     AS IdRol
     FROM USUARIO_TB U
     INNER JOIN PERSONA_TB P   ON U.IDENTIFICACION_FK  = P.IDENTIFICACION_PK
     INNER JOIN TELEFONO_TB T  ON P.IDENTIFICACION_PK  = T.IDENTIFICACION_FK
@@ -308,4 +307,82 @@ BEGIN
                (@Mensaje,@Lugar,@FechaHora,@ConsecutivoUsuario)
 
 END
+GO
 
+--Para perfil de usuario
+USE RFBakery;
+GO
+CREATE PROCEDURE SP_ConsultarUsuario
+    @Identificacion VARCHAR(20)
+AS
+BEGIN
+    SELECT
+        P.IDENTIFICACION_PK     AS Identificacion,
+        TI.DESCRIPCION          AS TipoIdentificacion,
+        P.NOMBRE_COMPLETO       AS NombreCompleto,
+        P.PRIMER_APELLIDO       AS PrimerApellido,
+        P.SEGUNDO_APELLIDO      AS SegundoApellido,
+        P.GENERO                AS Genero,
+        P.DIRECCION             AS Direccion,
+        P.NACIONALIDAD          AS Nacionalidad,
+        T.NUM_TELEFONO          AS NumTelefono,
+        U.EMAIL                 AS Email,
+        R.DESCRIPCION           AS Rol
+    FROM PERSONA_TB P
+    INNER JOIN TIPO_IDENTIFICACION_TB TI ON P.ID_TIPO_IDENTIFICACION_FK = TI.ID_TIPO_IDENTIFICACION_PK
+    INNER JOIN TELEFONO_TB T             ON P.IDENTIFICACION_PK         = T.IDENTIFICACION_FK
+    INNER JOIN USUARIO_TB U              ON P.IDENTIFICACION_PK         = U.IDENTIFICACION_FK
+    INNER JOIN ROL_TB R                  ON U.ID_ROL_FK                 = R.ID_ROL_PK
+    WHERE P.IDENTIFICACION_PK = @Identificacion
+END
+GO
+
+--Para editar usuario
+USE RFBakery;
+GO
+
+CREATE PROCEDURE SP_ActualizarUsuario
+    @Identificacion     VARCHAR(20),
+    @NombreCompleto      VARCHAR(100),
+    @PrimerApellido      VARCHAR(100),
+    @SegundoApellido     VARCHAR(100),
+    @Genero              VARCHAR(10),
+    @Direccion           VARCHAR(250),
+    @Nacionalidad        VARCHAR(50),
+    @NumTelefono         VARCHAR(20),
+    @Email               VARCHAR(100),
+    @NuevaContrasena     VARCHAR(250) = NULL
+AS
+BEGIN
+
+    -- Actualizar datos de PERSONA_TB
+    UPDATE PERSONA_TB
+    SET
+        NOMBRE_COMPLETO  = @NombreCompleto,
+        PRIMER_APELLIDO  = @PrimerApellido,
+        SEGUNDO_APELLIDO = @SegundoApellido,
+        GENERO           = @Genero,
+        DIRECCION        = @Direccion,
+        NACIONALIDAD     = @Nacionalidad
+    WHERE IDENTIFICACION_PK = @Identificacion;
+
+    -- Actualizar teléfono
+    UPDATE TELEFONO_TB
+    SET NUM_TELEFONO = @NumTelefono
+    WHERE IDENTIFICACION_FK = @Identificacion;
+
+    -- Actualizar email
+    UPDATE USUARIO_TB
+    SET EMAIL = @Email
+    WHERE IDENTIFICACION_FK = @Identificacion;
+
+    -- Solo actualizar contraseña si llega un valor
+    IF @NuevaContrasena IS NOT NULL
+    BEGIN
+        UPDATE USUARIO_TB
+        SET CONTRASENA = @NuevaContrasena
+        WHERE IDENTIFICACION_FK = @Identificacion;
+    END
+
+END
+GO

@@ -101,8 +101,65 @@ namespace API_GRUPODOS.Controllers
             infoUsuario.FechaRegistro = usuario.FechaRegistro;
             infoUsuario.NumTelefono = usuario.NumTelefono;
             infoUsuario.Email = usuario.Email;
+            infoUsuario.IdRol = usuario.IdRol;
 
             return Ok(infoUsuario);
+        }
+
+
+
+        [HttpGet("ConsultarInformacionUsuarioAPI")]
+        public IActionResult ConsultarInformacionUsuarioAPI(string identificacion)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var response = context.QueryFirstOrDefault<UsuarioConsultaModel>(
+                "SP_ConsultarUsuario",
+                new { Identificacion = identificacion },
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (response != null)
+                return Ok(response);
+
+            return BadRequest("No se encontró información para esa identificación");
+        }
+
+
+        [HttpPost("ActualizarUsuarioAPI")]
+        public IActionResult ActualizarUsuarioAPI(UsuarioEdicionRequestModel model)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            string? contrasenaHash = null;
+
+            if (!string.IsNullOrWhiteSpace(model.NuevaContrasena))
+                contrasenaHash = BCrypt.Net.BCrypt.HashPassword(model.NuevaContrasena);
+
+            var parametros = new
+            {
+                Identificacion = model.Identificacion,
+                NombreCompleto = model.NombreCompleto,
+                PrimerApellido = model.PrimerApellido,
+                SegundoApellido = model.SegundoApellido,
+                Genero = model.Genero,
+                Direccion = model.Direccion,
+                Nacionalidad = model.Nacionalidad,
+                NumTelefono = model.NumTelefono,
+                Email = model.Email,
+                NuevaContrasena = contrasenaHash
+            };
+
+            var response = context.Execute(
+                "SP_ActualizarUsuario",
+                parametros,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (response > 0)
+                return Ok("Perfil actualizado correctamente");
+
+            return BadRequest("No se pudo actualizar el perfil");
         }
 
 
