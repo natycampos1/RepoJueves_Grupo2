@@ -41,7 +41,7 @@ namespace PJ_GRUPODOS.Models
         [Required(ErrorMessage = "El teléfono es obligatorio")]
         [StringLength(20)]
         [Phone(ErrorMessage = "Número de teléfono no válido")]
-        public string NumTelefono { get; set; }
+        public string NumTelefono { get; set; } = string.Empty;
 
         // --- Datos de tbUsuario ---
         [Required(ErrorMessage = "El email es obligatorio")]

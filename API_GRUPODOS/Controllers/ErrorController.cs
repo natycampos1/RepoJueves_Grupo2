@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 
 namespace API_GRUPODOS.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("api/[controller]")]
     [ApiController]
     public class ErrorController(IConfiguration _config) : ControllerBase

@@ -24,6 +24,9 @@ namespace PJ_GRUPODOS.Controllers
         [HttpGet]
         public IActionResult IniciarSesion()
         {
+            if (TempData["MensajeLogin"] != null)
+                ViewBag.Mensaje = TempData["MensajeLogin"];
+
             return View();
         }
 
@@ -36,14 +39,14 @@ namespace PJ_GRUPODOS.Controllers
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                UsuarioRegistroModel? usuario = response.Content.ReadFromJsonAsync<UsuarioRegistroModel>().Result;
+                InfoVariableSesionUsuarioModel? usuario = response.Content.ReadFromJsonAsync<InfoVariableSesionUsuarioModel>().Result;
 
                 HttpContext.Session.SetInt32("Autenticado", 1);
 
                 HttpContext.Session.SetString("Identificacion", usuario!.Identificacion);
                 HttpContext.Session.SetString("Nombre", usuario!.NombreCompleto);
                 HttpContext.Session.SetString("PrimerApellido", usuario!.PrimerApellido);
-                HttpContext.Session.SetString("SegundoApellido", usuario!.SegundoApellido);
+                HttpContext.Session.SetString("SegundoApellido", usuario!.SegundoApellido ?? string.Empty);
                 HttpContext.Session.SetString("Email", usuario!.Email);
 
                 return RedirectToAction("Principal", "Home");
@@ -66,7 +69,7 @@ namespace PJ_GRUPODOS.Controllers
         public IActionResult CerrarSesion()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Index","Home");
+            return RedirectToAction("Index", "Home");
         }
 
         #endregion
@@ -93,8 +96,8 @@ namespace PJ_GRUPODOS.Controllers
             //Manejo la respeuesta recibida del api
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                ViewBag.Mensaje = "Cliente ingresado correctamente";
-                return RedirectToAction("Principal", "Home");
+                TempData["MensajeLogin"] = "Cuenta creada correctamente, inicia sesión para continuar";
+                return RedirectToAction("IniciarSesion", "Home");
             }
             else if (response.StatusCode == HttpStatusCode.BadRequest)
             {
@@ -103,8 +106,6 @@ namespace PJ_GRUPODOS.Controllers
                 return View();
             }
             throw new Exception("Error al registrar cliente");
-
-            return View();
         }
 
 
@@ -142,7 +143,22 @@ namespace PJ_GRUPODOS.Controllers
         [HttpPost]
         public IActionResult RecuperarAcceso(RecuperarAccesoModel model)
         {
-            return RedirectToAction("Index", "Home");
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + "Home/RecuperarAccesoAPI";
+            var response = client.PostAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                ViewBag.Mensaje = "Se ha generado una contraseña temporal, revisa tu correo electrónico";
+                return View();
+            }
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                ViewBag.Mensaje = response.Content.ReadAsStringAsync().Result;
+                return View();
+            }
+
+            throw new Exception("Error al recuperar el acceso");
         }
 
         #endregion
@@ -159,7 +175,7 @@ namespace PJ_GRUPODOS.Controllers
         [HttpGet]
         public IActionResult GestionPerfil()
         {
-            string identificacion = HttpContext.Session.GetString("Identificacion");
+            string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
 
             using var client = _http.CreateClient();
 
@@ -202,7 +218,7 @@ namespace PJ_GRUPODOS.Controllers
             }
 
             // Volver a consultar la info actualizada para repoblar la vista
-            string identificacion = HttpContext.Session.GetString("Identificacion");
+            string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
 
             var urlConsulta = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
             var responseConsulta = client.GetAsync(urlConsulta).Result;

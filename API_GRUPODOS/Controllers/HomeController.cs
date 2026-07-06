@@ -35,30 +35,26 @@ namespace API_GRUPODOS.Controllers
 
             using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
 
-            
-
-
             // Hasheo la contraseña antes de enviarla al Procedimiento almacenado
             string contrasenaHash = BCrypt.Net.BCrypt.HashPassword(model.Contrasena);
 
-            var parametros = new
-            {
-                Identificacion = model.Identificacion,
-                IdTipoIdentificacion = model.IdTipoIdentificacion,
-                NombreCompleto = model.NombreCompleto,
-                PrimerApellido = model.PrimerApellido,
-                SegundoApellido = model.SegundoApellido,
-                Genero = model.Genero,
-                Direccion = model.Direccion,
-                Nacionalidad = model.Nacionalidad,
-                NumTelefono = model.NumTelefono,
-                Email = model.Email,
-                Contrasena = contrasenaHash  // Esta es la contraseña ya Hasheada
-            };
+            var parameters = new DynamicParameters();
+            parameters.Add("@Identificacion", model.Identificacion);
+            parameters.Add("@IdTipoIdentificacion", model.IdTipoIdentificacion);
+            parameters.Add("@NombreCompleto", model.NombreCompleto);
+            parameters.Add("@PrimerApellido", model.PrimerApellido);
+            parameters.Add("@SegundoApellido", model.SegundoApellido);
+            parameters.Add("@Genero", model.Genero);
+            parameters.Add("@Direccion", model.Direccion);
+            parameters.Add("@Nacionalidad", model.Nacionalidad);
+            parameters.Add("@NumTelefono", model.NumTelefono);
+            parameters.Add("@Email", model.Email);
+            parameters.Add("@Contrasena", contrasenaHash);  // Esta es la contraseña ya Hasheada
 
             var response = context.Execute(
                 "SP_RegistrarUsuario",
-                parametros);
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure);
 
             if (response > 0)
                 return Ok("Usuario registrado correctamente");
@@ -76,12 +72,13 @@ namespace API_GRUPODOS.Controllers
             using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
 
             // Busco usuario por email
+            var parameters = new DynamicParameters();
+            parameters.Add("@Email", model.Email);
             var usuario = context.QueryFirstOrDefault<RegistroUsuarioRequestModel>(
                 "SP_IniciarSesion",
-                new { Email = model.Email },
+                parameters,
                 commandType: System.Data.CommandType.StoredProcedure
             );
-
 
             // Verifico que exista y que la contraseña coincida con el hash
             if (usuario == null || !BCrypt.Net.BCrypt.Verify(model.Contrasena, usuario.Contrasena))
@@ -113,9 +110,11 @@ namespace API_GRUPODOS.Controllers
         {
             using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
 
+            var parameters = new DynamicParameters();
+            parameters.Add("@Identificacion", identificacion);
             var response = context.QueryFirstOrDefault<UsuarioConsultaModel>(
                 "SP_ConsultarUsuario",
-                new { Identificacion = identificacion },
+                parameters,
                 commandType: System.Data.CommandType.StoredProcedure
             );
 
@@ -136,23 +135,21 @@ namespace API_GRUPODOS.Controllers
             if (!string.IsNullOrWhiteSpace(model.NuevaContrasena))
                 contrasenaHash = BCrypt.Net.BCrypt.HashPassword(model.NuevaContrasena);
 
-            var parametros = new
-            {
-                Identificacion = model.Identificacion,
-                NombreCompleto = model.NombreCompleto,
-                PrimerApellido = model.PrimerApellido,
-                SegundoApellido = model.SegundoApellido,
-                Genero = model.Genero,
-                Direccion = model.Direccion,
-                Nacionalidad = model.Nacionalidad,
-                NumTelefono = model.NumTelefono,
-                Email = model.Email,
-                NuevaContrasena = contrasenaHash
-            };
+            var parameters = new DynamicParameters();
+            parameters.Add("@Identificacion", model.Identificacion);
+            parameters.Add("@NombreCompleto", model.NombreCompleto);
+            parameters.Add("@PrimerApellido", model.PrimerApellido);
+            parameters.Add("@SegundoApellido", model.SegundoApellido);
+            parameters.Add("@Genero", model.Genero);
+            parameters.Add("@Direccion", model.Direccion);
+            parameters.Add("@Nacionalidad", model.Nacionalidad);
+            parameters.Add("@NumTelefono", model.NumTelefono);
+            parameters.Add("@Email", model.Email);
+            parameters.Add("@NuevaContrasena", contrasenaHash);
 
             var response = context.Execute(
                 "SP_ActualizarUsuario",
-                parametros,
+                parameters,
                 commandType: System.Data.CommandType.StoredProcedure
             );
 
@@ -164,7 +161,54 @@ namespace API_GRUPODOS.Controllers
 
 
         #endregion
+
+        #region Recuperar Acceso
+
+        [HttpPost("RecuperarAccesoAPI")]
+        public IActionResult RecuperarAccesoAPI(RecuperarAccesoRequestModel model)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Email", model.Email);
+            var usuario = context.QueryFirstOrDefault<UsuarioValidarCorreoModel>(
+                "SP_ValidarCorreo",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (usuario == null)
+                return NotFound("No se encontró una cuenta asociada a ese correo electrónico");
+
+            //2. Generar una contraseña temporal
+            var temporal = GenerarContrasena();
+            string contrasenaHash = BCrypt.Net.BCrypt.HashPassword(temporal);
+
+            parameters = new DynamicParameters();
+            parameters.Add("@IdUsuario", usuario.IdUsuario);
+            parameters.Add("@Contrasena", contrasenaHash);
+            parameters.Add("@IndicadorContrasenaTemp", true);
+            var update = context.Execute(
+                "SP_ActualizarContrasena",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (update > 0)
+            {
+                //3. Enviar la contraseña temporal al correo electrónico del usuario
+
+                return Ok(usuario);
+            }
+
+            return BadRequest("No se ha recuperado su acceso, intente nuevamente más tarde");
+        }
+
+        private string GenerarContrasena()
+        {
+            return Guid.NewGuid().ToString("N")[..10];
+        }
+
+        #endregion
     }
 }
-
-

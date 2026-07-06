@@ -8,10 +8,10 @@ namespace API_GRUPODOS.Models
         //la tabla tbPersona, la tabla tbUsuario y la tabla tbTelefono.
 
         // --- Datos de tbPersona ---
-        public string Identificacion { get; set; }
+        public string Identificacion { get; set; } = string.Empty;
         public int IdTipoIdentificacion { get; set; }
-        public string NombreCompleto { get; set; }
-        public string PrimerApellido { get; set; }
+        public string NombreCompleto { get; set; } = string.Empty;
+        public string PrimerApellido { get; set; } = string.Empty;
         public string? SegundoApellido { get; set; }
         public string? Genero { get; set; }
         public string? Direccion { get; set; }
@@ -19,12 +19,12 @@ namespace API_GRUPODOS.Models
         public DateTime FechaRegistro { get; set; } = DateTime.Now;
 
         // --- Datos de tbTelefono ---
-        public string NumTelefono { get; set; }
+        public string NumTelefono { get; set; } = string.Empty;
 
         // --- Datos de tbUsuario ---
-        public string Email { get; set; }
-        public string Contrasena { get; set; }
-        public string ConfirmarContrasena { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string Contrasena { get; set; } = string.Empty;
+        public string ConfirmarContrasena { get; set; } = string.Empty;
 
         public int IdRol { get; set; }
     }
