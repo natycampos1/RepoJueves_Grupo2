@@ -1,4 +1,6 @@
-﻿namespace PJ_GRUPODOS.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PJ_GRUPODOS.Models
 {
     public class UsuarioEdicionRequestModel
     {
@@ -11,7 +13,11 @@
         public string? Nacionalidad { get; set; }
         public string NumTelefono { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+
+        [StringLength(250, MinimumLength = 8, ErrorMessage = "Mínimo 8 caracteres")]
         public string? NuevaContrasena { get; set; }
+
+        [Compare("NuevaContrasena", ErrorMessage = "Las contraseñas no coinciden")]
         public string? ConfirmarNuevaContrasena { get; set; }
     }
 }

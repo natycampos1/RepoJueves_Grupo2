@@ -86,6 +86,12 @@ namespace PJ_GRUPODOS.Controllers
         [HttpPost]
         public IActionResult RegistrarUsuario(UsuarioRegistroModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                ConsultarTiposDeIdentificacion();
+                return View(model);
+            }
+
             //Creo el cliente http
             using var client = _http.CreateClient();
             //Obtengo la url del api
@@ -202,6 +208,23 @@ namespace PJ_GRUPODOS.Controllers
         [HttpPost]
         public IActionResult GestionPerfil(UsuarioEdicionRequestModel model)
         {
+            string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Mensaje = "Las contraseñas no coinciden";
+
+                using var clientValidacion = _http.CreateClient();
+                var urlConsultaValidacion = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
+                var responseValidacion = clientValidacion.GetAsync(urlConsultaValidacion).Result;
+
+                ViewBag.InfoUsuario = responseValidacion.IsSuccessStatusCode
+                    ? responseValidacion.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
+                    : new UsuarioConsultaModel();
+
+                return View();
+            }
+
             using var client = _http.CreateClient();
 
             var url = _config["Valores:UrlApi"] + "Home/ActualizarUsuarioAPI";
@@ -218,8 +241,6 @@ namespace PJ_GRUPODOS.Controllers
             }
 
             // Volver a consultar la info actualizada para repoblar la vista
-            string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
-
             var urlConsulta = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
             var responseConsulta = client.GetAsync(urlConsulta).Result;
 
