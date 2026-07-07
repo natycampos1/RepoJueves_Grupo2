@@ -81,14 +81,14 @@
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto mx-lg-auto py-0">
                 <a asp-action="Index" asp-controller="Home" class="nav-item nav-link active">Inicio</a>
-                <a href="about.html" class="nav-item nav-link">Sobre Nosotros</a>
-                <a href="menu.html" class="nav-item nav-link">Menu y Precios</a>
-                <a href="team.html" class="nav-item nav-link">Nuestros Equipo</a>
+                <a asp-action="SobreNosotros" asp-controller="Home" class="nav-item nav-link">Sobre Nosotros</a>
+                <a asp-action="Index" asp-controller="Menu" class="nav-item nav-link">Menú y Precios</a>
+                <a asp-action="NuestroEquipo" asp-controller="Home" class="nav-item nav-link">Nuestro Equipo</a>
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Mas Detalles</a>
                     <div class="dropdown-menu m-0">
-                        <a href="service.html" class="dropdown-item">Nuestro Servicio</a>
-                        <a href="testimonial.html" class="dropdown-item">Testimonios</a>
+                        <a asp-action="NuestroServicio" asp-controller="Home" class="dropdown-item">Nuestro Servicio</a>
+                        <a asp-action="Testimonios" asp-controller="Home" class="dropdown-item">Testimonios</a>
                     </div>
                 </div>
                 <a href="contact.html" class="nav-item nav-link">Contactanos</a>

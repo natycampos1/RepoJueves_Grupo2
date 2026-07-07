@@ -176,6 +176,34 @@ namespace PJ_GRUPODOS.Controllers
         }
         #endregion
 
+        #region Páginas Informativas
+
+        [HttpGet]
+        public IActionResult SobreNosotros()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult NuestroEquipo()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult NuestroServicio()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Testimonios()
+        {
+            return View();
+        }
+
+        #endregion
+
         #region Gestion de Perfil
 
         [HttpGet]

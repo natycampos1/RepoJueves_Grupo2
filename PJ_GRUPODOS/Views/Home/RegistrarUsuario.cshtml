@@ -94,7 +94,7 @@
                                             <div class="input-wrapper">
                                                 <select asp-for="IdTipoIdentificacion" class="form-control form-control-auth">
                                                     <option value="">-- Seleccione --</option>
-                                                    @foreach (var item in ViewBag.TiposDeIdentificacion)
+                                                    @foreach (var item in (List<TipoIdentificacionModel>)ViewBag.TiposDeIdentificacion)
                                                     {
                                                         <option value="@item.IdTipoIdentificacion">@item.Descripcion</option>
                                                     }
