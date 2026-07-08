@@ -47,6 +47,7 @@
         var segundoApellido = Context.Session.GetString("SegundoApellido") ?? "";
         var identificacion = Context.Session.GetString("Identificacion") ?? "...";
         var email = Context.Session.GetString("Email") ?? "...";
+        var idRol = Context.Session.GetInt32("IdRol") ?? 0;
     }
 
     <!-- Topbar Start -->
@@ -91,14 +92,14 @@
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto mx-lg-auto py-0">
                 <a asp-action="Index" asp-controller="Home" class="nav-item nav-link active">Inicio</a>
-                    <a asp-action="SobreNosotros" asp-controller="Home" class="nav-item nav-link">Sobre Nosotros</a>
+                <a asp-action="SobreNosotros" asp-controller="Home" class="nav-item nav-link">Sobre Nosotros</a>
                 <a asp-action="Index" asp-controller="Menu" class="nav-item nav-link">Menú y Precios</a>
                 <a asp-action="NuestroEquipo" asp-controller="Home" class="nav-item nav-link">Nuestro Equipo</a>
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Mas Detalles</a>
                     <div class="dropdown-menu m-0">
-                        <a href="service.html" class="dropdown-item">Nuestro Servicio</a>
-                        <a href="testimonial.html" class="dropdown-item">Testimonios</a>
+                        <a asp-action="NuestroServicio" asp-controller="Home" class="dropdown-item">Nuestro Servicio</a>
+                        <a asp-action="Testimonios" asp-controller="Home" class="dropdown-item">Testimonios</a>
                     </div>
                 </div>
                 <a asp-action="Index" asp-controller="Contacto" class="nav-item nav-link">Contáctanos</a>
@@ -128,6 +129,9 @@
                         <div class="text-muted" style="font-size: 0.78rem; color:#EFF1ED;">
                             @email
                         </div>
+                        <div class="text-muted" style="font-size: 0.7rem; color:#FFD700;">
+                            Rol: @(idRol == 1 ? "Administrador" : "Cliente")
+                        </div>
                     </div>
                 </a>
 
@@ -139,6 +143,16 @@
                             Editar información
                         </a>
                     </li>
+
+                    @if (idRol == 1)
+                    {
+                        <li>
+                            <a class="dropdown-item" asp-action="Index" asp-controller="AdministrarMenu">
+                                <i class="bi bi-gear-fill me-2"></i>
+                                Administrar Menú
+                            </a>
+                        </li>
+                    }
 
                     <li>
                         <hr class="dropdown-divider">

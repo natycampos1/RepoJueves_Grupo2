@@ -1,0 +1,129 @@
+﻿@{
+    Layout = "_Layout";
+    var categorias = ViewBag.Categorias as List<PJ_GRUPODOS.Models.CategoriaProductoModel>;
+    var categoriasInactivas = ViewBag.CategoriasInactivas as List<PJ_GRUPODOS.Models.CategoriaProductoModel>;
+    var tipoMensaje = TempData["TipoMensajeCategoria"] as string ?? "info";
+}
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-uppercase">Administrar Menú</h2>
+        <a asp-action="ProductosIndex" asp-controller="AdministrarMenu" class="btn btn-primary">
+            <i class="bi bi-box-seam me-2"></i>Administrar Productos
+        </a>
+    </div>
+
+    @if (TempData["MensajeCategoria"] != null)
+    {
+        <div class="alert alert-@tipoMensaje alert-dismissible show fade">
+            <i class="bi @(tipoMensaje == "success" ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>
+            @TempData["MensajeCategoria"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+
+        <!-- Formulario para agregar categoría -->
+        <div class="col-lg-4">
+            <div class="card p-4">
+                <h5 class="mb-3">Nueva Categoría</h5>
+                <form asp-action="InsertarCategoria" asp-controller="AdministrarMenu" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <input type="text" name="Descripcion" class="form-control" placeholder="Ej: Cumpleaños" required maxlength="50" />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-plus-circle me-2"></i>Agregar Categoría
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Listado de categorías -->
+        <div class="col-lg-8">
+            <div class="card p-4">
+                <h5 class="mb-3">Categorías Existentes</h5>
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Descripción</th>
+                            <th class="text-center" style="width: 110px;">Editar</th>
+                            <th class="text-center" style="width: 110px;">Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (categorias != null && categorias.Any())
+                        {
+                            @foreach (var categoria in categorias)
+                            {
+                                <tr>
+                                    <td>@categoria.IdCategoria</td>
+                                    <td>
+                                        <form asp-action="ActualizarCategoria" asp-controller="AdministrarMenu" method="post" class="d-flex gap-2">
+                                            <input type="hidden" name="idCategoria" value="@categoria.IdCategoria" />
+                                            <input type="text" name="Descripcion" class="form-control form-control-sm" value="@categoria.Descripcion" maxlength="50" required />
+                                            <button type="submit" class="btn btn-sm btn-primary text-nowrap">
+                                                <i class="bi bi-save me-1"></i>Guardar
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="text-center">
+                                        <form asp-action="DesactivarCategoria" asp-controller="AdministrarMenu" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar la categoría \'@categoria.Descripcion\'?');">
+                                            <input type="hidden" name="idCategoria" value="@categoria.IdCategoria" />
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash me-1"></i>Eliminar
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center">No hay categorías registradas.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    @if (categoriasInactivas != null && categoriasInactivas.Any())
+    {
+        <div class="card p-4 mt-4">
+            <h5 class="mb-3 text-muted">Categorías Inactivas</h5>
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Descripción</th>
+                        <th class="text-center" style="width: 130px;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var categoria in categoriasInactivas)
+                    {
+                        <tr class="text-muted">
+                            <td>@categoria.IdCategoria</td>
+                            <td>@categoria.Descripcion</td>
+                            <td class="text-center">
+                                <form asp-action="ReactivarCategoria" asp-controller="AdministrarMenu" method="post">
+                                    <input type="hidden" name="idCategoria" value="@categoria.IdCategoria" />
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reactivar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

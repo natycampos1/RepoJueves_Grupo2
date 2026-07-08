@@ -36,7 +36,6 @@ namespace PJ_GRUPODOS.Controllers
             using var client = _http.CreateClient();
             var url = _config["Valores:UrlApi"] + "Home/IniciarSesionAPI";
             var response = client.PostAsJsonAsync(url, model).Result;
-
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 InfoVariableSesionUsuarioModel? usuario = response.Content.ReadFromJsonAsync<InfoVariableSesionUsuarioModel>().Result;
@@ -48,6 +47,7 @@ namespace PJ_GRUPODOS.Controllers
                 HttpContext.Session.SetString("PrimerApellido", usuario!.PrimerApellido);
                 HttpContext.Session.SetString("SegundoApellido", usuario!.SegundoApellido ?? string.Empty);
                 HttpContext.Session.SetString("Email", usuario!.Email);
+                HttpContext.Session.SetInt32("IdRol", usuario!.IdRol);
 
                 return RedirectToAction("Principal", "Home");
             }
