@@ -168,10 +168,17 @@ namespace PJ_GRUPODOS.Controllers
         }
 
         #endregion
-
         #region Principal
         public IActionResult Principal()
         {
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + "Menu/ConsultarCategoriasAPI";
+            var response = client.GetAsync(url).Result;
+
+            ViewBag.Categorias = response.IsSuccessStatusCode
+                ? response.Content.ReadFromJsonAsync<List<CategoriaProductoModel>>().Result ?? new()
+                : new List<CategoriaProductoModel>();
+
             return View();
         }
         #endregion
