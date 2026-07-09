@@ -1,0 +1,62 @@
+﻿@model PJ_GRUPODOS.Models.ProductoModel
+@{
+    Layout = "_Layout";
+    var categorias = ViewBag.Categorias as List<PJ_GRUPODOS.Models.CategoriaProductoModel>;
+    int idProducto = ViewBag.IdProducto;
+}
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-uppercase">Editar Producto</h2>
+        <a asp-action="ProductosIndex" asp-controller="AdministrarMenu" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Volver
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card p-4">
+                <form asp-action="EditarProducto" asp-controller="AdministrarMenu" asp-route-idProducto="@idProducto" method="post">
+
+                    <div class="mb-3">
+                        <label class="form-label">Categoría</label>
+                        <select name="IdCategoria" class="form-select" required>
+                            @if (categorias != null)
+                            {
+                                @foreach (var categoria in categorias)
+                                {
+                                    <option value="@categoria.IdCategoria" selected="@(categoria.IdCategoria == Model.IdCategoria)">@categoria.Descripcion</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" name="Nombre" class="form-control" value="@Model.Nombre" required maxlength="100" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea name="Descripcion" class="form-control" rows="3" required maxlength="250">@Model.Descripcion</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Precio</label>
+                        <input type="number" name="Precio" class="form-control" value="@Model.Precio" step="0.01" min="0.01" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Imagen <span class="text-muted" style="font-size:12px;">(nombre del archivo en /images)</span></label>
+                        <input type="text" name="Imagen" class="form-control" value="@Model.Imagen" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-save me-2"></i>Guardar Cambios
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

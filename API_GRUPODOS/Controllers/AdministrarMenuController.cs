@@ -235,6 +235,38 @@ namespace API_GRUPODOS.Controllers
 
             return BadRequest("No se pudo desactivar el producto");
         }
+        [HttpGet("ConsultarProductosInactivosAPI")]
+        public IActionResult ConsultarProductosInactivosAPI()
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var response = context.Query<ProductoAdminModel>(
+                "SP_ConsultarProductosInactivos",
+                commandType: System.Data.CommandType.StoredProcedure
+            ).ToList();
+
+            return Ok(response);
+        }
+
+        [HttpPut("ReactivarProductoAPI")]
+        public IActionResult ReactivarProductoAPI(int idProducto)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdProducto", idProducto);
+
+            var response = context.Execute(
+                "SP_ReactivarProducto",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (response > 0)
+                return Ok("Producto reactivado correctamente");
+
+            return BadRequest("No se pudo reactivar el producto");
+        }
 
         #endregion
     }
