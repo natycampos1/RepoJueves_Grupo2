@@ -1174,3 +1174,62 @@ BEGIN
 
 END
 GO
+
+---
+--PROCEDIMIENTO ALMACENADO PARA ACTUALIZAR SOLO EL PERFIL (sin contraseña)
+
+USE RFBakery;
+GO
+
+CREATE PROCEDURE SP_ActualizarPerfil
+    @Identificacion     VARCHAR(20),
+    @NombreCompleto     VARCHAR(100),
+    @PrimerApellido     VARCHAR(100),
+    @SegundoApellido    VARCHAR(100),
+    @Genero             VARCHAR(10),
+    @Direccion          VARCHAR(250),
+    @Nacionalidad       VARCHAR(50),
+    @NumTelefono        VARCHAR(20),
+    @Email              VARCHAR(100)
+AS
+BEGIN
+
+    UPDATE PERSONA_TB
+    SET
+        NOMBRE_COMPLETO  = @NombreCompleto,
+        PRIMER_APELLIDO  = @PrimerApellido,
+        SEGUNDO_APELLIDO = @SegundoApellido,
+        GENERO           = @Genero,
+        DIRECCION        = @Direccion,
+        NACIONALIDAD     = @Nacionalidad
+    WHERE IDENTIFICACION_PK = @Identificacion;
+
+    UPDATE TELEFONO_TB
+    SET NUM_TELEFONO = @NumTelefono
+    WHERE IDENTIFICACION_FK = @Identificacion;
+
+    UPDATE USUARIO_TB
+    SET EMAIL = @Email
+    WHERE IDENTIFICACION_FK = @Identificacion;
+
+END
+GO
+
+--PROCEDIMIENTO ALMACENADO PARA CAMBIAR SOLO LA CONTRASEÑA DESDE EL PERFIL
+
+USE RFBakery;
+GO
+
+CREATE PROCEDURE SP_CambiarContrasenaPerfil
+    @Identificacion     VARCHAR(20),
+    @NuevaContrasena    VARCHAR(250)
+AS
+BEGIN
+
+    UPDATE USUARIO_TB
+    SET CONTRASENA = @NuevaContrasena,
+        INDICADOR_CONTRASENA_TEMP = 0
+    WHERE IDENTIFICACION_FK = @Identificacion
+
+END
+GO
