@@ -232,68 +232,81 @@ namespace PJ_GRUPODOS.Controllers
             }
             else
             {
-                ViewBag.Mensaje = "La información del usuario no pudo cargarse";
+                ViewBag.MensajePerfil = "La información del usuario no pudo cargarse";
                 ViewBag.InfoUsuario = new UsuarioConsultaModel();
             }
 
             return View();
         }
 
-
         [HttpPost]
-        public IActionResult GestionPerfil(UsuarioEdicionRequestModel model)
+        public IActionResult ActualizarPerfil(UsuarioEdicionRequestModel model)
         {
             string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
-
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Mensaje = "Las contraseñas no coinciden";
-
-                using var clientValidacion = _http.CreateClient();
-                var urlConsultaValidacion = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
-                var responseValidacion = clientValidacion.GetAsync(urlConsultaValidacion).Result;
-
-                ViewBag.InfoUsuario = responseValidacion.IsSuccessStatusCode
-                    ? responseValidacion.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
-                    : new UsuarioConsultaModel();
-
-                return View();
-            }
+            model.Identificacion = identificacion;
 
             using var client = _http.CreateClient();
 
-            var url = _config["Valores:UrlApi"] + "Home/ActualizarUsuarioAPI";
-
-            var response = client.PostAsJsonAsync(url, model).Result;
+            var url = _config["Valores:UrlApi"] + "Home/ActualizarPerfilAPI";
+            var response = client.PutAsJsonAsync(url, model).Result;
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                ViewBag.Mensaje = "Perfil actualizado correctamente";
+                HttpContext.Session.SetString("Nombre", model.NombreCompleto);
+                HttpContext.Session.SetString("PrimerApellido", model.PrimerApellido);
+                HttpContext.Session.SetString("SegundoApellido", model.SegundoApellido ?? string.Empty);
+                HttpContext.Session.SetString("Email", model.Email);
+
+                ViewBag.MensajePerfil = "Perfil actualizado correctamente";
             }
             else
             {
-                ViewBag.Mensaje = response.Content.ReadAsStringAsync().Result;
+                ViewBag.MensajePerfil = response.Content.ReadAsStringAsync().Result;
             }
 
-            // Volver a consultar la info actualizada para repoblar la vista
             var urlConsulta = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
             var responseConsulta = client.GetAsync(urlConsulta).Result;
 
-            if (responseConsulta.IsSuccessStatusCode)
-            {
+            ViewBag.InfoUsuario = responseConsulta.IsSuccessStatusCode
+                ? responseConsulta.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
+                : new UsuarioConsultaModel();
 
-                ViewBag.InfoUsuario = responseConsulta.Content
-                    .ReadFromJsonAsync<UsuarioConsultaModel>()
-                    .Result;
+            return View("GestionPerfil");
+        }
+
+        [HttpPost]
+        public IActionResult CambiarContrasenaPerfil(CambiarContrasenaPerfilModel model)
+        {
+            string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
+            model.Identificacion = identificacion;
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.MensajeSeguridad = "Las contraseñas no coinciden o no cumplen los requisitos";
             }
             else
             {
-                ViewBag.InfoUsuario = new UsuarioConsultaModel();
+                using var client = _http.CreateClient();
+
+                var url = _config["Valores:UrlApi"] + "Home/CambiarContrasenaPerfilAPI";
+                var response = client.PutAsJsonAsync(url, model).Result;
+
+                ViewBag.MensajeSeguridad = response.StatusCode == HttpStatusCode.OK
+                    ? "Contraseña actualizada correctamente"
+                    : response.Content.ReadAsStringAsync().Result;
             }
-            HttpContext.Session.SetInt32("Autenticado", 1);
-            return View();
+
+            using var clientConsulta = _http.CreateClient();
+            var urlConsulta = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
+            var responseConsulta = clientConsulta.GetAsync(urlConsulta).Result;
+
+            ViewBag.InfoUsuario = responseConsulta.IsSuccessStatusCode
+                ? responseConsulta.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
+                : new UsuarioConsultaModel();
+
+            return View("GestionPerfil");
         }
 
         #endregion
     }
-}
+    }

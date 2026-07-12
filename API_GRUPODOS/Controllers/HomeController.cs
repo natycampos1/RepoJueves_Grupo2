@@ -1,4 +1,5 @@
 ﻿using API_GRUPODOS.Models;
+using API_GRUPODOS.Services;
 using Dapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ namespace API_GRUPODOS.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HomeController(IConfiguration _config) : ControllerBase
+    public class HomeController(IConfiguration _config, IUtilesService _utiles) : ControllerBase
     {
 
         #region Registro
@@ -162,10 +163,71 @@ namespace API_GRUPODOS.Controllers
 
         #endregion
 
+        #region Perfil
+
+        [HttpPut("ActualizarPerfilAPI")]
+        public IActionResult ActualizarPerfilAPI(PerfilRequestModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Identificacion", model.Identificacion);
+            parameters.Add("@NombreCompleto", model.NombreCompleto);
+            parameters.Add("@PrimerApellido", model.PrimerApellido);
+            parameters.Add("@SegundoApellido", model.SegundoApellido);
+            parameters.Add("@Genero", model.Genero);
+            parameters.Add("@Direccion", model.Direccion);
+            parameters.Add("@Nacionalidad", model.Nacionalidad);
+            parameters.Add("@NumTelefono", model.NumTelefono);
+            parameters.Add("@Email", model.Email);
+
+            var response = context.Execute(
+                "SP_ActualizarPerfil",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (response > 0)
+                return Ok("Perfil actualizado correctamente");
+
+            return BadRequest("No se pudo actualizar el perfil");
+        }
+
+        [HttpPut("CambiarContrasenaPerfilAPI")]
+        public IActionResult CambiarContrasenaPerfilAPI(CambiarContrasenaPerfilRequestModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            string contrasenaHash = BCrypt.Net.BCrypt.HashPassword(model.NuevaContrasena);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Identificacion", model.Identificacion);
+            parameters.Add("@NuevaContrasena", contrasenaHash);
+
+            var response = context.Execute(
+                "SP_CambiarContrasenaPerfil",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (response > 0)
+                return Ok("Contraseña actualizada correctamente");
+
+            return BadRequest("No se pudo actualizar la contraseña");
+        }
+
+        #endregion
+
         #region Recuperar Acceso
 
         [HttpPost("RecuperarAccesoAPI")]
-        public IActionResult RecuperarAccesoAPI(RecuperarAccesoRequestModel model)
+        public async Task<IActionResult> RecuperarAccesoAPI(RecuperarAccesoRequestModel model)
         {
             using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
 
@@ -181,7 +243,7 @@ namespace API_GRUPODOS.Controllers
                 return NotFound("No se encontró una cuenta asociada a ese correo electrónico");
 
             //2. Generar una contraseña temporal
-            var temporal = GenerarContrasena();
+            var temporal = _utiles.GenerarContrasena();
             string contrasenaHash = BCrypt.Net.BCrypt.HashPassword(temporal);
 
             parameters = new DynamicParameters();
@@ -197,16 +259,18 @@ namespace API_GRUPODOS.Controllers
             if (update > 0)
             {
                 //3. Enviar la contraseña temporal al correo electrónico del usuario
+                string ruta = Path.Combine(AppContext.BaseDirectory, "Templates", "RecuperarAcceso.html");
+                string plantilla = System.IO.File.ReadAllText(ruta);
+
+                plantilla = plantilla.Replace("{{TEMPORAL}}", temporal);
+                plantilla = plantilla.Replace("{{NOMBRE}}", usuario.NombreCompleto);
+
+                await _utiles.EnviarCorreoAsync(usuario.Email, "Recuperación de Acceso - RF Bakery", plantilla);
 
                 return Ok(usuario);
             }
 
             return BadRequest("No se ha recuperado su acceso, intente nuevamente más tarde");
-        }
-
-        private string GenerarContrasena()
-        {
-            return Guid.NewGuid().ToString("N")[..10];
         }
 
         #endregion

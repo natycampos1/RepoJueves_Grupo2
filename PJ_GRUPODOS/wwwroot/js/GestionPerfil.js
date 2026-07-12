@@ -1,6 +1,51 @@
 ﻿$(function () {
 
-    $("#GestionPerfilForm").validate({
+    $("#SeguridadForm").validate({
+        rules: {
+            NuevaContrasena: {
+                required: true,
+                minlength: 8,
+                maxlength: 250
+            },
+            ConfirmarContrasena: {
+                required: true,
+                equalTo: "#nuevaContrasena"
+            }
+        },
+
+        messages: {
+            NuevaContrasena: {
+                required: "Campo obligatorio",
+                minlength: "La contraseña debe tener al menos 8 caracteres",
+                maxlength: "Máximo 250 caracteres"
+            },
+            ConfirmarContrasena: {
+                required: "Debe confirmar la nueva contraseña",
+                equalTo: "Las contraseñas no coinciden"
+            }
+        },
+
+        errorElement: "span",
+
+        errorPlacement: function (error, element) {
+            error.addClass("text-danger small");
+            element.closest(".input-wrapper").after(error);
+        },
+
+        highlight: function (element) {
+            $(element).addClass("is-invalid");
+        },
+
+        unhighlight: function (element) {
+            $(element).removeClass("is-invalid").addClass("is-valid");
+        },
+
+        submitHandler: function (form) {
+            form.submit();
+        }
+    });
+
+    $("#PerfilForm").validate({
         rules: {
             NombreCompleto: {
                 required: true,
@@ -32,17 +77,6 @@
                 required: true,
                 email: true,
                 maxlength: 100
-            },
-            NuevaContrasena: {
-                required: false,
-                minlength: 8,
-                maxlength: 250
-            },
-            ConfirmarNuevaContrasena: {
-                required: function () {
-                    return $("#nuevaContrasena").val().length > 0;
-                },
-                equalTo: "#nuevaContrasena"
             }
         },
 
@@ -74,14 +108,6 @@
                 required: "Campo obligatorio",
                 email: "Ingrese un correo electrónico válido",
                 maxlength: "Máximo 100 caracteres"
-            },
-            NuevaContrasena: {
-                minlength: "La contraseña debe tener al menos 8 caracteres",
-                maxlength: "Máximo 250 caracteres"
-            },
-            ConfirmarNuevaContrasena: {
-                required: "Debe confirmar la nueva contraseña",
-                equalTo: "Las contraseñas no coinciden"
             }
         },
 
@@ -113,9 +139,9 @@
         $(this).toggleClass("bi-eye bi-eye-slash");
     });
 
-    // Toggle mostrar/ocultar confirmar nueva contraseña
-    $("#toggleConfirmarNuevaContrasena").on("click", function () {
-        var input = $("#confirmarNuevaContrasena");
+    // Toggle mostrar/ocultar confirmar contraseña
+    $("#toggleConfirmarContrasena").on("click", function () {
+        var input = $("#confirmarContrasena");
         var tipo = input.attr("type") === "password" ? "text" : "password";
         input.attr("type", tipo);
         $(this).toggleClass("bi-eye bi-eye-slash");
