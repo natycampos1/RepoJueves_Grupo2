@@ -16,6 +16,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Update="Templates\PedidoConfirmado.html">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="Templates\RecuperarAcceso.html">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

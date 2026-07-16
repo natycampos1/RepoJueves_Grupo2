@@ -2,6 +2,7 @@
 @{
     Layout = "_Layout";
     decimal total = ViewBag.Total;
+    var stockDisponible = ViewBag.StockDisponible as Dictionary<int, int>;
 }
 
 <div class="container py-5">
@@ -15,6 +16,8 @@
 
     @if (Model != null && Model.Any())
     {
+        bool haySuperaStock = false;
+
         <div class="card p-4">
             <table class="table table-hover align-middle">
                 <thead>
@@ -30,19 +33,38 @@
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        <tr>
+                        int stock = stockDisponible != null && stockDisponible.ContainsKey(item.IdProducto)
+                            ? stockDisponible[item.IdProducto]
+                            : 0;
+                        bool superaStock = item.Cantidad > stock;
+
+                        if (superaStock)
+                        {
+                            haySuperaStock = true;
+                        }
+
+                        <tr class="@(superaStock ? "table-warning" : "")">
                             <td>
                                 @if (!string.IsNullOrEmpty(item.Imagen))
                                 {
                                     <img src="~/images/@item.Imagen" alt="@item.NombreProducto" style="width: 60px; height: 60px; object-fit: cover;" />
                                 }
                             </td>
-                            <td>@item.NombreProducto</td>
+                            <td>
+                                @item.NombreProducto
+                                @if (superaStock)
+                                {
+                                    <br />
+                                    <small class="text-danger">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Solo quedan @stock disponibles
+                                    </small>
+                                }
+                            </td>
                             <td>₡@item.Precio.ToString("N0")</td>
                             <td>
                                 <form asp-action="ActualizarCantidad" asp-controller="Carrito" method="post" class="d-flex gap-1">
                                     <input type="hidden" name="idProducto" value="@item.IdProducto" />
-                                    <input type="number" name="cantidad" value="@item.Cantidad" min="1" class="form-control form-control-sm" style="width: 70px;" />
+                                    <input type="number" name="cantidad" value="@item.Cantidad" min="1" max="@stock" class="form-control form-control-sm" style="width: 70px;" />
                                     <button type="submit" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-arrow-repeat"></i>
                                     </button>
@@ -68,8 +90,16 @@
                 </tfoot>
             </table>
 
+            @if (haySuperaStock)
+            {
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Algunos productos superan el stock disponible. Ajusta las cantidades antes de continuar.
+                </div>
+            }
+
             <div class="text-end mt-3">
-                <a asp-action="ConfirmarPedido" asp-controller="Carrito" class="btn btn-primary btn-lg">
+                <a asp-action="ConfirmarPedido" asp-controller="Carrito" class="btn btn-primary btn-lg @(haySuperaStock ? "disabled" : "")">
                     <i class="bi bi-check-circle me-2"></i>Confirmar Pedido
                 </a>
             </div>

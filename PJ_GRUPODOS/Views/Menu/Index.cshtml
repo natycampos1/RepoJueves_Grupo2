@@ -65,6 +65,8 @@
                                 {
                                     @foreach (var producto in productos)
                                     {
+                                        bool sinStock = producto.Stock <= 0;
+
                                         <div class="col-lg-6">
                                             <div class="d-flex h-100">
                                                 <div class="flex-shrink-0">
@@ -75,12 +77,31 @@
                                                     <h5 class="text-uppercase">@producto.Nombre</h5>
                                                     <span>@producto.Descripcion</span>
 
+                                                    @if (sinStock)
+                                                    {
+                                                        <small class="text-danger fw-bold mt-1">
+                                                            <i class="bi bi-x-circle-fill me-1"></i>Agotado
+                                                        </small>
+                                                    }
+                                                    else if (producto.Stock <= 5)
+                                                    {
+                                                        <small class="text-warning fw-bold mt-1">
+                                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>¡Solo quedan @producto.Stock disponibles!
+                                                        </small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <small class="text-success mt-1">
+                                                            <i class="bi bi-check-circle-fill me-1"></i>@producto.Stock disponibles
+                                                        </small>
+                                                    }
+
                                                     <form asp-action="Agregar" asp-controller="Carrito" method="post" class="mt-2">
                                                         <input type="hidden" name="idProducto" value="@producto.IdProducto" />
                                                         <input type="hidden" name="nombreProducto" value="@producto.Nombre" />
                                                         <input type="hidden" name="precio" value="@producto.Precio" />
                                                         <input type="hidden" name="imagen" value="@producto.Imagen" />
-                                                        <button type="submit" class="btn btn-sm btn-primary">
+                                                        <button type="submit" class="btn btn-sm btn-primary" @(sinStock ? "disabled" : "")>
                                                             <i class="bi bi-cart-plus me-1"></i>Agregar al Carrito
                                                         </button>
                                                     </form>

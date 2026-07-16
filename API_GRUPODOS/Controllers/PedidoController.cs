@@ -1,14 +1,16 @@
 ﻿using API_GRUPODOS.Models;
+using API_GRUPODOS.Services;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Transactions;
 
+
 namespace API_GRUPODOS.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PedidoController(IConfiguration _config) : ControllerBase
+    public class PedidoController(IConfiguration _config, IUtilesService _utiles) : ControllerBase
     {
 
         #region Tipos de Entrega
@@ -31,7 +33,7 @@ namespace API_GRUPODOS.Controllers
         #region Registrar Pedido
 
         [HttpPost("RegistrarPedidoAPI")]
-        public IActionResult RegistrarPedidoAPI(RegistrarPedidoRequestModel model)
+        public async Task<IActionResult> RegistrarPedidoAPI(RegistrarPedidoRequestModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -39,7 +41,7 @@ namespace API_GRUPODOS.Controllers
             using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
             context.Open();
 
-            using (var scope = new TransactionScope())
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -120,6 +122,16 @@ namespace API_GRUPODOS.Controllers
 
                     // 5. Si todo salió bien, confirmamos la transacción completa
                     scope.Complete();
+
+                    // 6. Enviar correo de confirmación (fuera de la lógica crítica de la transacción)
+                    string ruta = Path.Combine(AppContext.BaseDirectory, "Templates", "PedidoConfirmado.html");
+                    string plantilla = System.IO.File.ReadAllText(ruta);
+
+                    plantilla = plantilla.Replace("{{NOMBRE}}", model.NombreCliente);
+                    plantilla = plantilla.Replace("{{NUMEROPEDIDO}}", idPedido.ToString());
+                    plantilla = plantilla.Replace("{{TOTAL}}", total.ToString("N0"));
+
+                    await _utiles.EnviarCorreoAsync(model.Email, "Pedido Confirmado - RF Bakery", plantilla);
 
                     return Ok(idPedido);
                 }
@@ -205,6 +217,29 @@ namespace API_GRUPODOS.Controllers
                 return Ok("Estado del pedido actualizado correctamente");
 
             return BadRequest("No se pudo actualizar el estado del pedido");
+        }
+
+        #endregion
+        #region Stock
+
+        [HttpGet("ConsultarStockProductoAPI")]
+        public IActionResult ConsultarStockProductoAPI(int idProducto)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdProducto", idProducto);
+
+            var response = context.QueryFirstOrDefault<ProductoStockModel>(
+                "SP_ConsultarStockProducto",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (response != null)
+                return Ok(response);
+
+            return NotFound("Producto no encontrado");
         }
 
         #endregion

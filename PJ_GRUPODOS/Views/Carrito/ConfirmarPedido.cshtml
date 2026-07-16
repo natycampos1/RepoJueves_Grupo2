@@ -49,7 +49,7 @@
         <div class="col-lg-5">
             <div class="card p-4">
                 <h5 class="mb-3">Datos de Entrega</h5>
-                <form asp-action="ConfirmarPedido" asp-controller="Carrito" method="post">
+                <form asp-action="ConfirmarPedido" asp-controller="Carrito" method="post" id="ConfirmarPedidoForm">
 
                     <div class="mb-3">
                         <label class="form-label">Tipo de Entrega</label>
@@ -59,15 +59,15 @@
                             {
                                 @foreach (var tipo in tiposEntrega)
                                 {
-                                    <option value="@tipo.IdTipoEntrega">@tipo.Descripcion</option>
+                                    <option value="@tipo.IdTipoEntrega" data-descripcion="@tipo.Descripcion">@tipo.Descripcion</option>
                                 }
                             }
                         </select>
                     </div>
 
-                    <div class="mb-3" id="direccionGroup">
+                    <div class="mb-3 d-none" id="direccionGroup">
                         <label class="form-label">Dirección de Entrega</label>
-                        <textarea name="DireccionEntrega" class="form-control" rows="3" placeholder="Solo necesaria si elegiste Delivery"></textarea>
+                        <textarea name="DireccionEntrega" id="direccionEntrega" class="form-control" rows="3" placeholder="Escribe tu dirección completa"></textarea>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">
@@ -79,3 +79,5 @@
 
     </div>
 </div>
+
+<script src="~/js/confirmarpedido.js" asp-append-version="true"></script>

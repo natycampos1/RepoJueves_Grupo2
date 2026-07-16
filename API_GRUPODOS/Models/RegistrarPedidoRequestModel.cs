@@ -6,6 +6,11 @@ namespace API_GRUPODOS.Models
     {
         [Required]
         public int IdUsuario { get; set; }
+        [Required]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string NombreCliente { get; set; } = string.Empty;
 
         [Required]
         public int IdTipoEntrega { get; set; }

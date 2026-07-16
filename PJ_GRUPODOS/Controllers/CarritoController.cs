@@ -38,6 +38,24 @@ namespace PJ_GRUPODOS.Controllers
         {
             var carrito = ObtenerCarrito();
             ViewBag.Total = carrito.Sum(i => i.Precio * i.Cantidad);
+
+            var stockDisponible = new Dictionary<int, int>();
+
+            using var client = _http.CreateClient();
+            foreach (var item in carrito)
+            {
+                var url = _config["Valores:UrlApi"] + $"Pedido/ConsultarStockProductoAPI?idProducto={item.IdProducto}";
+                var response = client.GetAsync(url).Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var stock = response.Content.ReadFromJsonAsync<ProductoStockModel>().Result;
+                    stockDisponible[item.IdProducto] = stock?.Stock ?? 0;
+                }
+            }
+
+            ViewBag.StockDisponible = stockDisponible;
+
             return View(carrito);
         }
 
@@ -151,10 +169,14 @@ namespace PJ_GRUPODOS.Controllers
                 return RedirectToAction("Index");
 
             int idUsuario = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
+            string email = HttpContext.Session.GetString("Email") ?? string.Empty;
+            string nombre = HttpContext.Session.GetString("Nombre") ?? string.Empty;
 
             var pedidoRequest = new
             {
                 IdUsuario = idUsuario,
+                Email = email,
+                NombreCliente = nombre,
                 IdTipoEntrega = model.IdTipoEntrega,
                 DireccionEntrega = model.DireccionEntrega,
                 Carrito = carrito.Select(i => new { i.IdProducto, i.Cantidad }).ToList()
