@@ -295,5 +295,49 @@ namespace PJ_GRUPODOS.Controllers
         }
 
         #endregion
+        #region Pedidos
+
+        [HttpGet]
+        public IActionResult PedidosIndex()
+        {
+            if (!EsAdministrador())
+                return RedirectToAction("Principal", "Home");
+
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + "Pedido/ConsultarTodosLosPedidosAPI";
+            var response = client.GetAsync(url).Result;
+
+            var pedidos = response.IsSuccessStatusCode
+                ? response.Content.ReadFromJsonAsync<List<PedidoAdminModel>>().Result ?? new()
+                : new List<PedidoAdminModel>();
+
+            return View(pedidos);
+        }
+
+        [HttpPost]
+        public IActionResult ActualizarEstadoPedido(int idPedido, int idEstadoPedido)
+        {
+            if (!EsAdministrador())
+                return RedirectToAction("Principal", "Home");
+
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + $"Pedido/ActualizarEstadoPedidoAPI?idPedido={idPedido}&idEstadoPedido={idEstadoPedido}";
+            var response = client.PutAsync(url, null).Result;
+
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                TempData["MensajePedidos"] = "Estado del pedido actualizado correctamente";
+                TempData["TipoMensajePedidos"] = "success";
+            }
+            else
+            {
+                TempData["MensajePedidos"] = response.Content.ReadAsStringAsync().Result;
+                TempData["TipoMensajePedidos"] = "danger";
+            }
+
+            return RedirectToAction("PedidosIndex");
+        }
+
+        #endregion
     }
 }

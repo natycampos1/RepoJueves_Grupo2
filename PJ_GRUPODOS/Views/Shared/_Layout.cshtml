@@ -143,6 +143,12 @@
                             Editar información
                         </a>
                     </li>
+                    <li>
+                        <a class="dropdown-item" asp-action="MisPedidos" asp-controller="Carrito">
+                            <i class="bi bi-bag-check me-2"></i>
+                            Mis Pedidos
+                        </a>
+                    </li>
 
                     @if (idRol == 1)
                     {
@@ -150,6 +156,12 @@
                             <a class="dropdown-item" asp-action="Index" asp-controller="AdministrarMenu">
                                 <i class="bi bi-gear-fill me-2"></i>
                                 Administrar Menú
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" asp-action="PedidosIndex" asp-controller="AdministrarMenu">
+                                <i class="bi bi-receipt me-2"></i>
+                                Administrar Pedidos
                             </a>
                         </li>
                     }

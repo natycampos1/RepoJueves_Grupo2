@@ -1,0 +1,75 @@
+﻿@model List<PJ_GRUPODOS.Models.PedidoAdminModel>
+@{
+    Layout = "_Layout";
+    var tipoMensaje = TempData["TipoMensajePedidos"] as string ?? "info";
+}
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-uppercase">Administrar Pedidos</h2>
+        <a asp-action="Index" asp-controller="AdministrarMenu" class="btn btn-outline-primary">
+            <i class="bi bi-tags me-2"></i>Volver a Categorías
+        </a>
+    </div>
+
+    @if (TempData["MensajePedidos"] != null)
+    {
+        <div class="alert alert-@tipoMensaje alert-dismissible show fade">
+            <i class="bi @(tipoMensaje == "success" ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>
+            @TempData["MensajePedidos"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card p-4">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Pedido #</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th>Tipo de Entrega</th>
+                    <th>Total</th>
+                    <th style="width: 220px;">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var pedido in Model)
+                    {
+                        <tr>
+                            <td>#@pedido.IdPedido</td>
+                            <td>@pedido.Cliente</td>
+                            <td>@pedido.FechaPedido.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@pedido.TipoEntrega</td>
+                            <td>₡@pedido.Total.ToString("N0")</td>
+                            <td>
+                                <form asp-action="ActualizarEstadoPedido" asp-controller="AdministrarMenu" method="post" class="d-flex gap-2">
+                                    <input type="hidden" name="idPedido" value="@pedido.IdPedido" />
+                                    <select name="idEstadoPedido" class="form-select form-select-sm">
+                                        <option value="1" selected="@(pedido.EstadoPedido == "Pendiente")">Pendiente</option>
+                                        <option value="2" selected="@(pedido.EstadoPedido == "En Preparación")">En Preparación</option>
+                                        <option value="3" selected="@(pedido.EstadoPedido == "Listo")">Listo</option>
+                                        <option value="4" selected="@(pedido.EstadoPedido == "Entregado")">Entregado</option>
+                                        <option value="5" selected="@(pedido.EstadoPedido == "Cancelado")">Cancelado</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-save"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center">No hay pedidos registrados.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
