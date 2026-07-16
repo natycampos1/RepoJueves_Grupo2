@@ -52,6 +52,11 @@
                         <input type="text" name="Imagen" class="form-control" value="@Model.Imagen" />
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Stock Disponible</label>
+                        <input type="number" name="Stock" class="form-control" value="@Model.Stock" min="0" required />
+                    </div>
+
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-save me-2"></i>Guardar Cambios
                     </button>

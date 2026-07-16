@@ -20,5 +20,9 @@ namespace PJ_GRUPODOS.Models
         public decimal Precio { get; set; }
 
         public string? Imagen { get; set; }
+
+        [Required(ErrorMessage = "El stock es obligatorio")]
+        [Range(0, 999999, ErrorMessage = "El stock no puede ser negativo")]
+        public int Stock { get; set; }
     }
 }

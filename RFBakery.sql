@@ -1265,3 +1265,142 @@ BEGIN
     AND U.ID_ESTADO_FK = 1
 END
 GO
+
+--ACTUALIZACIÓN DEL PROCEDIMIENTO PARA INCLUIR EL STOCK EN EL MENÚ PÚBLICO
+
+USE RFBakery;
+GO
+
+ALTER PROCEDURE SP_ConsultarProductosPorCategoria
+    @IdCategoria INT
+AS
+BEGIN
+    SELECT
+        P.ID_PRODUCTO_PK    AS IdProducto,
+        P.ID_CATEGORIA_FK   AS IdCategoria,
+        P.NOMBRE            AS Nombre,
+        P.DESCRIPCION       AS Descripcion,
+        P.PRECIO            AS Precio,
+        P.IMAGEN            AS Imagen,
+        P.STOCK             AS Stock
+    FROM PRODUCTO_TB P
+    WHERE P.ID_CATEGORIA_FK = @IdCategoria
+    AND P.ID_ESTADO_FK = 1
+    ORDER BY P.NOMBRE
+END
+GO
+
+--ACTUALIZACIÓN: SP_InsertarProducto AHORA RECIBE EL STOCK INICIAL
+
+USE RFBakery;
+GO
+
+ALTER PROCEDURE SP_InsertarProducto
+    @IdCategoria    INT,
+    @Nombre         VARCHAR(100),
+    @Descripcion    VARCHAR(250),
+    @Precio         DECIMAL(10,2),
+    @Imagen         VARCHAR(200),
+    @Stock          INT
+AS
+BEGIN
+
+    INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, STOCK, ID_ESTADO_FK)
+    VALUES (@IdCategoria, @Nombre, @Descripcion, @Precio, @Imagen, @Stock, 1)
+
+END
+GO
+
+--ACTUALIZACIÓN: SP_ActualizarProducto AHORA PERMITE ACTUALIZAR EL STOCK
+
+USE RFBakery;
+GO
+
+ALTER PROCEDURE SP_ActualizarProducto
+    @IdProducto     INT,
+    @IdCategoria    INT,
+    @Nombre         VARCHAR(100),
+    @Descripcion    VARCHAR(250),
+    @Precio         DECIMAL(10,2),
+    @Imagen         VARCHAR(200),
+    @Stock          INT
+AS
+BEGIN
+
+    UPDATE PRODUCTO_TB
+    SET ID_CATEGORIA_FK = @IdCategoria,
+        NOMBRE          = @Nombre,
+        DESCRIPCION     = @Descripcion,
+        PRECIO          = @Precio,
+        IMAGEN          = @Imagen,
+        STOCK           = @Stock
+    WHERE ID_PRODUCTO_PK = @IdProducto
+
+END
+GO
+
+USE RFBakery;
+GO
+
+EXEC sp_helptext 'SP_ActualizarProducto';
+
+SELECT ID_PRODUCTO_PK, NOMBRE, STOCK
+FROM PRODUCTO_TB
+WHERE NOMBRE = 'Torta de Oreo';
+
+USE RFBakery;
+GO
+
+EXEC sp_helptext 'SP_ConsultarTodosLosProductos';
+
+--ACTUALIZACIÓN: AGREGAR STOCK AL LISTADO DE PRODUCTOS DEL PANEL DE ADMINISTRADOR
+
+USE RFBakery;
+GO
+
+ALTER PROCEDURE SP_ConsultarTodosLosProductos
+AS
+BEGIN
+
+    SELECT
+        P.ID_PRODUCTO_PK   AS IdProducto,
+        P.ID_CATEGORIA_FK  AS IdCategoria,
+        C.DESCRIPCION      AS Categoria,
+        P.NOMBRE           AS Nombre,
+        P.DESCRIPCION      AS Descripcion,
+        P.PRECIO           AS Precio,
+        P.IMAGEN           AS Imagen,
+        P.STOCK            AS Stock
+    FROM PRODUCTO_TB P
+    INNER JOIN CATEGORIA_PRODUCTO_TB C ON P.ID_CATEGORIA_FK = C.ID_CATEGORIA_PK
+    WHERE P.ID_ESTADO_FK = 1
+    ORDER BY C.DESCRIPCION, P.NOMBRE
+
+END
+GO
+
+EXEC sp_helptext 'SP_ConsultarProductosInactivos';
+
+--ACTUALIZACIÓN: AGREGAR STOCK AL LISTADO DE PRODUCTOS INACTIVOS
+
+USE RFBakery;
+GO
+
+ALTER PROCEDURE SP_ConsultarProductosInactivos
+AS
+BEGIN
+    SELECT
+        P.ID_PRODUCTO_PK    AS IdProducto,
+        P.ID_CATEGORIA_FK   AS IdCategoria,
+        C.DESCRIPCION       AS Categoria,
+        P.NOMBRE            AS Nombre,
+        P.DESCRIPCION       AS Descripcion,
+        P.PRECIO            AS Precio,
+        P.IMAGEN            AS Imagen,
+        P.STOCK             AS Stock
+    FROM PRODUCTO_TB P
+    INNER JOIN CATEGORIA_PRODUCTO_TB C ON P.ID_CATEGORIA_FK = C.ID_CATEGORIA_PK
+    WHERE P.ID_ESTADO_FK = 2
+    ORDER BY P.NOMBRE
+END
+GO

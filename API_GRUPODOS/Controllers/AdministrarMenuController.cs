@@ -175,6 +175,7 @@ namespace API_GRUPODOS.Controllers
             parameters.Add("@Descripcion", model.Descripcion);
             parameters.Add("@Precio", model.Precio);
             parameters.Add("@Imagen", model.Imagen);
+            parameters.Add("@Stock", model.Stock);
 
             var response = context.Execute(
                 "SP_InsertarProducto",
@@ -203,6 +204,7 @@ namespace API_GRUPODOS.Controllers
             parameters.Add("@Descripcion", model.Descripcion);
             parameters.Add("@Precio", model.Precio);
             parameters.Add("@Imagen", model.Imagen);
+            parameters.Add("@Stock", model.Stock);
 
             var response = context.Execute(
                 "SP_ActualizarProducto",

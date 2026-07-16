@@ -66,6 +66,11 @@
                         <input type="text" name="Imagen" class="form-control" placeholder="Ej: cake-4.jpg" />
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Stock Inicial</label>
+                        <input type="number" name="Stock" class="form-control" placeholder="10" min="0" required />
+                    </div>
+
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-plus-circle me-2"></i>Agregar Producto
                     </button>
@@ -83,6 +88,7 @@
                             <th>Categoría</th>
                             <th>Nombre</th>
                             <th>Precio</th>
+                            <th>Stock</th>
                             <th class="text-center">Editar</th>
                             <th class="text-center">Eliminar</th>
                         </tr>
@@ -96,6 +102,7 @@
                                     <td>@producto.Categoria</td>
                                     <td>@producto.Nombre</td>
                                     <td>₡@producto.Precio.ToString("N0")</td>
+                                    <td>@producto.Stock</td>
                                     <td class="text-center">
                                         <a asp-action="EditarProducto" asp-controller="AdministrarMenu" asp-route-idProducto="@producto.IdProducto" class="btn btn-sm btn-primary">
                                             <i class="bi bi-pencil-square me-1"></i>Editar
@@ -115,7 +122,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="5" class="text-center">No hay productos registrados.</td>
+                                <td colspan="6" class="text-center">No hay productos registrados.</td>
                             </tr>
                         }
                     </tbody>
@@ -135,6 +142,7 @@
                         <th>Categoría</th>
                         <th>Nombre</th>
                         <th>Precio</th>
+                        <th>Stock</th>
                         <th class="text-center" style="width: 130px;">Acción</th>
                     </tr>
                 </thead>
@@ -145,6 +153,7 @@
                             <td>@producto.Categoria</td>
                             <td>@producto.Nombre</td>
                             <td>₡@producto.Precio.ToString("N0")</td>
+                            <td>@producto.Stock</td>
                             <td class="text-center">
                                 <form asp-action="ReactivarProducto" asp-controller="AdministrarMenu" method="post">
                                     <input type="hidden" name="idProducto" value="@producto.IdProducto" />

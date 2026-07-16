@@ -105,8 +105,6 @@ namespace API_GRUPODOS.Controllers
             return Ok(infoUsuario);
         }
 
-
-
         [HttpGet("ConsultarInformacionUsuarioAPI")]
         public IActionResult ConsultarInformacionUsuarioAPI(string identificacion)
         {
@@ -125,42 +123,6 @@ namespace API_GRUPODOS.Controllers
 
             return BadRequest("No se encontró información para esa identificación");
         }
-
-
-        [HttpPost("ActualizarUsuarioAPI")]
-        public IActionResult ActualizarUsuarioAPI(UsuarioEdicionRequestModel model)
-        {
-            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
-
-            string? contrasenaHash = null;
-
-            if (!string.IsNullOrWhiteSpace(model.NuevaContrasena))
-                contrasenaHash = BCrypt.Net.BCrypt.HashPassword(model.NuevaContrasena);
-
-            var parameters = new DynamicParameters();
-            parameters.Add("@Identificacion", model.Identificacion);
-            parameters.Add("@NombreCompleto", model.NombreCompleto);
-            parameters.Add("@PrimerApellido", model.PrimerApellido);
-            parameters.Add("@SegundoApellido", model.SegundoApellido);
-            parameters.Add("@Genero", model.Genero);
-            parameters.Add("@Direccion", model.Direccion);
-            parameters.Add("@Nacionalidad", model.Nacionalidad);
-            parameters.Add("@NumTelefono", model.NumTelefono);
-            parameters.Add("@Email", model.Email);
-            parameters.Add("@NuevaContrasena", contrasenaHash);
-
-            var response = context.Execute(
-                "SP_ActualizarUsuario",
-                parameters,
-                commandType: System.Data.CommandType.StoredProcedure
-            );
-
-            if (response > 0)
-                return Ok("Perfil actualizado correctamente");
-
-            return BadRequest("No se pudo actualizar el perfil");
-        }
-
 
         #endregion
 
