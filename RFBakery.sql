@@ -1233,3 +1233,35 @@ BEGIN
 
 END
 GO
+
+--ACTUALIZACIÓN DEL PROCEDIMIENTO PARA INCLUIR EL ID_USUARIO_PK EN EL LOGIN
+
+USE RFBakery;
+GO
+
+ALTER PROCEDURE SP_IniciarSesion
+    @Email VARCHAR(100)
+AS
+BEGIN
+    SELECT
+        U.ID_USUARIO_PK                 AS IdUsuario,
+        P.IDENTIFICACION_PK             AS Identificacion,
+        P.ID_TIPO_IDENTIFICACION_FK     AS IdTipoIdentificacion,
+        P.NOMBRE_COMPLETO               AS NombreCompleto,
+        P.PRIMER_APELLIDO               AS PrimerApellido,
+        P.SEGUNDO_APELLIDO              AS SegundoApellido,
+        P.GENERO                        AS Genero,
+        P.DIRECCION                     AS Direccion,
+        P.NACIONALIDAD                  AS Nacionalidad,
+        P.FECHA_REGISTRO                AS FechaRegistro,
+        T.NUM_TELEFONO                  AS NumTelefono,
+        U.EMAIL                         AS Email,
+        U.CONTRASENA                    AS Contrasena,
+        U.ID_ROL_FK                     AS IdRol
+    FROM USUARIO_TB U
+    INNER JOIN PERSONA_TB P   ON U.IDENTIFICACION_FK  = P.IDENTIFICACION_PK
+    INNER JOIN TELEFONO_TB T  ON P.IDENTIFICACION_PK  = T.IDENTIFICACION_FK
+    WHERE U.EMAIL = @Email
+    AND U.ID_ESTADO_FK = 1
+END
+GO

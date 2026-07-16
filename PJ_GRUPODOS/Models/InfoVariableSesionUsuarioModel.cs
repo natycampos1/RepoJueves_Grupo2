@@ -2,6 +2,7 @@
 {
     public class InfoVariableSesionUsuarioModel
     {
+        public int IdUsuario { get; set; }
         public string Identificacion { get; set; } = string.Empty;
         public int IdTipoIdentificacion { get; set; }
         public string NombreCompleto { get; set; } = string.Empty;

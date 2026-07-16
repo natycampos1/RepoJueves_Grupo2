@@ -88,6 +88,7 @@ namespace API_GRUPODOS.Controllers
             // En caso de Login exitoso
             // Mando InfoVariableSesionUsuarioModel para no mandar la contraseña
             InfoVariableSesionUsuarioModel infoUsuario = new();
+            infoUsuario.IdUsuario = usuario.IdUsuario;
             infoUsuario.Identificacion = usuario.Identificacion;
             infoUsuario.IdTipoIdentificacion = usuario.IdTipoIdentificacion;
             infoUsuario.NombreCompleto = usuario.NombreCompleto;
