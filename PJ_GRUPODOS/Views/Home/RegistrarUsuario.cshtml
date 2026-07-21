@@ -1,0 +1,258 @@
+﻿@model UsuarioRegistroModel
+@{
+    Layout = "_LayoutExterno";
+}
+
+<!-- Register Section Start -->
+<div class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-11 col-lg-12">
+                <div class="auth-card">
+                    <div class="row g-0">
+                        <!-- Image Side -->
+                        <div class="col-lg-4 d-none d-lg-flex">
+                            <div class="auth-image-side w-100">
+                                <i class="fa fa-birthday-cake auth-cake-icon"></i>
+                                <h3 class="font-secondary text-primary mb-4">¿Por qué unirte?</h3>
+
+                                <div class="benefit-item">
+                                    <div class="benefit-icon">
+                                        <i class="bi bi-tag-fill text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-white mb-0" style="font-size:14px;font-weight:600;">Descuentos Exclusivos</p>
+                                        <p class="text-secondary mb-0" style="font-size:12px;">Accede a ofertas solo para miembros</p>
+                                    </div>
+                                </div>
+
+                                <div class="benefit-item">
+                                    <div class="benefit-icon">
+                                        <i class="bi bi-truck text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-white mb-0" style="font-size:14px;font-weight:600;">Pedidos en Línea</p>
+                                        <p class="text-secondary mb-0" style="font-size:12px;">Ordena y rastrea tus pedidos fácilmente</p>
+                                    </div>
+                                </div>
+
+                                <div class="benefit-item">
+                                    <div class="benefit-icon">
+                                        <i class="bi bi-heart-fill text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-white mb-0" style="font-size:14px;font-weight:600;">Lista de Favoritos</p>
+                                        <p class="text-secondary mb-0" style="font-size:12px;">Guarda tus pasteles preferidos</p>
+                                    </div>
+                                </div>
+
+                                <div class="benefit-item">
+                                    <div class="benefit-icon">
+                                        <i class="bi bi-gift-fill text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-white mb-0" style="font-size:14px;font-weight:600;">Programa de Puntos</p>
+                                        <p class="text-secondary mb-0" style="font-size:12px;">Acumula y canjea puntos en cada compra</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <p class="text-secondary mb-2" style="font-size:13px;">¿Ya tienes cuenta?</p>
+                                    <a asp-action="IniciarSesion" asp-controller="Home" class="btn btn-primary border-inner px-4 py-2" style="font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:1px;">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+
+                        <!-- Form Side -->
+                        <div class="col-lg-8">
+                            <div class="auth-card-header">
+                                <i class="bi bi-person-plus-fill text-primary fs-1 mb-2"></i>
+                                <h3 class="text-white text-uppercase mb-1" style="font-family:'Oswald',sans-serif;letter-spacing:2px;">Crear Nueva Cuenta</h3>
+                                <p class="text-secondary mb-0" style="font-size:14px;">Completa el formulario para unirte a la familia RF Bakery</p>
+                            </div>
+                            <div class="auth-card-body">
+
+                                <!-- Mensaje -->
+                                @if (ViewBag.Mensaje != null)
+                                {
+                                    <div class="alert alert-danger alert-dismissible show fade text-center mb-1">
+                                        @ViewBag.Mensaje
+                                    </div>
+                                }
+
+                                <form id="RegistrarUsuarioForm" asp-action="RegistrarUsuario" asp-controller="Home" method="post" novalidate>
+                                    @Html.AntiForgeryToken()
+                                    <div class="row g-4">
+
+                                        <!-- Tipo de Identificación -->
+                                        <div class="col-md-6">
+                                            <label asp-for="IdTipoIdentificacion" class="label-auth">Tipo de Identificación</label>
+                                            <div class="input-wrapper">
+                                                <select asp-for="IdTipoIdentificacion" class="form-control form-control-auth">
+                                                    <option value="">-- Seleccione --</option>
+                                                    @foreach (var item in (List<TipoIdentificacionModel>)ViewBag.TiposDeIdentificacion)
+                                                    {
+                                                        <option value="@item.IdTipoIdentificacion">@item.Descripcion</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <span asp-validation-for="IdTipoIdentificacion" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Identificación -->
+                                        <div class="col-md-6">
+                                            <label asp-for="Identificacion" class="label-auth">Identificación</label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="Identificacion" class="form-control form-control-auth"
+                                                       placeholder="Tu número de identificación" />
+                                            </div>
+                                            <span asp-validation-for="Identificacion" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Nombre Completo -->
+                                        <div class="col-md-6">
+                                            <label asp-for="NombreCompleto" class="label-auth">Nombre Completo</label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="NombreCompleto" class="form-control form-control-auth"
+                                                       placeholder="Tu nombre completo" />
+                                            </div>
+                                            <span asp-validation-for="NombreCompleto" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Primer Apellido -->
+                                        <div class="col-md-6">
+                                            <label asp-for="PrimerApellido" class="label-auth">Primer Apellido</label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="PrimerApellido" class="form-control form-control-auth"
+                                                       placeholder="Tu primer apellido" />
+                                            </div>
+                                            <span asp-validation-for="PrimerApellido" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Segundo Apellido -->
+                                        <div class="col-md-6">
+                                            <label asp-for="SegundoApellido" class="label-auth">
+                                                Segundo Apellido <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="SegundoApellido" class="form-control form-control-auth"
+                                                       placeholder="Tu segundo apellido" />
+                                            </div>
+                                            <span asp-validation-for="SegundoApellido" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Género -->
+                                        <div class="col-md-6">
+                                            <label asp-for="Genero" class="label-auth">
+                                                Género <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <select asp-for="Genero" class="form-control form-control-auth">
+                                                    <option value="">-- Seleccione --</option>
+                                                    <option value="Masculino">Masculino</option>
+                                                    <option value="Femenino">Femenino</option>
+                                                    <option value="Otro">Otro</option>
+                                                </select>
+                                            </div>
+                                            <span asp-validation-for="Genero" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Dirección -->
+                                        <div class="col-md-6">
+                                            <label asp-for="Direccion" class="label-auth">
+                                                Dirección <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="Direccion" class="form-control form-control-auth"
+                                                       placeholder="Tu dirección" />
+                                            </div>
+                                            <span asp-validation-for="Direccion" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Nacionalidad -->
+                                        <div class="col-md-6">
+                                            <label asp-for="Nacionalidad" class="label-auth">
+                                                Nacionalidad <span class="text-muted" style="font-size:11px;font-weight:400;">(Opcional)</span>
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="Nacionalidad" class="form-control form-control-auth"
+                                                       placeholder="Tu nacionalidad" />
+                                            </div>
+                                            <span asp-validation-for="Nacionalidad" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Teléfono -->
+                                        <div class="col-md-6">
+                                            <label asp-for="NumTelefono" class="label-auth">Teléfono</label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="NumTelefono" class="form-control form-control-auth"
+                                                       placeholder="+506 8888-8888" />
+                                            </div>
+                                            <span asp-validation-for="NumTelefono" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Correo -->
+                                        <div class="col-md-6">
+                                            <label asp-for="Email" class="label-auth">Correo Electrónico</label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="Email" class="form-control form-control-auth"
+                                                       placeholder="tucorreo@ejemplo.com" />
+                                            </div>
+                                            <span asp-validation-for="Email" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Contraseña -->
+                                        <div class="col-md-6">
+                                            <label asp-for="Contrasena" class="label-auth">Contraseña</label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="Contrasena" class="form-control form-control-auth"
+                                                       placeholder="Mínimo 8 caracteres" id="regPassword" />
+                                                <i class="bi bi-eye input-icon" id="toggleRegPassword"></i>
+                                            </div>
+                                            <div class="strength-bar">
+                                                <div class="strength-fill" id="strengthFill"></div>
+                                            </div>
+                                            <div class="strength-text" id="strengthText" style="color:#aaa;">Ingresa una contraseña</div>
+                                            <span asp-validation-for="Contrasena" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Confirmar Contraseña -->
+                                        <div class="col-md-6">
+                                            <label asp-for="ConfirmarContrasena" class="label-auth">Confirmar Contraseña</label>
+                                            <div class="input-wrapper">
+                                                <input asp-for="ConfirmarContrasena" class="form-control form-control-auth"
+                                                       placeholder="Repite tu contraseña" id="confirmPassword" />
+                                                <i class="bi bi-eye input-icon" id="toggleConfirmPassword"></i>
+                                            </div>
+                                            <span asp-validation-for="ConfirmarContrasena" class="text-danger" style="font-size:12px;"></span>
+                                        </div>
+
+                                        <!-- Submit -->
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-auth btn-auth-primary" id="registerBtn">
+                                                <i class="bi bi-person-check me-2"></i>Crear Mi Cuenta
+                                            </button>
+                                        </div>
+
+                                        <div class="col-12 text-center d-lg-none">
+                                            <p class="mb-0" style="font-size:14px;color:#888;">
+                                                ¿Ya tienes cuenta?
+                                                <a asp-action="IniciarSesion" asp-controller="Home" class="auth-link">Inicia sesión aquí</a>
+                                            </p>
+                                        </div>
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/js/RegistrarUsuario.js"></script>

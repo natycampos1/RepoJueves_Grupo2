@@ -1,0 +1,105 @@
+﻿@model LoginModel
+@{
+    Layout = "_LayoutExterno";
+}
+
+<!-- Login Section Start -->
+<div class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-11">
+                <div class="auth-card">
+                    <div class="row g-0">
+                        <!-- Image Side -->
+                        <div class="col-lg-5 d-none d-lg-flex">
+                            <div class="auth-image-side w-100">
+                                <i class="fa fa-birthday-cake auth-cake-icon"></i>
+                                <h2 class="font-secondary text-primary mb-3">RF Bakery</h2>
+                                <p class="text-secondary mb-4">Las mejores creaciones de repostería artesanal, elaboradas con amor y los ingredientes más frescos.</p>
+                                <div class="d-flex align-items-center justify-content-center gap-3 mt-3">
+                                    <div class="text-center">
+                                        <h4 class="text-white mb-0">500+</h4>
+                                        <small class="text-secondary" style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:11px;">PRODUCTOS</small>
+                                    </div>
+                                    <div class="border-start border-secondary" style="height:40px;"></div>
+                                    <div class="text-center">
+                                        <h4 class="text-white mb-0">10k+</h4>
+                                        <small class="text-secondary" style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:11px;">CLIENTES</small>
+                                    </div>
+                                    <div class="border-start border-secondary" style="height:40px;"></div>
+                                    <div class="text-center">
+                                        <h4 class="text-white mb-0">15</h4>
+                                        <small class="text-secondary" style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:11px;">AÑOS</small>
+                                    </div>
+                                </div>
+                                <div class="mt-5">
+                                    <p class="text-secondary mb-2" style="font-size:13px;">¿Aún no tienes cuenta?</p>
+                                    <a asp-action="RegistrarUsuario" asp-controller="Home" class="btn btn-primary border-inner px-4 py-2" style="font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:1px;">
+                                        <i class="bi bi-person-plus me-1"></i> Crear Cuenta
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Side -->
+                        <div class="col-lg-7">
+                            <div class="auth-card-header">
+                                <!-- Mensaje -->
+                                @if (ViewBag.Mensaje != null)
+                                {
+                                    <div class="alert alert-danger alert-dismissible show fade text-center mb-1">
+                                        @ViewBag.Mensaje
+                                    </div>
+                                }
+                            </div>
+                            <div class="auth-card-body">
+
+
+                                <!-- Login Form -->
+                                <div id="loginAlert" class="alert alert-danger d-none" role="alert">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Correo o contraseña incorrectos. Por favor verifica tus datos.
+                                </div>
+
+                                <form asp-action="IniciarSesion" asp-controller="Home" method="post" id="loginForm" novalidate>
+                                    <div class="mb-4">
+                                        <label class="label-auth">Correo Electrónico</label>
+                                        <div class="input-wrapper">
+                                            <input type="email" asp-for="Email" class="form-control form-control-auth" id="loginEmail"
+                                                   placeholder="tucorreo@ejemplo.com" required>
+                                            <i class="bi bi-envelope input-icon"></i>
+                                        </div>
+                                        <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <label class="label-auth">Contraseña</label>
+                                            <a asp-action="RecuperarAcceso" asp-controller="Home" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                                        </div>
+                                        <div class="input-wrapper">
+                                            <input type="password" asp-for="Contrasena" class="form-control form-control-auth" id="loginPassword"
+                                                   placeholder="Ingresa tu contraseña" required minlength="6">
+                                            <i class="bi bi-eye input-icon" id="togglePassword" title="Mostrar/ocultar contraseña"></i>
+                                        </div>
+                                        <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-auth btn-auth-primary mb-4" id="loginBtn">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                                    </button>
+
+                                    <p class="text-center mb-0 d-lg-none" style="font-size:14px;color:#888;">
+                                        ¿No tienes cuenta?
+                                        <a asp-action="RegistrarUsuario" asp-controller="Home" class="auth-link">Regístrate aquí</a>
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Login Section End -->

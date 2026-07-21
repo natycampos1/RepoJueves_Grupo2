@@ -1,0 +1,173 @@
+﻿@{
+    Layout = "_Layout";
+    var info = ViewBag.InfoUsuario as UsuarioConsultaModel;
+}
+
+<!-- Gestion Perfil Section Start -->
+<div class="auth-section">
+    <div class="container">
+        <div class="row g-4">
+
+            <!-- Formulario de Seguridad -->
+            <div class="col-lg-6">
+                <div class="auth-card h-100">
+                    <div class="auth-card-header">
+                        <i class="bi bi-shield-lock text-primary fs-1 mb-2"></i>
+                        <h3 class="text-white text-uppercase mb-1" style="font-family:'Oswald',sans-serif;letter-spacing:2px;">Seguridad</h3>
+                        <p class="text-secondary mb-0" style="font-size:14px;">Cambia tu contraseña de acceso</p>
+                    </div>
+                    <div class="auth-card-body">
+
+                        @if (ViewBag.MensajeSeguridad != null)
+                        {
+                            <div class="alert alert-info alert-dismissible show fade text-center mb-3">
+                                @ViewBag.MensajeSeguridad
+                            </div>
+                        }
+
+                        <form id="SeguridadForm" asp-action="CambiarContrasenaPerfil" asp-controller="Home" method="post" novalidate>
+                            <div class="mb-3">
+                                <label class="label-auth">Nueva Contraseña</label>
+                                <div class="input-wrapper">
+                                    <input type="password" name="NuevaContrasena" class="form-control form-control-auth" placeholder="Mínimo 8 caracteres" id="nuevaContrasena" />
+                                    <i class="bi bi-eye input-icon" id="toggleNuevaContrasena"></i>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="label-auth">Confirmar Contraseña</label>
+                                <div class="input-wrapper">
+                                    <input type="password" name="ConfirmarContrasena" class="form-control form-control-auth" placeholder="Repite la nueva contraseña" id="confirmarContrasena" />
+                                    <i class="bi bi-eye input-icon" id="toggleConfirmarContrasena"></i>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-auth btn-auth-primary w-100">
+                                <i class="bi bi-check-circle me-2"></i>Cambiar Contraseña
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de Perfil -->
+            <div class="col-lg-6">
+                <div class="auth-card h-100">
+                    <div class="auth-card-header">
+                        <i class="bi bi-person-gear text-primary fs-1 mb-2"></i>
+                        <h3 class="text-white text-uppercase mb-1" style="font-family:'Oswald',sans-serif;letter-spacing:2px;">Perfil</h3>
+                        <p class="text-secondary mb-0" style="font-size:14px;">Ajusta tu información personal</p>
+                    </div>
+                    <div class="auth-card-body">
+
+                        @if (ViewBag.MensajePerfil != null)
+                        {
+                            <div class="alert alert-info alert-dismissible show fade text-center mb-3">
+                                @ViewBag.MensajePerfil
+                            </div>
+                        }
+
+                        <form id="PerfilForm" asp-action="ActualizarPerfil" asp-controller="Home" method="post" novalidate>
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <label class="label-auth">Tipo de Identificación</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" class="form-control form-control-auth" value="@info?.TipoIdentificacion" disabled />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="label-auth">Identificación</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" class="form-control form-control-auth" value="@info?.Identificacion" disabled />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="label-auth">Nombre Completo</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" name="NombreCompleto" class="form-control form-control-auth" value="@info?.NombreCompleto" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="label-auth">Primer Apellido</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" name="PrimerApellido" class="form-control form-control-auth" value="@info?.PrimerApellido" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="label-auth">Segundo Apellido</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" name="SegundoApellido" class="form-control form-control-auth" value="@info?.SegundoApellido" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="label-auth">Género</label>
+                                    <div class="input-wrapper">
+                                        <select name="Genero" class="form-control form-control-auth">
+                                            <option value="">-- Seleccione --</option>
+                                            <option value="Masculino" selected="@(info?.Genero == "Masculino")">Masculino</option>
+                                            <option value="Femenino" selected="@(info?.Genero == "Femenino")">Femenino</option>
+                                            <option value="Otro" selected="@(info?.Genero == "Otro")">Otro</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="label-auth">Dirección</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" name="Direccion" class="form-control form-control-auth" value="@info?.Direccion" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="label-auth">Nacionalidad</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" name="Nacionalidad" class="form-control form-control-auth" value="@info?.Nacionalidad" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="label-auth">Teléfono</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" name="NumTelefono" class="form-control form-control-auth" value="@info?.NumTelefono" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="label-auth">Correo Electrónico</label>
+                                    <div class="input-wrapper">
+                                        <input type="email" name="Email" class="form-control form-control-auth" value="@info?.Email" />
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="label-auth">Rol</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" class="form-control form-control-auth" value="@info?.Rol" disabled />
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-auth btn-auth-primary w-100 mt-2">
+                                        <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+                                    </button>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- Gestion Perfil Section End -->
+
+<script src="~/js/gestionperfil.js" asp-append-version="true"></script>

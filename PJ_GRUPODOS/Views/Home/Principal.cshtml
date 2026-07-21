@@ -1,49 +1,101 @@
-﻿<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">¡Bienvenido a Dulce Encanto! 🎂</h5>
-            </div>
-            <div class="card-body">
-                <p class="text-muted">Bienvenido al sistema de gestión de la pastelería. Desde aquí podrás administrar tus pedidos, productos y clientes de manera fácil y rápida.</p>
+﻿@{
+    Layout = "_Layout";
+    var categorias = ViewBag.Categorias as List<PJ_GRUPODOS.Models.CategoriaProductoModel>;
+}
 
-                <div class="row mt-4">
-                    <div class="col-md-4">
-                        <div class="card bg-light mb-3">
-                            <div class="card-body text-center">
-                                <i class="bi bi-bag-heart fs-1"></i>
-                                <h6 class="card-title mt-2">Pedidos</h6>
-                                <p class="card-text text-muted">Gestiona los pedidos de tus clientes.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-light mb-3">
-                            <div class="card-body text-center">
-                                <i class="bi bi-cake2 fs-1"></i>
-                                <h6 class="card-title mt-2">Productos</h6>
-                                <p class="card-text text-muted">Administra tu catálogo de pasteles.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-light mb-3">
-                            <div class="card-body text-center">
-                                <i class="bi bi-people fs-1"></i>
-                                <h6 class="card-title mt-2">Clientes</h6>
-                                <p class="card-text text-muted">Consulta y gestiona tus clientes.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+@{
+    var nombre = Context.Session.GetString("Nombre");
+    var identificacion = Context.Session.GetString("Identificacion");
+    var email = Context.Session.GetString("Email");
+}
 
-                <div class="mt-3">
-                    <a asp-action="Index" asp-controller="Home" class="btn btn-primary">
-                        <i class="bi bi-box-arrow-left"></i> Cerrar Sesión
-                    </a>
-                </div>
 
+
+<!-- Esta es la pagina a ingresar una ves se inicio sesion correctamente -->
+<!-- Hero Start -->
+<div class="container-fluid bg-primary py-5 mb-5 hero-header">
+    <div class="container py-5">
+        <div class="row justify-content-start">
+            <div class="col-lg-8 text-center text-lg-start">
+                <h1 class="font-secondary text-primary mb-4">Hola! @nombre!</h1>
+                <h1 class="display-1 text-uppercase text-white mb-4">Pastelería RF Bakery</h1>
+                <h1 class="text-uppercase text-white">Endulzando tu día</h1>
             </div>
         </div>
     </div>
 </div>
+<!-- Hero End -->
+<!-- About Start -->
+<div class="container-fluid pt-5">
+    <div class="container">
+        <div class="section-title position-relative text-center mx-auto mb-5 pb-3" style="max-width: 600px;">
+            <h2 class="text-primary font-secondary">Sobre Nosotros</h2>
+            <h1 class="display-4 text-uppercase">Bienvenido a RF Bakery</h1>
+        </div>
+        <div class="row gx-5">
+            <div class="col-lg-5 mb-5 mb-lg-0" style="min-height: 400px;">
+                <div class="position-relative h-100">
+                    <img class="position-absolute w-100 h-100" src="~/images/about.jpg" style="object-fit: cover;">
+                </div>
+            </div>
+            <div class="col-lg-6 pb-5">
+                <h4 class="mb-4">Repostería artesanal preparada con pasión, calidad y el auténtico sabor casero</h4>
+                <p class="mb-5">
+                    En RF Bakery cada torta, cupcake y postre es elaborado a mano, con ingredientes seleccionados
+                    para hacer de cada ocasión un momento especial. Nos enorgullece acompañar tus celebraciones
+                    más importantes con productos frescos y un servicio cercano.
+                </p>
+                <div class="row g-5">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center justify-content-center bg-primary border-inner mb-4" style="width: 90px; height: 90px;">
+                            <i class="fa fa-heartbeat fa-2x text-white"></i>
+                        </div>
+                        <h4 class="text-uppercase">100% Artesanal</h4>
+                        <p class="mb-0">Cada producto es elaborado con dedicación y los mejores ingredientes.</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center justify-content-center bg-primary border-inner mb-4" style="width: 90px; height: 90px;">
+                            <i class="fa fa-award fa-2x text-white"></i>
+                        </div>
+                        <h4 class="text-uppercase">Calidad Premiada</h4>
+                        <p class="mb-0">Reconocidos por nuestros clientes como una de las mejores pastelerías.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- About End -->
+<!-- Categories Start -->
+<div class="container-fluid about py-5">
+    <div class="container">
+        <div class="section-title position-relative text-center mx-auto mb-5 pb-3" style="max-width: 600px;">
+            <h2 class="text-primary font-secondary">Menú y Precios</h2>
+            <h1 class="display-4 text-uppercase">Explora Nuestras Categorías</h1>
+        </div>
+
+        @if (categorias != null && categorias.Any())
+        {
+            <div class="row g-4 justify-content-center">
+                @foreach (var categoria in categorias)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="text-center bg-secondary border-inner p-4 h-100">
+                            <div class="d-flex align-items-center justify-content-center bg-primary rounded-circle mx-auto mb-4" style="width: 90px; height: 90px;">
+                                <i class="fa fa-birthday-cake fa-2x text-white"></i>
+                            </div>
+                            <h4 class="text-uppercase">@categoria.Descripcion</h4>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="text-center mt-5">
+            <a asp-action="Index" asp-controller="Menu" class="btn btn-primary border-inner px-5 py-3" style="font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:1px;">
+                <i class="bi bi-book me-2"></i>Ver Menú Completo
+            </a>
+        </div>
+    </div>
+</div>
+<!-- Categories End -->

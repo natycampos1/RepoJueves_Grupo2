@@ -4,19 +4,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 //Espacio de dependencias
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient(); //Dependencia para consumir servicios web
+builder.Services.AddSession(); //Dependencia para manejar sesiones
 
 var app = builder.Build();
 
 //Middleware de Errores
 app.UseExceptionHandler("/Error/CapturarError");
 
-
 app.UseHsts();
 
-
 app.UseHttpsRedirection();
+
 app.UseRouting();
+
+app.UseSession();
 
 app.UseAuthorization();
 

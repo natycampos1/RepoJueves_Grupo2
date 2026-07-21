@@ -1,0 +1,83 @@
+﻿@model MensajeContactoModel
+@{
+    Layout = "_LayoutExterno";
+}
+
+<!-- Hero Start -->
+<div class="container-fluid bg-primary py-5 mb-5 hero-header">
+    <div class="container py-5">
+        <div class="row justify-content-start">
+            <div class="col-lg-8 text-center text-lg-start">
+                <h1 class="display-1 text-uppercase text-white mb-4">Contáctanos</h1>
+                <h1 class="text-uppercase text-white">Estamos para ayudarte</h1>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Hero End -->
+<!-- Contact Start -->
+<div class="container-fluid py-5">
+    <div class="container">
+        <div class="section-title position-relative text-center mx-auto mb-5 pb-3" style="max-width: 600px;">
+            <h2 class="text-primary font-secondary">Contacto</h2>
+            <h1 class="display-4 text-uppercase">Escríbenos</h1>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                @if (ViewBag.Mensaje != null)
+                {
+                    <div class="alert alert-info alert-dismissible show fade text-center mb-4">
+                        @ViewBag.Mensaje
+                    </div>
+                }
+
+                <form id="ContactoForm" asp-action="Index" asp-controller="Contacto" method="post" novalidate>
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+                            <label asp-for="Nombre" class="label-auth">Nombre</label>
+                            <div class="input-wrapper">
+                                <input asp-for="Nombre" class="form-control form-control-auth" placeholder="Tu nombre" />
+                            </div>
+                            <span asp-validation-for="Nombre" class="text-danger" style="font-size:12px;"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="label-auth">Correo Electrónico</label>
+                            <div class="input-wrapper">
+                                <input asp-for="Email" class="form-control form-control-auth" placeholder="tucorreo@ejemplo.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger" style="font-size:12px;"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Asunto" class="label-auth">Asunto</label>
+                            <div class="input-wrapper">
+                                <input asp-for="Asunto" class="form-control form-control-auth" placeholder="¿Sobre qué quieres escribirnos?" />
+                            </div>
+                            <span asp-validation-for="Asunto" class="text-danger" style="font-size:12px;"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Mensaje" class="label-auth">Mensaje</label>
+                            <div class="input-wrapper">
+                                <textarea asp-for="Mensaje" class="form-control form-control-auth" rows="5" placeholder="Escribe tu mensaje aquí..."></textarea>
+                            </div>
+                            <span asp-validation-for="Mensaje" class="text-danger" style="font-size:12px;"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-auth btn-auth-primary">
+                                <i class="bi bi-send me-2"></i>Enviar Mensaje
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Contact End -->
