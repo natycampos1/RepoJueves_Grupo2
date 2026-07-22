@@ -34,7 +34,7 @@
                                 </div>
                                 <div class="mt-5">
                                     <p class="text-secondary mb-2" style="font-size:13px;">¿Aún no tienes cuenta?</p>
-                                    <a asp-action="Registrar" asp-controller="Home" class="btn btn-primary border-inner px-4 py-2" style="font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:1px;">
+                                    <a asp-action="RegistrarUsuario" asp-controller="Home" class="btn btn-primary border-inner px-4 py-2" style="font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:1px;">
                                         <i class="bi bi-person-plus me-1"></i> Crear Cuenta
                                     </a>
                                 </div>
@@ -61,7 +61,7 @@
                                     Correo o contraseña incorrectos. Por favor verifica tus datos.
                                 </div>
 
-                                <form asp-action="IniciarSesion" asp-controller="Home" id="loginForm" novalidate>
+                                <form asp-action="IniciarSesion" asp-controller="Home" method="post" id="loginForm" novalidate>
                                     <div class="mb-4">
                                         <label class="label-auth">Correo Electrónico</label>
                                         <div class="input-wrapper">
@@ -74,7 +74,7 @@
 
                                     <div class="mb-3">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <label class="label-auth" >Contraseña</label>
+                                            <label class="label-auth">Contraseña</label>
                                             <a asp-action="RecuperarAcceso" asp-controller="Home" class="forgot-link">¿Olvidaste tu contraseña?</a>
                                         </div>
                                         <div class="input-wrapper">
@@ -91,7 +91,7 @@
 
                                     <p class="text-center mb-0 d-lg-none" style="font-size:14px;color:#888;">
                                         ¿No tienes cuenta?
-                                        <a asp-action="Registrar" asp-controller="Home" class="auth-link">Regístrate aquí</a>
+                                        <a asp-action="RegistrarUsuario" asp-controller="Home" class="auth-link">Regístrate aquí</a>
                                     </p>
                                 </form>
                             </div>

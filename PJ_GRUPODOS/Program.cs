@@ -12,13 +12,13 @@ var app = builder.Build();
 //Middleware de Errores
 app.UseExceptionHandler("/Error/CapturarError");
 
-app.UseSession(); 
-
 app.UseHsts();
 
 app.UseHttpsRedirection();
 
 app.UseRouting();
+
+app.UseSession();
 
 app.UseAuthorization();
 

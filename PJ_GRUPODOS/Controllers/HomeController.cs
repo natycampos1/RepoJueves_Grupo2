@@ -24,6 +24,9 @@ namespace PJ_GRUPODOS.Controllers
         [HttpGet]
         public IActionResult IniciarSesion()
         {
+            if (TempData["MensajeLogin"] != null)
+                ViewBag.Mensaje = TempData["MensajeLogin"];
+
             return View();
         }
 
@@ -33,18 +36,19 @@ namespace PJ_GRUPODOS.Controllers
             using var client = _http.CreateClient();
             var url = _config["Valores:UrlApi"] + "Home/IniciarSesionAPI";
             var response = client.PostAsJsonAsync(url, model).Result;
-
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                UsuarioRegistroModel? usuario = response.Content.ReadFromJsonAsync<UsuarioRegistroModel>().Result;
+                InfoVariableSesionUsuarioModel? usuario = response.Content.ReadFromJsonAsync<InfoVariableSesionUsuarioModel>().Result;
 
                 HttpContext.Session.SetInt32("Autenticado", 1);
 
+                HttpContext.Session.SetInt32("IdUsuario", usuario!.IdUsuario);
                 HttpContext.Session.SetString("Identificacion", usuario!.Identificacion);
                 HttpContext.Session.SetString("Nombre", usuario!.NombreCompleto);
                 HttpContext.Session.SetString("PrimerApellido", usuario!.PrimerApellido);
-                HttpContext.Session.SetString("SegundoApellido", usuario!.SegundoApellido);
+                HttpContext.Session.SetString("SegundoApellido", usuario!.SegundoApellido ?? string.Empty);
                 HttpContext.Session.SetString("Email", usuario!.Email);
+                HttpContext.Session.SetInt32("IdRol", usuario!.IdRol);
 
                 return RedirectToAction("Principal", "Home");
             }
@@ -66,7 +70,7 @@ namespace PJ_GRUPODOS.Controllers
         public IActionResult CerrarSesion()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Index","Home");
+            return RedirectToAction("Index", "Home");
         }
 
         #endregion
@@ -83,6 +87,12 @@ namespace PJ_GRUPODOS.Controllers
         [HttpPost]
         public IActionResult RegistrarUsuario(UsuarioRegistroModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                ConsultarTiposDeIdentificacion();
+                return View(model);
+            }
+
             //Creo el cliente http
             using var client = _http.CreateClient();
             //Obtengo la url del api
@@ -93,8 +103,8 @@ namespace PJ_GRUPODOS.Controllers
             //Manejo la respeuesta recibida del api
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                ViewBag.Mensaje = "Cliente ingresado correctamente";
-                return RedirectToAction("Principal", "Home");
+                TempData["MensajeLogin"] = "Cuenta creada correctamente, inicia sesión para continuar";
+                return RedirectToAction("IniciarSesion", "Home");
             }
             else if (response.StatusCode == HttpStatusCode.BadRequest)
             {
@@ -103,8 +113,6 @@ namespace PJ_GRUPODOS.Controllers
                 return View();
             }
             throw new Exception("Error al registrar cliente");
-
-            return View();
         }
 
 
@@ -142,16 +150,66 @@ namespace PJ_GRUPODOS.Controllers
         [HttpPost]
         public IActionResult RecuperarAcceso(RecuperarAccesoModel model)
         {
-            return RedirectToAction("Index", "Home");
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + "Home/RecuperarAccesoAPI";
+            var response = client.PostAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                ViewBag.Mensaje = "Se ha generado una contraseña temporal, revisa tu correo electrónico";
+                return View();
+            }
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                ViewBag.Mensaje = response.Content.ReadAsStringAsync().Result;
+                return View();
+            }
+
+            throw new Exception("Error al recuperar el acceso");
         }
 
         #endregion
-
         #region Principal
         public IActionResult Principal()
         {
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + "Menu/ConsultarCategoriasAPI";
+            var response = client.GetAsync(url).Result;
+
+            ViewBag.Categorias = response.IsSuccessStatusCode
+                ? response.Content.ReadFromJsonAsync<List<CategoriaProductoModel>>().Result ?? new()
+                : new List<CategoriaProductoModel>();
+
             return View();
         }
+        #endregion
+
+        #region Páginas Informativas
+
+        [HttpGet]
+        public IActionResult SobreNosotros()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult NuestroEquipo()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult NuestroServicio()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Testimonios()
+        {
+            return View();
+        }
+
         #endregion
 
         #region Gestion de Perfil
@@ -159,7 +217,7 @@ namespace PJ_GRUPODOS.Controllers
         [HttpGet]
         public IActionResult GestionPerfil()
         {
-            string identificacion = HttpContext.Session.GetString("Identificacion");
+            string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
 
             using var client = _http.CreateClient();
 
@@ -175,53 +233,81 @@ namespace PJ_GRUPODOS.Controllers
             }
             else
             {
-                ViewBag.Mensaje = "La información del usuario no pudo cargarse";
+                ViewBag.MensajePerfil = "La información del usuario no pudo cargarse";
                 ViewBag.InfoUsuario = new UsuarioConsultaModel();
             }
 
             return View();
         }
 
-
         [HttpPost]
-        public IActionResult GestionPerfil(UsuarioEdicionRequestModel model)
+        public IActionResult ActualizarPerfil(UsuarioEdicionRequestModel model)
         {
+            string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
+            model.Identificacion = identificacion;
+
             using var client = _http.CreateClient();
 
-            var url = _config["Valores:UrlApi"] + "Home/ActualizarUsuarioAPI";
-
-            var response = client.PostAsJsonAsync(url, model).Result;
+            var url = _config["Valores:UrlApi"] + "Home/ActualizarPerfilAPI";
+            var response = client.PutAsJsonAsync(url, model).Result;
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                ViewBag.Mensaje = "Perfil actualizado correctamente";
+                HttpContext.Session.SetString("Nombre", model.NombreCompleto);
+                HttpContext.Session.SetString("PrimerApellido", model.PrimerApellido);
+                HttpContext.Session.SetString("SegundoApellido", model.SegundoApellido ?? string.Empty);
+                HttpContext.Session.SetString("Email", model.Email);
+
+                ViewBag.MensajePerfil = "Perfil actualizado correctamente";
             }
             else
             {
-                ViewBag.Mensaje = response.Content.ReadAsStringAsync().Result;
+                ViewBag.MensajePerfil = response.Content.ReadAsStringAsync().Result;
             }
-
-            // Volver a consultar la info actualizada para repoblar la vista
-            string identificacion = HttpContext.Session.GetString("Identificacion");
 
             var urlConsulta = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
             var responseConsulta = client.GetAsync(urlConsulta).Result;
 
-            if (responseConsulta.IsSuccessStatusCode)
-            {
+            ViewBag.InfoUsuario = responseConsulta.IsSuccessStatusCode
+                ? responseConsulta.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
+                : new UsuarioConsultaModel();
 
-                ViewBag.InfoUsuario = responseConsulta.Content
-                    .ReadFromJsonAsync<UsuarioConsultaModel>()
-                    .Result;
+            return View("GestionPerfil");
+        }
+
+        [HttpPost]
+        public IActionResult CambiarContrasenaPerfil(CambiarContrasenaPerfilModel model)
+        {
+            string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
+            model.Identificacion = identificacion;
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.MensajeSeguridad = "Las contraseñas no coinciden o no cumplen los requisitos";
             }
             else
             {
-                ViewBag.InfoUsuario = new UsuarioConsultaModel();
+                using var client = _http.CreateClient();
+
+                var url = _config["Valores:UrlApi"] + "Home/CambiarContrasenaPerfilAPI";
+                var response = client.PutAsJsonAsync(url, model).Result;
+
+                ViewBag.MensajeSeguridad = response.StatusCode == HttpStatusCode.OK
+                    ? "Contraseña actualizada correctamente"
+                    : response.Content.ReadAsStringAsync().Result;
             }
-            HttpContext.Session.SetInt32("Autenticado", 1);
-            return View();
+
+            using var clientConsulta = _http.CreateClient();
+            var urlConsulta = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
+            var responseConsulta = clientConsulta.GetAsync(urlConsulta).Result;
+
+            ViewBag.InfoUsuario = responseConsulta.IsSuccessStatusCode
+                ? responseConsulta.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
+                : new UsuarioConsultaModel();
+
+            return View("GestionPerfil");
         }
 
         #endregion
     }
-}
+    }

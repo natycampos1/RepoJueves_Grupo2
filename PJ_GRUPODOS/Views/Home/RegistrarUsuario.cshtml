@@ -72,7 +72,7 @@
                             <div class="auth-card-header">
                                 <i class="bi bi-person-plus-fill text-primary fs-1 mb-2"></i>
                                 <h3 class="text-white text-uppercase mb-1" style="font-family:'Oswald',sans-serif;letter-spacing:2px;">Crear Nueva Cuenta</h3>
-                                <p class="text-secondary mb-0" style="font-size:14px;">Completa el formulario para unirte a la familia CakeZone</p>
+                                <p class="text-secondary mb-0" style="font-size:14px;">Completa el formulario para unirte a la familia RF Bakery</p>
                             </div>
                             <div class="auth-card-body">
 
@@ -94,7 +94,7 @@
                                             <div class="input-wrapper">
                                                 <select asp-for="IdTipoIdentificacion" class="form-control form-control-auth">
                                                     <option value="">-- Seleccione --</option>
-                                                    @foreach (var item in ViewBag.TiposDeIdentificacion)
+                                                    @foreach (var item in (List<TipoIdentificacionModel>)ViewBag.TiposDeIdentificacion)
                                                     {
                                                         <option value="@item.IdTipoIdentificacion">@item.Descripcion</option>
                                                     }

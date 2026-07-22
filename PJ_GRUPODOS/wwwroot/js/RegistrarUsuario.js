@@ -122,5 +122,55 @@
             form.submit();
         }
     });
+    // Toggle mostrar/ocultar contraseña
+    $("#toggleRegPassword").on("click", function () {
+        var input = $("#regPassword");
+        var tipo = input.attr("type") === "password" ? "text" : "password";
+        input.attr("type", tipo);
+        $(this).toggleClass("bi-eye bi-eye-slash");
+    });
+
+    // Toggle mostrar/ocultar confirmar contraseña
+    $("#toggleConfirmPassword").on("click", function () {
+        var input = $("#confirmPassword");
+        var tipo = input.attr("type") === "password" ? "text" : "password";
+        input.attr("type", tipo);
+        $(this).toggleClass("bi-eye bi-eye-slash");
+    });
+
+    // Medidor de fortaleza de contraseña
+    $("#regPassword").on("input", function () {
+        var valor = $(this).val();
+        var puntaje = 0;
+
+        if (valor.length >= 8) puntaje++;
+        if (/[A-Z]/.test(valor)) puntaje++;
+        if (/[0-9]/.test(valor)) puntaje++;
+        if (/[^A-Za-z0-9]/.test(valor)) puntaje++;
+
+        var porcentaje = (puntaje / 4) * 100;
+        var color = "#dc3545"; // rojo (débil)
+        var texto = "Débil";
+
+        if (puntaje === 2) {
+            color = "#fd7e14"; // naranja (media)
+            texto = "Media";
+        } else if (puntaje === 3) {
+            color = "#ffc107"; // amarillo (buena)
+            texto = "Buena";
+        } else if (puntaje === 4) {
+            color = "#28a745"; // verde (fuerte)
+            texto = "Fuerte";
+        }
+
+        if (valor.length === 0) {
+            porcentaje = 0;
+            texto = "Ingresa una contraseña";
+            color = "#aaa";
+        }
+
+        $("#strengthFill").css({ width: porcentaje + "%", "background-color": color });
+        $("#strengthText").css("color", color).text(texto);
+    });
 
 });

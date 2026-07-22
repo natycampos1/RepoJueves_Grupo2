@@ -1,0 +1,171 @@
+﻿@{
+    Layout = "_Layout";
+    var categorias = ViewBag.Categorias as List<PJ_GRUPODOS.Models.CategoriaProductoModel>;
+    var productos = ViewBag.Productos as List<PJ_GRUPODOS.Models.ProductoAdminModel>;
+    var productosInactivos = ViewBag.ProductosInactivos as List<PJ_GRUPODOS.Models.ProductoAdminModel>;
+    var tipoMensaje = TempData["TipoMensajeProducto"] as string ?? "info";
+}
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-uppercase">Administrar Productos</h2>
+        <a asp-action="Index" asp-controller="AdministrarMenu" class="btn btn-outline-primary">
+            <i class="bi bi-tags me-2"></i>Administrar Categorías
+        </a>
+    </div>
+
+    @if (TempData["MensajeProducto"] != null)
+    {
+        <div class="alert alert-@tipoMensaje alert-dismissible show fade">
+            <i class="bi @(tipoMensaje == "success" ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>
+            @TempData["MensajeProducto"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+
+        <!-- Formulario para agregar producto -->
+        <div class="col-lg-4">
+            <div class="card p-4">
+                <h5 class="mb-3">Nuevo Producto</h5>
+                <form asp-action="InsertarProducto" asp-controller="AdministrarMenu" method="post">
+
+                    <div class="mb-3">
+                        <label class="form-label">Categoría</label>
+                        <select name="IdCategoria" class="form-select" required>
+                            <option value="">-- Seleccione --</option>
+                            @if (categorias != null)
+                            {
+                                @foreach (var categoria in categorias)
+                                {
+                                    <option value="@categoria.IdCategoria">@categoria.Descripcion</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" name="Nombre" class="form-control" placeholder="Ej: Torta de Chocolate" required maxlength="100" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea name="Descripcion" class="form-control" rows="3" placeholder="Describe el producto" required maxlength="250"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Precio</label>
+                        <input type="number" name="Precio" class="form-control" placeholder="99.00" step="0.01" min="0.01" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Imagen <span class="text-muted" style="font-size:12px;">(nombre del archivo en /images)</span></label>
+                        <input type="text" name="Imagen" class="form-control" placeholder="Ej: cake-4.jpg" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Stock Inicial</label>
+                        <input type="number" name="Stock" class="form-control" placeholder="10" min="0" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-plus-circle me-2"></i>Agregar Producto
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Listado de productos -->
+        <div class="col-lg-8">
+            <div class="card p-4">
+                <h5 class="mb-3">Productos Existentes</h5>
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th class="text-center">Editar</th>
+                            <th class="text-center">Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (productos != null && productos.Any())
+                        {
+                            @foreach (var producto in productos)
+                            {
+                                <tr>
+                                    <td>@producto.Categoria</td>
+                                    <td>@producto.Nombre</td>
+                                    <td>₡@producto.Precio.ToString("N0")</td>
+                                    <td>@producto.Stock</td>
+                                    <td class="text-center">
+                                        <a asp-action="EditarProducto" asp-controller="AdministrarMenu" asp-route-idProducto="@producto.IdProducto" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-pencil-square me-1"></i>Editar
+                                        </a>
+                                    </td>
+                                    <td class="text-center">
+                                        <form asp-action="DesactivarProducto" asp-controller="AdministrarMenu" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar el producto \'@producto.Nombre\'?');">
+                                            <input type="hidden" name="idProducto" value="@producto.IdProducto" />
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash me-1"></i>Eliminar
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center">No hay productos registrados.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    @if (productosInactivos != null && productosInactivos.Any())
+    {
+        <div class="card p-4 mt-4">
+            <h5 class="mb-3 text-muted">Productos Inactivos</h5>
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th class="text-center" style="width: 130px;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var producto in productosInactivos)
+                    {
+                        <tr class="text-muted">
+                            <td>@producto.Categoria</td>
+                            <td>@producto.Nombre</td>
+                            <td>₡@producto.Precio.ToString("N0")</td>
+                            <td>@producto.Stock</td>
+                            <td class="text-center">
+                                <form asp-action="ReactivarProducto" asp-controller="AdministrarMenu" method="post">
+                                    <input type="hidden" name="idProducto" value="@producto.IdProducto" />
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reactivar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
