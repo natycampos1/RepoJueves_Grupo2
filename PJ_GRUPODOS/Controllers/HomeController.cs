@@ -14,8 +14,9 @@ namespace PJ_GRUPODOS.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Principal", "Home");
         }
+        
 
         #endregion
 
@@ -73,7 +74,7 @@ namespace PJ_GRUPODOS.Controllers
         public IActionResult CerrarSesion()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Principal", "Home");
         }
 
         #endregion
@@ -212,6 +213,21 @@ namespace PJ_GRUPODOS.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public IActionResult DetallePedido(int idPedido)
+        {
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + $"Pedido/ConsultarDetallePedidoAPI?idPedido={idPedido}";
+            var response = client.GetAsync(url).Result;
+
+            var detalle = response.IsSuccessStatusCode
+                ? response.Content.ReadFromJsonAsync<List<DetallePedidoModel>>().Result ?? new()
+                : new List<DetallePedidoModel>();
+
+            return View(detalle);
+        }
+
 
         #endregion
 

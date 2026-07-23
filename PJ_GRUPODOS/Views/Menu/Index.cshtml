@@ -2,6 +2,10 @@
     Layout = "_Layout";
     var categorias = ViewBag.Categorias as List<PJ_GRUPODOS.Models.CategoriaProductoModel>;
     var productosPorCategoria = ViewBag.ProductosPorCategoria as Dictionary<int, List<PJ_GRUPODOS.Models.ProductoModel>>;
+    bool autenticado = Context.Session.GetInt32("Autenticado") == 1;
+    var idRol = Context.Session.GetInt32("IdRol") ?? 0;
+    bool esAdministrador = idRol == 1;
+    bool esCliente = idRol == 2;
 }
 
 @if (TempData["MensajeCarrito"] != null)
@@ -96,15 +100,36 @@
                                                         </small>
                                                     }
 
-                                                    <form asp-action="Agregar" asp-controller="Carrito" method="post" class="mt-2">
-                                                        <input type="hidden" name="idProducto" value="@producto.IdProducto" />
-                                                        <input type="hidden" name="nombreProducto" value="@producto.Nombre" />
-                                                        <input type="hidden" name="precio" value="@producto.Precio" />
-                                                        <input type="hidden" name="imagen" value="@producto.Imagen" />
-                                                        <button type="submit" class="btn btn-sm btn-primary" @(sinStock ? "disabled" : "")>
-                                                            <i class="bi bi-cart-plus me-1"></i>Agregar al Carrito
-                                                        </button>
-                                                    </form>
+                                                    @if (!autenticado) {
+                                                        
+                                                        <div class="mt-2">
+                                                            <input type="hidden" name="idProducto" value="@producto.IdProducto" />
+                                                            <input type="hidden" name="nombreProducto" value="@producto.Nombre" />
+                                                            <input type="hidden" name="precio" value="@producto.Precio" />
+                                                            <input type="hidden" name="imagen" value="@producto.Imagen" />
+                                                            <button type="button" class="btn btn-sm btn-primary" @(sinStock ? "disabled" : "") data-bs-toggle="modal"
+                                                                    data-bs-target="#loginRequiredModal">
+                                                                <i class="bi bi-cart-plus me-1"></i>Agregar al Carrito
+                                                            </button>
+                                                        </div>
+                                                        
+                                                    }
+                                                    else if (esCliente)
+                                                    {
+                                                    
+                                                        <form asp-action="Agregar" asp-controller="Carrito" method="post" class="mt-2">
+                                                            <input type="hidden" name="idProducto" value="@producto.IdProducto" />
+                                                            <input type="hidden" name="nombreProducto" value="@producto.Nombre" />
+                                                            <input type="hidden" name="precio" value="@producto.Precio" />
+                                                            <input type="hidden" name="imagen" value="@producto.Imagen" />
+                                                            <button type="submit" class="btn btn-sm btn-primary" @(sinStock ? "disabled" : "")>
+                                                                <i class="bi bi-cart-plus me-1"></i>Agregar al Carrito
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    
+
+                                                    
                                                 </div>
                                             </div>
                                         </div>
@@ -131,3 +156,58 @@
     </div>
 </div>
 <!-- Products End -->
+
+<!-- Modal: Inicio de Sesión Requerido -->
+<div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="loginRequiredModalLabel">
+                    <i class="bi bi-lock-fill text-warning me-2"></i>
+                    Acceso requerido
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <p class="mb-2">
+                    Debe iniciar sesión para poder realizar pedidos.
+                </p>
+
+                <p class="text-muted mb-0">
+                    Si aún no posee una cuenta, puede registrarse gratuitamente.
+                </p>
+
+            </div>
+
+            <div class="modal-footer border-0">
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <a asp-controller="Home"
+                   asp-action="RegistrarUsuario"
+                   class="btn btn-outline-primary">
+                    Registrarse
+                </a>
+
+                <a asp-controller="Home"
+                   asp-action="IniciarSesion"
+                   class="btn btn-primary">
+                    Iniciar Sesión
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+</div>

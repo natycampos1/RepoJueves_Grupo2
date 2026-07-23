@@ -66,7 +66,15 @@ namespace PJ_GRUPODOS.Controllers
         [HttpPost]
         public IActionResult Agregar(int idProducto, string nombreProducto, decimal precio, string? imagen)
         {
+            var autenticado = HttpContext.Session.GetInt32("Autenticado") == 1;
+            if (!autenticado)
+            {
+                return RedirectToAction("IniciarSesion", "Home");
+            }
+
+            
             var carrito = ObtenerCarrito();
+
 
             var itemExistente = carrito.FirstOrDefault(i => i.IdProducto == idProducto);
 
