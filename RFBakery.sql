@@ -1,8 +1,5 @@
----BASE DE DATOS: CakeZone Pastelería
--- Tablas necesarias para el registro de usuario
--- =============================================
-
 USE master;
+GO
 
 CREATE DATABASE RFBakery;
 GO
@@ -50,8 +47,6 @@ GO
 -- =============================================
 -- TABLAS PRINCIPALES
 -- =============================================
-select * from PERSONA_TB;
-
 CREATE TABLE PERSONA_TB (
     IDENTIFICACION_PK           VARCHAR(20)     NOT NULL,
     ID_TIPO_IDENTIFICACION_FK   INT             NOT NULL,
@@ -85,6 +80,7 @@ CREATE TABLE TELEFONO_TB (
 );
 GO
 
+
 CREATE TABLE USUARIO_TB (
     ID_USUARIO_PK       INT             NOT NULL IDENTITY(1,1),
     IDENTIFICACION_FK   VARCHAR(20)     NOT NULL,
@@ -92,6 +88,7 @@ CREATE TABLE USUARIO_TB (
     EMAIL               VARCHAR(100)    NOT NULL,
     CONTRASENA          VARCHAR(250)    NOT NULL,
     ID_ESTADO_FK        INT             NOT NULL,
+    INDICADOR_CONTRASENA_TEMP BIT       NOT NULL DEFAULT 0
 
     CONSTRAINT PK_USUARIO PRIMARY KEY (ID_USUARIO_PK),
     CONSTRAINT UQ_USUARIO_EMAIL UNIQUE (EMAIL),
@@ -103,12 +100,123 @@ CREATE TABLE USUARIO_TB (
     CONSTRAINT FK_USUARIO_ESTADO FOREIGN KEY (ID_ESTADO_FK)
         REFERENCES ESTADO_TB(ID_ESTADO_PK)
 );
+
+CREATE TABLE [dbo].[tbError](
+	[Consecutivo] [int] IDENTITY(1,1) NOT NULL,
+	[Mensaje] [varchar](max) NOT NULL,
+	[Lugar] [varchar](50) NOT NULL,
+	[FechaHora] [datetime] NOT NULL,
+	[ConsecutivoUsuario] [int] NOT NULL,
+ CONSTRAINT [PK_tbError] PRIMARY KEY CLUSTERED 
+(
+	[Consecutivo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
+
+CREATE TABLE CATEGORIA_PRODUCTO_TB (
+    ID_CATEGORIA_PK     INT             NOT NULL IDENTITY(1,1),
+    DESCRIPCION         VARCHAR(50)     NOT NULL,
+    ID_ESTADO_FK        INT             NOT NULL,
+
+    CONSTRAINT PK_CATEGORIA_PRODUCTO PRIMARY KEY (ID_CATEGORIA_PK),
+    CONSTRAINT UQ_CATEGORIA_DESCRIPCION UNIQUE (DESCRIPCION),
+    CONSTRAINT FK_CATEGORIA_ESTADO FOREIGN KEY (ID_ESTADO_FK)
+        REFERENCES ESTADO_TB(ID_ESTADO_PK)
+);
+GO
+
+CREATE TABLE PRODUCTO_TB (
+    ID_PRODUCTO_PK      INT             NOT NULL IDENTITY(1,1),
+    ID_CATEGORIA_FK     INT             NOT NULL,
+    NOMBRE              VARCHAR(100)    NOT NULL,
+    DESCRIPCION         VARCHAR(250)    NOT NULL,
+    PRECIO              DECIMAL(10,2)   NOT NULL,
+    IMAGEN              VARCHAR(200)    NULL,
+    ID_ESTADO_FK        INT             NOT NULL,
+    STOCK               INT NOT NULL DEFAULT 0
+
+    CONSTRAINT PK_PRODUCTO PRIMARY KEY (ID_PRODUCTO_PK),
+    CONSTRAINT FK_PRODUCTO_CATEGORIA FOREIGN KEY (ID_CATEGORIA_FK)
+        REFERENCES CATEGORIA_PRODUCTO_TB(ID_CATEGORIA_PK),
+    CONSTRAINT FK_PRODUCTO_ESTADO FOREIGN KEY (ID_ESTADO_FK)
+        REFERENCES ESTADO_TB(ID_ESTADO_PK)
+);
+
+CREATE TABLE MENSAJE_CONTACTO_TB (
+    ID_MENSAJE_PK       INT             NOT NULL IDENTITY(1,1),
+    NOMBRE              VARCHAR(100)    NOT NULL,
+    EMAIL               VARCHAR(100)    NOT NULL,
+    ASUNTO              VARCHAR(150)    NOT NULL,
+    MENSAJE             VARCHAR(1000)   NOT NULL,
+    FECHA_ENVIO         DATETIME        NOT NULL,
+    ID_ESTADO_FK        INT             NOT NULL,
+
+    CONSTRAINT PK_MENSAJE_CONTACTO PRIMARY KEY (ID_MENSAJE_PK),
+    CONSTRAINT FK_MENSAJE_CONTACTO_ESTADO FOREIGN KEY (ID_ESTADO_FK)
+        REFERENCES ESTADO_TB(ID_ESTADO_PK)
+);
+GO
+
+CREATE TABLE TIPO_ENTREGA_TB (
+    ID_TIPO_ENTREGA_PK  INT             NOT NULL IDENTITY(1,1),
+    DESCRIPCION         VARCHAR(50)     NOT NULL,
+    ID_ESTADO_FK        INT             NOT NULL,
+
+    CONSTRAINT PK_TIPO_ENTREGA PRIMARY KEY (ID_TIPO_ENTREGA_PK),
+    CONSTRAINT FK_TIPO_ENTREGA_ESTADO FOREIGN KEY (ID_ESTADO_FK)
+        REFERENCES ESTADO_TB(ID_ESTADO_PK)
+);
+GO
+
+CREATE TABLE ESTADO_PEDIDO_TB (
+    ID_ESTADO_PEDIDO_PK     INT             NOT NULL IDENTITY(1,1),
+    DESCRIPCION             VARCHAR(50)     NOT NULL,
+
+    CONSTRAINT PK_ESTADO_PEDIDO PRIMARY KEY (ID_ESTADO_PEDIDO_PK)
+);
+GO
+
+CREATE TABLE PEDIDO_TB (
+    ID_PEDIDO_PK            INT             NOT NULL IDENTITY(1,1),
+    ID_USUARIO_FK           INT             NOT NULL,
+    FECHA_PEDIDO            DATETIME        NOT NULL,
+    ID_TIPO_ENTREGA_FK      INT             NOT NULL,
+    DIRECCION_ENTREGA       VARCHAR(250)    NULL,
+    ID_ESTADO_PEDIDO_FK     INT             NOT NULL,
+    TOTAL                   DECIMAL(10,2)   NOT NULL,
+
+    CONSTRAINT PK_PEDIDO PRIMARY KEY (ID_PEDIDO_PK),
+    CONSTRAINT FK_PEDIDO_USUARIO FOREIGN KEY (ID_USUARIO_FK)
+        REFERENCES USUARIO_TB(ID_USUARIO_PK),
+    CONSTRAINT FK_PEDIDO_TIPO_ENTREGA FOREIGN KEY (ID_TIPO_ENTREGA_FK)
+        REFERENCES TIPO_ENTREGA_TB(ID_TIPO_ENTREGA_PK),
+    CONSTRAINT FK_PEDIDO_ESTADO_PEDIDO FOREIGN KEY (ID_ESTADO_PEDIDO_FK)
+        REFERENCES ESTADO_PEDIDO_TB(ID_ESTADO_PEDIDO_PK)
+);
+GO
+
+--CREACIÓN DE TABLA DE DETALLE DE PEDIDOS
+CREATE TABLE DETALLE_PEDIDO_TB (
+    ID_DETALLE_PEDIDO_PK    INT             NOT NULL IDENTITY(1,1),
+    ID_PEDIDO_FK            INT             NOT NULL,
+    ID_PRODUCTO_FK          INT             NOT NULL,
+    CANTIDAD                INT             NOT NULL,
+    PRECIO_UNITARIO         DECIMAL(10,2)   NOT NULL,
+    SUBTOTAL                DECIMAL(10,2)   NOT NULL,
+
+    CONSTRAINT PK_DETALLE_PEDIDO PRIMARY KEY (ID_DETALLE_PEDIDO_PK),
+    CONSTRAINT FK_DETALLE_PEDIDO_PEDIDO FOREIGN KEY (ID_PEDIDO_FK)
+        REFERENCES PEDIDO_TB(ID_PEDIDO_PK),
+    CONSTRAINT FK_DETALLE_PEDIDO_PRODUCTO FOREIGN KEY (ID_PRODUCTO_FK)
+        REFERENCES PRODUCTO_TB(ID_PRODUCTO_PK)
+);
+GO
+
 
 -- =============================================
 -- DATOS INICIALES (catálogos base)
 -- =============================================
-
 -- Estados
 INSERT INTO ESTADO_TB (DESCRIPCION) VALUES ('Activo');
 INSERT INTO ESTADO_TB (DESCRIPCION) VALUES ('Inactivo');
@@ -125,11 +233,102 @@ INSERT INTO TIPO_IDENTIFICACION_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Pasaport
 INSERT INTO TIPO_IDENTIFICACION_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('DIMEX', 1);
 GO
 
+--DATOS INICIALES: CATEGORÍAS
+INSERT INTO CATEGORIA_PRODUCTO_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Cumpleaños', 1);   -- 1
+INSERT INTO CATEGORIA_PRODUCTO_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Bodas', 1);         -- 2
+INSERT INTO CATEGORIA_PRODUCTO_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Cupcakes', 1);      -- 3
+INSERT INTO CATEGORIA_PRODUCTO_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Baby Shower', 1);   -- 4
 
---Procedimientos almacenados
---Consulta de tipos de identificacion
-USE RFBakery;
+--DATOS INICIALES: PRODUCTOS DE EJEMPLO
+-- Cumpleaños (1)
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (1, 'Torta de Vainilla y Fresa', 'Bizcocho de vainilla relleno de crema y fresas frescas', 25000, 'cumpleanos-1.jpg', 1, 15);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (1, 'Torta de Chocolate Intenso', 'Bizcocho húmedo de chocolate con ganache', 27000, 'cumpleanos-2.jpg', 1, 8);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (1, 'Torta Arcoíris Infantil', 'Colorida torta ideal para fiestas infantiles', 30000, 'cumpleanos-3.jpg', 1, 0);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (1, 'Torta de Oreo', 'Bizcocho de chocolate con crema y galletas Oreo trituradas', 28000, 'cumpleanos-4.jpg', 1, 12);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (1, 'Torta Tres Leches', 'Clásica torta tres leches, suave y jugosa', 24000, 'cumpleanos-5.jpg', 1, 5);
+
+-- Bodas (2)
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (2, 'Torta Clásica de 3 Pisos', 'Elegante torta de tres pisos decorada con flores comestibles', 85000, 'bodas-1.jpg', 1, 3);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (2, 'Torta Rústica Naked Cake', 'Estilo naked cake con frutas frescas y flores', 70000, 'bodas-2.jpg', 1, 0);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (2, 'Torta Elegante Blanca', 'Torta de fondant blanco con detalles dorados, ideal para bodas formales', 90000, 'bodas-3.jpg', 1, 2);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (2, 'Torta de 2 Pisos con Perlas', 'Torta de dos pisos decorada con perlas comestibles y encaje de azúcar', 65000, 'bodas-4.jpg', 1, 4);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (2, 'Mesa de Postres para Boda', 'Selección de mini postres variados para mesa de dulces', 55000, 'bodas-5.jpg', 1, 6);
+
+-- Cupcakes (3)
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (3, 'Cupcakes de Vainilla', 'Docena de cupcakes de vainilla con buttercream', 12000, 'cupcakes-1.jpg', 1, 25);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (3, 'Cupcakes Red Velvet', 'Docena de cupcakes red velvet con frosting de queso crema', 14000, 'cupcakes-2.jpg', 1, 0);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (3, 'Cupcakes de Chocolate', 'Docena de cupcakes de chocolate con ganache', 13000, 'cupcakes-3.jpg', 1, 18);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (3, 'Cupcakes de Limón', 'Docena de cupcakes de limón con buttercream cítrico', 13000, 'cupcakes-4.jpg', 1, 10);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (3, 'Cupcakes Surtidos', 'Docena de cupcakes surtidos en varios sabores', 14000, 'cupcakes-5.jpg', 1, 20);
+
+-- Baby Shower (4)
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (4, 'Torta Baby Shower Celeste', 'Torta decorada en tonos celestes con detalles de bebé', 32000, 'babyshower-1.jpg', 1, 7);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (4, 'Torta Baby Shower Rosada', 'Torta decorada en tonos rosados con detalles tiernos', 32000, 'babyshower-2.jpg', 1, 9);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (4, 'Torta Baby Shower Neutra', 'Torta en tonos amarillos y verdes, ideal cuando no se sabe el género', 32000, 'babyshower-3.jpg', 1, 0);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (4, 'Cupcakes Baby Shower', 'Docena de cupcakes temáticos para baby shower', 15000, 'babyshower-4.jpg', 1, 14);
+INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK, STOCK) VALUES (4, 'Torta con Cigüeña', 'Torta decorada con la clásica cigüeña, para anunciar la llegada del bebé', 34000, 'babyshower-5.jpg', 1, 5);
 GO
+
+
+-- DATOS INICIALES: TIPOS DE ENTREGA
+INSERT INTO TIPO_ENTREGA_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Delivery', 1);
+INSERT INTO TIPO_ENTREGA_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Retiro en Tienda', 1);
+GO
+
+-- DATOS INICIALES: ESTADOS DE PEDIDO
+INSERT INTO ESTADO_PEDIDO_TB (DESCRIPCION) VALUES ('Pendiente');       -- 1
+INSERT INTO ESTADO_PEDIDO_TB (DESCRIPCION) VALUES ('En Preparación');  -- 2
+INSERT INTO ESTADO_PEDIDO_TB (DESCRIPCION) VALUES ('Listo');           -- 3
+INSERT INTO ESTADO_PEDIDO_TB (DESCRIPCION) VALUES ('Entregado');       -- 4
+INSERT INTO ESTADO_PEDIDO_TB (DESCRIPCION) VALUES ('Cancelado');       -- 5
+GO
+
+-- DATOS INICIALES: USUARIOS DE PRUEBA (ADMINISTRADOR Y CLIENTE)
+-- 1. INSERTAR PERSONAS (Requerido antes de insertar en USUARIO_TB)
+INSERT INTO PERSONA_TB (
+    IDENTIFICACION_PK, ID_TIPO_IDENTIFICACION_FK, NOMBRE_COMPLETO, 
+    PRIMER_APELLIDO, SEGUNDO_APELLIDO, GENERO, DIRECCION, 
+    NACIONALIDAD, FECHA_REGISTRO, ID_ESTADO_FK
+) VALUES 
+('101110222', 1, 'Carlos', 'Mendoza', 'Araya', 'Masculino', 'Av. Principal 123', 'Costarricense', GETDATE(), 1),
+('203330444', 1, 'María', 'Gómez', 'Rojas', 'Femenino', 'Calle Central 456', 'Costarricense', GETDATE(), 1);
+
+-- 2. INSERTAR USUARIOS (Con contraseñas hasheadas en SHA2_256)
+
+-- Usuario Administrador (ID_ROL_FK = 1)
+INSERT INTO USUARIO_TB (
+    IDENTIFICACION_FK, ID_ROL_FK, EMAIL, CONTRASENA, 
+    ID_ESTADO_FK, INDICADOR_CONTRASENA_TEMP
+) VALUES (
+    '101110222', 
+    1, 
+    'admin@pasteleria.com', 
+    CONVERT(VARCHAR(250), HASHBYTES('SHA2_256', 'Admin2026!Pass'), 2), 
+    1, 
+    0
+);
+
+-- Usuario Cliente (ID_ROL_FK = 2)
+INSERT INTO USUARIO_TB (
+    IDENTIFICACION_FK, ID_ROL_FK, EMAIL, CONTRASENA, 
+    ID_ESTADO_FK, INDICADOR_CONTRASENA_TEMP
+) VALUES (
+    '203330444', 
+    2, 
+    'cliente@gmail.com', 
+    CONVERT(VARCHAR(250), HASHBYTES('SHA2_256', 'Cliente123!'), 2), 
+    1, 
+    0
+);
+GO
+
+
+
+-- =============================================
+-- PROCEDIMIENTOS ALMACENADOS
+-- =============================================
+
+-- Consulta de tipos de identificacion
 CREATE PROCEDURE SP_ConsultarTiposIdentificacion
 AS
 BEGIN
@@ -142,9 +341,6 @@ END
 GO
 
 --Registro de usuario
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_RegistrarUsuario
     @Identificacion         VARCHAR(20),
     @IdTipoIdentificacion   INT,
@@ -218,34 +414,13 @@ BEGIN
 END
 GO
 
---Select para verificar que el usuario se haya registrado correctamente
-USE RFBakery;
-GO
-SELECT
-    P.IDENTIFICACION_PK             AS Identificacion,
-    TI.DESCRIPCION                  AS TipoIdentificacion,
-    P.NOMBRE_COMPLETO               AS NombreCompleto,
-    P.PRIMER_APELLIDO               AS PrimerApellido,
-    P.SEGUNDO_APELLIDO              AS SegundoApellido,
-    P.GENERO                        AS Genero,
-    P.DIRECCION                     AS Direccion,
-    P.NACIONALIDAD                  AS Nacionalidad,
-    P.FECHA_REGISTRO                AS FechaRegistro,
-    T.NUM_TELEFONO                  AS NumTelefono,
-    U.EMAIL                         AS Email,
-    U.CONTRASENA                    AS Contrasena
-FROM PERSONA_TB P
-INNER JOIN TIPO_IDENTIFICACION_TB TI ON P.ID_TIPO_IDENTIFICACION_FK = TI.ID_TIPO_IDENTIFICACION_PK
-INNER JOIN TELEFONO_TB T             ON P.IDENTIFICACION_PK         = T.IDENTIFICACION_FK
-INNER JOIN USUARIO_TB U              ON P.IDENTIFICACION_PK         = U.IDENTIFICACION_FK;
-GO
-
 --Procedimiento almacenado para iniciar sesión de usuario (consulto usuario por email y envio los datos de interes para la variable de sesion)
 CREATE PROCEDURE SP_IniciarSesion
     @Email VARCHAR(100)
 AS
 BEGIN
     SELECT
+        U.ID_USUARIO_PK                 AS IdUsuario,
         P.IDENTIFICACION_PK             AS Identificacion,
         P.ID_TIPO_IDENTIFICACION_FK     AS IdTipoIdentificacion,
         P.NOMBRE_COMPLETO               AS NombreCompleto,
@@ -267,28 +442,6 @@ BEGIN
 END
 GO
 
---CREACION DE TABLA PARA INSERTAR ERRORES
-
-USE RFBakery;
-GO
-
-CREATE TABLE [dbo].[tbError](
-	[Consecutivo] [int] IDENTITY(1,1) NOT NULL,
-	[Mensaje] [varchar](max) NOT NULL,
-	[Lugar] [varchar](50) NOT NULL,
-	[FechaHora] [datetime] NOT NULL,
-	[ConsecutivoUsuario] [int] NOT NULL,
- CONSTRAINT [PK_tbError] PRIMARY KEY CLUSTERED 
-(
-	[Consecutivo] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-GO
-
---CREACIION DE PROCEDIMIENTO ALMACENADO PARA GUARDAR DATOS DE ERROR
-
-USE RFBakery;
-GO
 CREATE PROCEDURE [dbo].[SP_RegistrarError]
     @Mensaje                varchar(max),
     @Lugar                  varchar(50),
@@ -310,8 +463,6 @@ END
 GO
 
 --Para perfil de usuario
-USE RFBakery;
-GO
 CREATE PROCEDURE SP_ConsultarUsuario
     @Identificacion VARCHAR(20)
 AS
@@ -338,9 +489,6 @@ END
 GO
 
 --Para editar usuario
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_ActualizarUsuario
     @Identificacion     VARCHAR(20),
     @NombreCompleto      VARCHAR(100),
@@ -387,16 +535,6 @@ BEGIN
 END
 GO 
 
-
------NATY HIZO AQUI--
-USE RFBakery;
-GO
-
--- Agregar columna para indicar si la contraseña es temporal
-ALTER TABLE USUARIO_TB
-ADD INDICADOR_CONTRASENA_TEMP BIT NOT NULL DEFAULT 0;
-GO
-
 -- SP para validar que el correo existe (paso 1 de recuperar acceso)
 CREATE PROCEDURE SP_ValidarCorreo
     @Email VARCHAR(100)
@@ -428,87 +566,7 @@ BEGIN
 END
 GO
 
---prueba de contraseña temporal
-SELECT ID_USUARIO_PK, EMAIL, CONTRASENA, INDICADOR_CONTRASENA_TEMP
-FROM USUARIO_TB
-WHERE EMAIL = 'nataliacamposagui1302@gmail.com'
-
-UPDATE USUARIO_TB
-SET CONTRASENA = '$2b$11$zF155ZTrTVxMgvnA5vy0YuWZ2Q42HpU3lex9FTpEhbqGtwm06yacS',
-    INDICADOR_CONTRASENA_TEMP = 0
-WHERE EMAIL = 'nataliacamposagui1302@gmail.com';
-
----clave --> 123
-----continuacion de tablas NUEVAS
---CREACIÓN DE TABLA DE CATEGORÍAS DE PRODUCTO
-
-USE RFBakery;
-GO
-
-CREATE TABLE CATEGORIA_PRODUCTO_TB (
-    ID_CATEGORIA_PK     INT             NOT NULL IDENTITY(1,1),
-    DESCRIPCION         VARCHAR(50)     NOT NULL,
-    ID_ESTADO_FK        INT             NOT NULL,
-
-    CONSTRAINT PK_CATEGORIA_PRODUCTO PRIMARY KEY (ID_CATEGORIA_PK),
-    CONSTRAINT UQ_CATEGORIA_DESCRIPCION UNIQUE (DESCRIPCION),
-    CONSTRAINT FK_CATEGORIA_ESTADO FOREIGN KEY (ID_ESTADO_FK)
-        REFERENCES ESTADO_TB(ID_ESTADO_PK)
-);
-GO
-
---CREACIÓN DE TABLA DE PRODUCTOS
-
-USE RFBakery;
-GO
-
-CREATE TABLE PRODUCTO_TB (
-    ID_PRODUCTO_PK      INT             NOT NULL IDENTITY(1,1),
-    ID_CATEGORIA_FK     INT             NOT NULL,
-    NOMBRE              VARCHAR(100)    NOT NULL,
-    DESCRIPCION         VARCHAR(250)    NOT NULL,
-    PRECIO              DECIMAL(10,2)   NOT NULL,
-    IMAGEN              VARCHAR(200)    NULL,
-    ID_ESTADO_FK        INT             NOT NULL,
-
-    CONSTRAINT PK_PRODUCTO PRIMARY KEY (ID_PRODUCTO_PK),
-    CONSTRAINT FK_PRODUCTO_CATEGORIA FOREIGN KEY (ID_CATEGORIA_FK)
-        REFERENCES CATEGORIA_PRODUCTO_TB(ID_CATEGORIA_PK),
-    CONSTRAINT FK_PRODUCTO_ESTADO FOREIGN KEY (ID_ESTADO_FK)
-        REFERENCES ESTADO_TB(ID_ESTADO_PK)
-);
-GO
-
---DATOS INICIALES: CATEGORÍAS
-
-USE RFBakery;
-GO
-
-INSERT INTO CATEGORIA_PRODUCTO_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Cumpleaños', 1);
-INSERT INTO CATEGORIA_PRODUCTO_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Bodas', 1);
-INSERT INTO CATEGORIA_PRODUCTO_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Personalizados', 1);
-GO
-
---DATOS INICIALES: PRODUCTOS DE EJEMPLO
-
-USE RFBakery;
-GO
-
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK)
-VALUES (1, 'Torta de Cumpleaños', 'Deliciosa torta artesanal decorada especialmente para celebraciones de cumpleaños', 99.00, 'cake-1.jpg', 1);
-
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK)
-VALUES (2, 'Torta de Boda', 'Elegante torta de varios pisos, ideal para bodas y grandes celebraciones', 99.00, 'cake-2.jpg', 1);
-
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK)
-VALUES (3, 'Torta Personalizada', 'Diseñada a tu gusto, con los sabores y decoración que prefieras', 99.00, 'cake-3.jpg', 1);
-GO
-
 --PROCEDIMIENTO ALMACENADO PARA CONSULTAR LAS CATEGORÍAS DE PRODUCTO ACTIVAS
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_ConsultarCategoriasProducto
 AS
 BEGIN
@@ -522,10 +580,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA CONSULTAR LOS PRODUCTOS DE UNA CATEGORÍA ESPECÍFICA
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_ConsultarProductosPorCategoria
     @IdCategoria INT
 AS
@@ -536,7 +590,8 @@ BEGIN
         P.NOMBRE            AS Nombre,
         P.DESCRIPCION       AS Descripcion,
         P.PRECIO            AS Precio,
-        P.IMAGEN            AS Imagen
+        P.IMAGEN            AS Imagen,
+        P.STOCK             AS Stock
     FROM PRODUCTO_TB P
     WHERE P.ID_CATEGORIA_FK = @IdCategoria
     AND P.ID_ESTADO_FK = 1
@@ -544,31 +599,7 @@ BEGIN
 END
 GO
 
-USE RFBakery;
-GO
-
-SELECT * FROM MENSAJE_CONTACTO_TB
-
-CREATE TABLE MENSAJE_CONTACTO_TB (
-    ID_MENSAJE_PK       INT             NOT NULL IDENTITY(1,1),
-    NOMBRE              VARCHAR(100)    NOT NULL,
-    EMAIL               VARCHAR(100)    NOT NULL,
-    ASUNTO              VARCHAR(150)    NOT NULL,
-    MENSAJE             VARCHAR(1000)   NOT NULL,
-    FECHA_ENVIO         DATETIME        NOT NULL,
-    ID_ESTADO_FK        INT             NOT NULL,
-
-    CONSTRAINT PK_MENSAJE_CONTACTO PRIMARY KEY (ID_MENSAJE_PK),
-    CONSTRAINT FK_MENSAJE_CONTACTO_ESTADO FOREIGN KEY (ID_ESTADO_FK)
-        REFERENCES ESTADO_TB(ID_ESTADO_PK)
-);
-GO
-
 --PROCEDIMIENTO ALMACENADO PARA REGISTRAR UN MENSAJE DE CONTACTO
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_RegistrarMensajeContacto
     @Nombre     VARCHAR(100),
     @Email      VARCHAR(100),
@@ -583,33 +614,7 @@ BEGIN
 END
 GO
 
-
----ver usuarios
-
-SELECT 
-    U.ID_USUARIO_PK,
-    P.NOMBRE_COMPLETO,
-    P.PRIMER_APELLIDO,
-    U.EMAIL,
-    U.ID_ROL_FK,
-    R.DESCRIPCION AS Rol
-FROM USUARIO_TB U
-INNER JOIN PERSONA_TB P ON U.IDENTIFICACION_FK = P.IDENTIFICACION_PK
-INNER JOIN ROL_TB R ON U.ID_ROL_FK = R.ID_ROL_PK
-ORDER BY U.ID_USUARIO_PK;
-
----rol a admin
-UPDATE USUARIO_TB
-SET ID_ROL_FK = 1
-
-
----procedimientos nuevos
-
 --PROCEDIMIENTO ALMACENADO PARA INSERTAR UNA CATEGORÍA
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_InsertarCategoria
     @Descripcion VARCHAR(50)
 AS
@@ -625,10 +630,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA ACTUALIZAR UNA CATEGORÍA
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_ActualizarCategoria
     @IdCategoria    INT,
     @Descripcion    VARCHAR(50)
@@ -643,10 +644,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA DESACTIVAR UNA CATEGORÍA
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_DesactivarCategoria
     @IdCategoria INT
 AS
@@ -660,37 +657,31 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA INSERTAR UN PRODUCTO
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_InsertarProducto
     @IdCategoria    INT,
     @Nombre         VARCHAR(100),
     @Descripcion    VARCHAR(250),
     @Precio         DECIMAL(10,2),
-    @Imagen         VARCHAR(200)
+    @Imagen         VARCHAR(200),
+    @Stock          INT
 AS
 BEGIN
 
-    INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK)
-    VALUES (@IdCategoria, @Nombre, @Descripcion, @Precio, @Imagen, 1)
+    INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, STOCK, ID_ESTADO_FK)
+    VALUES (@IdCategoria, @Nombre, @Descripcion, @Precio, @Imagen, @Stock, 1)
 
 END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA ACTUALIZAR UN PRODUCTO
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_ActualizarProducto
     @IdProducto     INT,
     @IdCategoria    INT,
     @Nombre         VARCHAR(100),
     @Descripcion    VARCHAR(250),
     @Precio         DECIMAL(10,2),
-    @Imagen         VARCHAR(200)
+    @Imagen         VARCHAR(200),
+    @Stock          INT
 AS
 BEGIN
 
@@ -699,17 +690,14 @@ BEGIN
         NOMBRE          = @Nombre,
         DESCRIPCION     = @Descripcion,
         PRECIO          = @Precio,
-        IMAGEN          = @Imagen
+        IMAGEN          = @Imagen,
+        STOCK           = @Stock
     WHERE ID_PRODUCTO_PK = @IdProducto
 
 END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA DESACTIVAR UN PRODUCTO
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_DesactivarProducto
     @IdProducto INT
 AS
@@ -723,10 +711,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA CONSULTAR UN PRODUCTO POR ID (para editar)
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_ConsultarProductoPorId
     @IdProducto INT
 AS
@@ -746,22 +730,19 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA CONSULTAR TODOS LOS PRODUCTOS ACTIVOS (para el panel de administración)
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_ConsultarTodosLosProductos
 AS
 BEGIN
 
     SELECT
-        P.ID_PRODUCTO_PK    AS IdProducto,
-        P.ID_CATEGORIA_FK   AS IdCategoria,
-        C.DESCRIPCION       AS Categoria,
-        P.NOMBRE            AS Nombre,
-        P.DESCRIPCION       AS Descripcion,
-        P.PRECIO            AS Precio,
-        P.IMAGEN            AS Imagen
+        P.ID_PRODUCTO_PK   AS IdProducto,
+        P.ID_CATEGORIA_FK  AS IdCategoria,
+        C.DESCRIPCION      AS Categoria,
+        P.NOMBRE           AS Nombre,
+        P.DESCRIPCION      AS Descripcion,
+        P.PRECIO           AS Precio,
+        P.IMAGEN           AS Imagen,
+        P.STOCK            AS Stock
     FROM PRODUCTO_TB P
     INNER JOIN CATEGORIA_PRODUCTO_TB C ON P.ID_CATEGORIA_FK = C.ID_CATEGORIA_PK
     WHERE P.ID_ESTADO_FK = 1
@@ -770,14 +751,8 @@ BEGIN
 END
 GO
 
-SELECT * FROM CATEGORIA_PRODUCTO_TB;
-
 
 --PROCEDIMIENTO ALMACENADO PARA CONSULTAR CATEGORÍAS INACTIVAS
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_ConsultarCategoriasInactivas
 AS
 BEGIN
@@ -791,10 +766,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA REACTIVAR UNA CATEGORÍA
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_ReactivarCategoria
     @IdCategoria INT
 AS
@@ -808,7 +779,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA CONSULTAR PRODUCTOS INACTIVOS
-
 CREATE PROCEDURE SP_ConsultarProductosInactivos
 AS
 BEGIN
@@ -819,7 +789,8 @@ BEGIN
         P.NOMBRE            AS Nombre,
         P.DESCRIPCION       AS Descripcion,
         P.PRECIO            AS Precio,
-        P.IMAGEN            AS Imagen
+        P.IMAGEN            AS Imagen,
+        P.STOCK             AS Stock
     FROM PRODUCTO_TB P
     INNER JOIN CATEGORIA_PRODUCTO_TB C ON P.ID_CATEGORIA_FK = C.ID_CATEGORIA_PK
     WHERE P.ID_ESTADO_FK = 2
@@ -838,190 +809,8 @@ BEGIN
 
 END
 GO
---pruebas 
-SELECT ID_CATEGORIA_PK, DESCRIPCION FROM CATEGORIA_PRODUCTO_TB WHERE ID_ESTADO_FK = 1 ORDER BY ID_CATEGORIA_PK;
 
-SELECT 
-    P.ID_PRODUCTO_PK,
-    C.DESCRIPCION AS Categoria,
-    P.NOMBRE,
-    P.DESCRIPCION,
-    P.PRECIO,
-    P.IMAGEN,
-    P.ID_ESTADO_FK
-FROM PRODUCTO_TB P
-INNER JOIN CATEGORIA_PRODUCTO_TB C ON P.ID_CATEGORIA_FK = C.ID_CATEGORIA_PK
-ORDER BY C.ID_CATEGORIA_PK, P.NOMBRE;
-
-USE RFBakery;
-GO
-
-DELETE FROM PRODUCTO_TB;
-GO
-
-DELETE FROM CATEGORIA_PRODUCTO_TB;
-GO
-
-DBCC CHECKIDENT ('PRODUCTO_TB', RESEED, 0);
-GO
-
-DBCC CHECKIDENT ('CATEGORIA_PRODUCTO_TB', RESEED, 0);
-GO
-
-USE RFBakery;
-GO
-
-INSERT INTO CATEGORIA_PRODUCTO_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Cumpleaños', 1);   -- 1
-INSERT INTO CATEGORIA_PRODUCTO_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Bodas', 1);         -- 2
-INSERT INTO CATEGORIA_PRODUCTO_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Cupcakes', 1);      -- 3
-INSERT INTO CATEGORIA_PRODUCTO_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Baby Shower', 1);   -- 4
-GO
-
-USE RFBakery;
-GO
-
--- Cumpleaños (1)
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (1, 'Torta de Vainilla y Fresa', 'Bizcocho de vainilla relleno de crema y fresas frescas', 25000, 'cumpleanos-1.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (1, 'Torta de Chocolate Intenso', 'Bizcocho húmedo de chocolate con ganache', 27000, 'cumpleanos-2.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (1, 'Torta Arcoíris Infantil', 'Colorida torta ideal para fiestas infantiles', 30000, 'cumpleanos-3.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (1, 'Torta de Oreo', 'Bizcocho de chocolate con crema y galletas Oreo trituradas', 28000, 'cumpleanos-4.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (1, 'Torta Tres Leches', 'Clásica torta tres leches, suave y jugosa', 24000, 'cumpleanos-5.jpg', 1);
-
--- Bodas (2)
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (2, 'Torta Clásica de 3 Pisos', 'Elegante torta de tres pisos decorada con flores comestibles', 85000, 'bodas-1.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (2, 'Torta Rústica Naked Cake', 'Estilo naked cake con frutas frescas y flores', 70000, 'bodas-2.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (2, 'Torta Elegante Blanca', 'Torta de fondant blanco con detalles dorados, ideal para bodas formales', 90000, 'bodas-3.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (2, 'Torta de 2 Pisos con Perlas', 'Torta de dos pisos decorada con perlas comestibles y encaje de azúcar', 65000, 'bodas-4.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (2, 'Mesa de Postres para Boda', 'Selección de mini postres variados para mesa de dulces', 55000, 'bodas-5.jpg', 1);
-
--- Cupcakes (3)
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (3, 'Cupcakes de Vainilla', 'Docena de cupcakes de vainilla con buttercream', 12000, 'cupcakes-1.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (3, 'Cupcakes Red Velvet', 'Docena de cupcakes red velvet con frosting de queso crema', 14000, 'cupcakes-2.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (3, 'Cupcakes de Chocolate', 'Docena de cupcakes de chocolate con ganache', 13000, 'cupcakes-3.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (3, 'Cupcakes de Limón', 'Docena de cupcakes de limón con buttercream cítrico', 13000, 'cupcakes-4.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (3, 'Cupcakes Surtidos', 'Docena de cupcakes surtidos en varios sabores', 14000, 'cupcakes-5.jpg', 1);
-
--- Baby Shower (4)
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (4, 'Torta Baby Shower Celeste', 'Torta decorada en tonos celestes con detalles de bebé', 32000, 'babyshower-1.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (4, 'Torta Baby Shower Rosada', 'Torta decorada en tonos rosados con detalles tiernos', 32000, 'babyshower-2.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (4, 'Torta Baby Shower Neutra', 'Torta en tonos amarillos y verdes, ideal cuando no se sabe el género', 32000, 'babyshower-3.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (4, 'Cupcakes Baby Shower', 'Docena de cupcakes temáticos para baby shower', 15000, 'babyshower-4.jpg', 1);
-INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, ID_ESTADO_FK) VALUES (4, 'Torta con Cigüeña', 'Torta decorada con la clásica cigüeña, para anunciar la llegada del bebé', 34000, 'babyshower-5.jpg', 1);
-GO
-
-USE RFBakery;
-GO
-
-UPDATE PRODUCTO_TB SET PRECIO = 40000 WHERE NOMBRE = 'Torta Clásica de 3 Pisos';
-UPDATE PRODUCTO_TB SET PRECIO = 35000 WHERE NOMBRE = 'Torta Rústica Naked Cake';
-UPDATE PRODUCTO_TB SET PRECIO = 45000 WHERE NOMBRE = 'Torta Elegante Blanca';
-UPDATE PRODUCTO_TB SET PRECIO = 38000 WHERE NOMBRE = 'Torta de 2 Pisos con Perlas';
-UPDATE PRODUCTO_TB SET PRECIO = 32000 WHERE NOMBRE = 'Mesa de Postres para Boda';
-GO
-
---AGREGAR COLUMNA DE STOCK A PRODUCTO_TB
-
-USE RFBakery;
-GO
-
-ALTER TABLE PRODUCTO_TB
-ADD STOCK INT NOT NULL DEFAULT 0;
-GO
-
---ASIGNAR STOCK INICIAL A LOS PRODUCTOS EXISTENTES
-
-USE RFBakery;
-GO
-
-UPDATE PRODUCTO_TB SET STOCK =5;
-GO
-
---CREACIÓN DE TABLA DE TIPOS DE ENTREGA
-
-USE RFBakery;
-GO
-
-CREATE TABLE TIPO_ENTREGA_TB (
-    ID_TIPO_ENTREGA_PK  INT             NOT NULL IDENTITY(1,1),
-    DESCRIPCION         VARCHAR(50)     NOT NULL,
-    ID_ESTADO_FK        INT             NOT NULL,
-
-    CONSTRAINT PK_TIPO_ENTREGA PRIMARY KEY (ID_TIPO_ENTREGA_PK),
-    CONSTRAINT FK_TIPO_ENTREGA_ESTADO FOREIGN KEY (ID_ESTADO_FK)
-        REFERENCES ESTADO_TB(ID_ESTADO_PK)
-);
-GO
-
-INSERT INTO TIPO_ENTREGA_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Delivery', 1);
-INSERT INTO TIPO_ENTREGA_TB (DESCRIPCION, ID_ESTADO_FK) VALUES ('Retiro en Tienda', 1);
-GO
-
---CREACIÓN DE TABLA DE ESTADOS DE PEDIDO
-
-USE RFBakery;
-GO
-
-CREATE TABLE ESTADO_PEDIDO_TB (
-    ID_ESTADO_PEDIDO_PK     INT             NOT NULL IDENTITY(1,1),
-    DESCRIPCION             VARCHAR(50)     NOT NULL,
-
-    CONSTRAINT PK_ESTADO_PEDIDO PRIMARY KEY (ID_ESTADO_PEDIDO_PK)
-);
-GO
-
-INSERT INTO ESTADO_PEDIDO_TB (DESCRIPCION) VALUES ('Pendiente');       -- 1
-INSERT INTO ESTADO_PEDIDO_TB (DESCRIPCION) VALUES ('En Preparación');  -- 2
-INSERT INTO ESTADO_PEDIDO_TB (DESCRIPCION) VALUES ('Listo');           -- 3
-INSERT INTO ESTADO_PEDIDO_TB (DESCRIPCION) VALUES ('Entregado');       -- 4
-INSERT INTO ESTADO_PEDIDO_TB (DESCRIPCION) VALUES ('Cancelado');       -- 5
-GO
-
---CREACIÓN DE TABLA DE PEDIDOS
-
-USE RFBakery;
-GO
-
-CREATE TABLE PEDIDO_TB (
-    ID_PEDIDO_PK            INT             NOT NULL IDENTITY(1,1),
-    ID_USUARIO_FK           INT             NOT NULL,
-    FECHA_PEDIDO            DATETIME        NOT NULL,
-    ID_TIPO_ENTREGA_FK      INT             NOT NULL,
-    DIRECCION_ENTREGA       VARCHAR(250)    NULL,
-    ID_ESTADO_PEDIDO_FK     INT             NOT NULL,
-    TOTAL                   DECIMAL(10,2)   NOT NULL,
-
-    CONSTRAINT PK_PEDIDO PRIMARY KEY (ID_PEDIDO_PK),
-    CONSTRAINT FK_PEDIDO_USUARIO FOREIGN KEY (ID_USUARIO_FK)
-        REFERENCES USUARIO_TB(ID_USUARIO_PK),
-    CONSTRAINT FK_PEDIDO_TIPO_ENTREGA FOREIGN KEY (ID_TIPO_ENTREGA_FK)
-        REFERENCES TIPO_ENTREGA_TB(ID_TIPO_ENTREGA_PK),
-    CONSTRAINT FK_PEDIDO_ESTADO_PEDIDO FOREIGN KEY (ID_ESTADO_PEDIDO_FK)
-        REFERENCES ESTADO_PEDIDO_TB(ID_ESTADO_PEDIDO_PK)
-);
-GO
-
---CREACIÓN DE TABLA DE DETALLE DE PEDIDOS
-
-CREATE TABLE DETALLE_PEDIDO_TB (
-    ID_DETALLE_PEDIDO_PK    INT             NOT NULL IDENTITY(1,1),
-    ID_PEDIDO_FK            INT             NOT NULL,
-    ID_PRODUCTO_FK          INT             NOT NULL,
-    CANTIDAD                INT             NOT NULL,
-    PRECIO_UNITARIO         DECIMAL(10,2)   NOT NULL,
-    SUBTOTAL                DECIMAL(10,2)   NOT NULL,
-
-    CONSTRAINT PK_DETALLE_PEDIDO PRIMARY KEY (ID_DETALLE_PEDIDO_PK),
-    CONSTRAINT FK_DETALLE_PEDIDO_PEDIDO FOREIGN KEY (ID_PEDIDO_FK)
-        REFERENCES PEDIDO_TB(ID_PEDIDO_PK),
-    CONSTRAINT FK_DETALLE_PEDIDO_PRODUCTO FOREIGN KEY (ID_PRODUCTO_FK)
-        REFERENCES PRODUCTO_TB(ID_PRODUCTO_PK)
-);
-GO
-
--------------
 --PROCEDIMIENTO ALMACENADO PARA CONSULTAR TIPOS DE ENTREGA
-
-
 CREATE PROCEDURE SP_ConsultarTiposEntrega
 AS
 BEGIN
@@ -1035,7 +824,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA REGISTRAR EL ENCABEZADO DE UN PEDIDO
-
 CREATE PROCEDURE SP_RegistrarPedido
     @IdUsuario          INT,
     @IdTipoEntrega      INT,
@@ -1053,8 +841,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA REGISTRAR UNA LÍNEA DE DETALLE DE PEDIDO
-
-
 CREATE PROCEDURE SP_RegistrarDetallePedido
     @IdPedido           INT,
     @IdProducto         INT,
@@ -1070,8 +856,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA DESCONTAR STOCK DE UN PRODUCTO
-
-
 CREATE PROCEDURE SP_DescontarStock
     @IdProducto     INT,
     @Cantidad       INT
@@ -1086,8 +870,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA CONSULTAR EL STOCK DISPONIBLE DE UN PRODUCTO
-
-
 CREATE PROCEDURE SP_ConsultarStockProducto
     @IdProducto INT
 AS
@@ -1101,7 +883,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA CONSULTAR PEDIDOS DE UN USUARIO ESPECÍFICO
-
 CREATE PROCEDURE SP_ConsultarPedidosPorUsuario
     @IdUsuario INT
 AS
@@ -1122,7 +903,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA CONSULTAR EL DETALLE DE UN PEDIDO ESPECÍFICO
-
 CREATE PROCEDURE SP_ConsultarDetallePedido
     @IdPedido INT
 AS
@@ -1140,7 +920,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA CONSULTAR TODOS LOS PEDIDOS (para el Administrador)
-
 CREATE PROCEDURE SP_ConsultarTodosLosPedidos
 AS
 BEGIN
@@ -1161,7 +940,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA ACTUALIZAR EL ESTADO DE UN PEDIDO (uso del Administrador)
-
 CREATE PROCEDURE SP_ActualizarEstadoPedido
     @IdPedido           INT,
     @IdEstadoPedido     INT
@@ -1175,12 +953,7 @@ BEGIN
 END
 GO
 
----
 --PROCEDIMIENTO ALMACENADO PARA ACTUALIZAR SOLO EL PERFIL (sin contraseña)
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_ActualizarPerfil
     @Identificacion     VARCHAR(20),
     @NombreCompleto     VARCHAR(100),
@@ -1216,10 +989,6 @@ END
 GO
 
 --PROCEDIMIENTO ALMACENADO PARA CAMBIAR SOLO LA CONTRASEÑA DESDE EL PERFIL
-
-USE RFBakery;
-GO
-
 CREATE PROCEDURE SP_CambiarContrasenaPerfil
     @Identificacion     VARCHAR(20),
     @NuevaContrasena    VARCHAR(250)
@@ -1234,173 +1003,65 @@ BEGIN
 END
 GO
 
---ACTUALIZACIÓN DEL PROCEDIMIENTO PARA INCLUIR EL ID_USUARIO_PK EN EL LOGIN
 
+
+select * from USUARIO_TB;
+
+update USUARIO_TB set ID_ROL_FK = 1 WHERE ID_USUARIO_PK = 1
+
+--Select para verificar que el usuario se haya registrado correctamente
 USE RFBakery;
 GO
-
-ALTER PROCEDURE SP_IniciarSesion
-    @Email VARCHAR(100)
-AS
-BEGIN
-    SELECT
-        U.ID_USUARIO_PK                 AS IdUsuario,
-        P.IDENTIFICACION_PK             AS Identificacion,
-        P.ID_TIPO_IDENTIFICACION_FK     AS IdTipoIdentificacion,
-        P.NOMBRE_COMPLETO               AS NombreCompleto,
-        P.PRIMER_APELLIDO               AS PrimerApellido,
-        P.SEGUNDO_APELLIDO              AS SegundoApellido,
-        P.GENERO                        AS Genero,
-        P.DIRECCION                     AS Direccion,
-        P.NACIONALIDAD                  AS Nacionalidad,
-        P.FECHA_REGISTRO                AS FechaRegistro,
-        T.NUM_TELEFONO                  AS NumTelefono,
-        U.EMAIL                         AS Email,
-        U.CONTRASENA                    AS Contrasena,
-        U.ID_ROL_FK                     AS IdRol
-    FROM USUARIO_TB U
-    INNER JOIN PERSONA_TB P   ON U.IDENTIFICACION_FK  = P.IDENTIFICACION_PK
-    INNER JOIN TELEFONO_TB T  ON P.IDENTIFICACION_PK  = T.IDENTIFICACION_FK
-    WHERE U.EMAIL = @Email
-    AND U.ID_ESTADO_FK = 1
-END
+SELECT
+    P.IDENTIFICACION_PK             AS Identificacion,
+    TI.DESCRIPCION                  AS TipoIdentificacion,
+    P.NOMBRE_COMPLETO               AS NombreCompleto,
+    P.PRIMER_APELLIDO               AS PrimerApellido,
+    P.SEGUNDO_APELLIDO              AS SegundoApellido,
+    P.GENERO                        AS Genero,
+    P.DIRECCION                     AS Direccion,
+    P.NACIONALIDAD                  AS Nacionalidad,
+    P.FECHA_REGISTRO                AS FechaRegistro,
+    T.NUM_TELEFONO                  AS NumTelefono,
+    U.EMAIL                         AS Email,
+    U.CONTRASENA                    AS Contrasena
+FROM PERSONA_TB P
+INNER JOIN TIPO_IDENTIFICACION_TB TI ON P.ID_TIPO_IDENTIFICACION_FK = TI.ID_TIPO_IDENTIFICACION_PK
+INNER JOIN TELEFONO_TB T             ON P.IDENTIFICACION_PK         = T.IDENTIFICACION_FK
+INNER JOIN USUARIO_TB U              ON P.IDENTIFICACION_PK         = U.IDENTIFICACION_FK;
 GO
 
---ACTUALIZACIÓN DEL PROCEDIMIENTO PARA INCLUIR EL STOCK EN EL MENÚ PÚBLICO
+---ver usuarios
 
-USE RFBakery;
-GO
+SELECT 
+    U.ID_USUARIO_PK,
+    P.NOMBRE_COMPLETO,
+    P.PRIMER_APELLIDO,
+    U.EMAIL,
+    U.ID_ROL_FK,
+    R.DESCRIPCION AS Rol
+FROM USUARIO_TB U
+INNER JOIN PERSONA_TB P ON U.IDENTIFICACION_FK = P.IDENTIFICACION_PK
+INNER JOIN ROL_TB R ON U.ID_ROL_FK = R.ID_ROL_PK
+ORDER BY U.ID_USUARIO_PK;
 
-ALTER PROCEDURE SP_ConsultarProductosPorCategoria
-    @IdCategoria INT
-AS
-BEGIN
-    SELECT
-        P.ID_PRODUCTO_PK    AS IdProducto,
-        P.ID_CATEGORIA_FK   AS IdCategoria,
-        P.NOMBRE            AS Nombre,
-        P.DESCRIPCION       AS Descripcion,
-        P.PRECIO            AS Precio,
-        P.IMAGEN            AS Imagen,
-        P.STOCK             AS Stock
-    FROM PRODUCTO_TB P
-    WHERE P.ID_CATEGORIA_FK = @IdCategoria
-    AND P.ID_ESTADO_FK = 1
-    ORDER BY P.NOMBRE
-END
-GO
+---rol a admin
+UPDATE USUARIO_TB
+SET ID_ROL_FK = 1
 
---ACTUALIZACIÓN: SP_InsertarProducto AHORA RECIBE EL STOCK INICIAL
+SELECT * FROM CATEGORIA_PRODUCTO_TB;
 
-USE RFBakery;
-GO
+--pruebas 
+SELECT ID_CATEGORIA_PK, DESCRIPCION FROM CATEGORIA_PRODUCTO_TB WHERE ID_ESTADO_FK = 1 ORDER BY ID_CATEGORIA_PK;
 
-ALTER PROCEDURE SP_InsertarProducto
-    @IdCategoria    INT,
-    @Nombre         VARCHAR(100),
-    @Descripcion    VARCHAR(250),
-    @Precio         DECIMAL(10,2),
-    @Imagen         VARCHAR(200),
-    @Stock          INT
-AS
-BEGIN
-
-    INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, STOCK, ID_ESTADO_FK)
-    VALUES (@IdCategoria, @Nombre, @Descripcion, @Precio, @Imagen, @Stock, 1)
-
-END
-GO
-
---ACTUALIZACIÓN: SP_ActualizarProducto AHORA PERMITE ACTUALIZAR EL STOCK
-
-USE RFBakery;
-GO
-
-ALTER PROCEDURE SP_ActualizarProducto
-    @IdProducto     INT,
-    @IdCategoria    INT,
-    @Nombre         VARCHAR(100),
-    @Descripcion    VARCHAR(250),
-    @Precio         DECIMAL(10,2),
-    @Imagen         VARCHAR(200),
-    @Stock          INT
-AS
-BEGIN
-
-    UPDATE PRODUCTO_TB
-    SET ID_CATEGORIA_FK = @IdCategoria,
-        NOMBRE          = @Nombre,
-        DESCRIPCION     = @Descripcion,
-        PRECIO          = @Precio,
-        IMAGEN          = @Imagen,
-        STOCK           = @Stock
-    WHERE ID_PRODUCTO_PK = @IdProducto
-
-END
-GO
-
-USE RFBakery;
-GO
-
-EXEC sp_helptext 'SP_ActualizarProducto';
-
-SELECT ID_PRODUCTO_PK, NOMBRE, STOCK
-FROM PRODUCTO_TB
-WHERE NOMBRE = 'Torta de Oreo';
-
-USE RFBakery;
-GO
-
-EXEC sp_helptext 'SP_ConsultarTodosLosProductos';
-
---ACTUALIZACIÓN: AGREGAR STOCK AL LISTADO DE PRODUCTOS DEL PANEL DE ADMINISTRADOR
-
-USE RFBakery;
-GO
-
-ALTER PROCEDURE SP_ConsultarTodosLosProductos
-AS
-BEGIN
-
-    SELECT
-        P.ID_PRODUCTO_PK   AS IdProducto,
-        P.ID_CATEGORIA_FK  AS IdCategoria,
-        C.DESCRIPCION      AS Categoria,
-        P.NOMBRE           AS Nombre,
-        P.DESCRIPCION      AS Descripcion,
-        P.PRECIO           AS Precio,
-        P.IMAGEN           AS Imagen,
-        P.STOCK            AS Stock
-    FROM PRODUCTO_TB P
-    INNER JOIN CATEGORIA_PRODUCTO_TB C ON P.ID_CATEGORIA_FK = C.ID_CATEGORIA_PK
-    WHERE P.ID_ESTADO_FK = 1
-    ORDER BY C.DESCRIPCION, P.NOMBRE
-
-END
-GO
-
-EXEC sp_helptext 'SP_ConsultarProductosInactivos';
-
---ACTUALIZACIÓN: AGREGAR STOCK AL LISTADO DE PRODUCTOS INACTIVOS
-
-USE RFBakery;
-GO
-
-ALTER PROCEDURE SP_ConsultarProductosInactivos
-AS
-BEGIN
-    SELECT
-        P.ID_PRODUCTO_PK    AS IdProducto,
-        P.ID_CATEGORIA_FK   AS IdCategoria,
-        C.DESCRIPCION       AS Categoria,
-        P.NOMBRE            AS Nombre,
-        P.DESCRIPCION       AS Descripcion,
-        P.PRECIO            AS Precio,
-        P.IMAGEN            AS Imagen,
-        P.STOCK             AS Stock
-    FROM PRODUCTO_TB P
-    INNER JOIN CATEGORIA_PRODUCTO_TB C ON P.ID_CATEGORIA_FK = C.ID_CATEGORIA_PK
-    WHERE P.ID_ESTADO_FK = 2
-    ORDER BY P.NOMBRE
-END
-GO
+SELECT 
+    P.ID_PRODUCTO_PK,
+    C.DESCRIPCION AS Categoria,
+    P.NOMBRE,
+    P.DESCRIPCION,
+    P.PRECIO,
+    P.IMAGEN,
+    P.ID_ESTADO_FK
+FROM PRODUCTO_TB P
+INNER JOIN CATEGORIA_PRODUCTO_TB C ON P.ID_CATEGORIA_FK = C.ID_CATEGORIA_PK
+ORDER BY C.ID_CATEGORIA_PK, P.NOMBRE;
