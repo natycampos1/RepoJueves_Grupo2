@@ -14,8 +14,9 @@ namespace PJ_GRUPODOS.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Principal", "Home");
         }
+        
 
         #endregion
 
@@ -49,7 +50,10 @@ namespace PJ_GRUPODOS.Controllers
                 HttpContext.Session.SetString("SegundoApellido", usuario!.SegundoApellido ?? string.Empty);
                 HttpContext.Session.SetString("Email", usuario!.Email);
                 HttpContext.Session.SetInt32("IdRol", usuario!.IdRol);
-
+                if (usuario!.IdRol == 1)
+                {
+                    return RedirectToAction("Index", "AdministrarMenu");
+                }
                 return RedirectToAction("Principal", "Home");
             }
             else if (response.StatusCode == HttpStatusCode.NotFound)
@@ -70,7 +74,7 @@ namespace PJ_GRUPODOS.Controllers
         public IActionResult CerrarSesion()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Principal", "Home");
         }
 
         #endregion
@@ -209,6 +213,21 @@ namespace PJ_GRUPODOS.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public IActionResult DetallePedido(int idPedido)
+        {
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + $"Pedido/ConsultarDetallePedidoAPI?idPedido={idPedido}";
+            var response = client.GetAsync(url).Result;
+
+            var detalle = response.IsSuccessStatusCode
+                ? response.Content.ReadFromJsonAsync<List<DetallePedidoModel>>().Result ?? new()
+                : new List<DetallePedidoModel>();
+
+            return View(detalle);
+        }
+
 
         #endregion
 

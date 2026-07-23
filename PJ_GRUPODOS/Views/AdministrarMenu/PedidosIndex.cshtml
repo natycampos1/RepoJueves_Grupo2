@@ -32,6 +32,7 @@
                     <th>Tipo de Entrega</th>
                     <th>Total</th>
                     <th style="width: 220px;">Estado</th>
+                    <th class="text-center">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -59,6 +60,20 @@
                                         <i class="bi bi-save"></i>
                                     </button>
                                 </form>
+                            </td>
+                            <td class="text-center">
+
+                                <a asp-controller="Carrito"
+                                   asp-action="DetallePedido"
+                                   asp-route-idPedido="@pedido.IdPedido"
+                                   class="btn btn-outline-primary btn-sm">
+
+                                    <i class="bi bi-eye"></i>
+
+                                    Ver detalle
+
+                                </a>
+
                             </td>
                         </tr>
                     }

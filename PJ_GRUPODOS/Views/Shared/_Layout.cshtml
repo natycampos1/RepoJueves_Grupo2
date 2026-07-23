@@ -39,15 +39,22 @@
 </head>
 
 <body>
-
-
     @{
+
+        bool autenticado = Context.Session.GetInt32("Autenticado") == 1;
         var nombre = Context.Session.GetString("Nombre") ?? "Usuario";
         var primerApellido = Context.Session.GetString("PrimerApellido") ?? "";
         var segundoApellido = Context.Session.GetString("SegundoApellido") ?? "";
         var identificacion = Context.Session.GetString("Identificacion") ?? "...";
         var email = Context.Session.GetString("Email") ?? "...";
         var idRol = Context.Session.GetInt32("IdRol") ?? 0;
+        bool esAdministrador = idRol == 1;
+        bool esCliente = idRol == 2;
+
+        var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+        var action = ViewContext.RouteData.Values["action"]?.ToString();
+
+
     }
 
     <!-- Topbar Start -->
@@ -91,95 +98,155 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto mx-lg-auto py-0">
-                <a asp-action="Index" asp-controller="Home" class="nav-item nav-link active">Inicio</a>
-                <a asp-action="SobreNosotros" asp-controller="Home" class="nav-item nav-link">Sobre Nosotros</a>
-                <a asp-action="Index" asp-controller="Menu" class="nav-item nav-link">Menú y Precios</a>
-                <a asp-action="NuestroEquipo" asp-controller="Home" class="nav-item nav-link">Nuestro Equipo</a>
-                <div class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Mas Detalles</a>
-                    <div class="dropdown-menu m-0">
-                        <a asp-action="NuestroServicio" asp-controller="Home" class="dropdown-item">Nuestro Servicio</a>
-                        <a asp-action="Testimonios" asp-controller="Home" class="dropdown-item">Testimonios</a>
-                    </div>
-                </div>
-                <a asp-action="Index" asp-controller="Contacto" class="nav-item nav-link">Contáctanos</a>
-            </div>
-
-
-            <!-- Opciones de usuario -->
-            <div class="dropdown ms-4 py-3 py-lg-0 me-5">
-
-                <a href="#"
-                   class="d-flex align-items-center text-decoration-none dropdown-toggle"
-                   id="dropdownUsuario"
-                   data-bs-toggle="dropdown"
-                   aria-expanded="false">
-
-                    <!-- Avatar -->
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
-                         style="width: 42px; height: 42px; font-family:'Oswald',sans-serif; font-weight:600;">
-                        <i class="bi bi-person-fill"></i>
-                    </div>
-
-                    <!-- Nombre y correo -->
-                    <div class="d-none d-lg-block text-start">
-                        <div style="font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:1px; color:#EFF1ED;">
-                            @nombre @primerApellido @segundoApellido
-                        </div>
-                        <div class="text-muted" style="font-size: 0.78rem; color:#EFF1ED;">
-                            @email
-                        </div>
-                        <div class="text-muted" style="font-size: 0.7rem; color:#FFD700;">
-                            Rol: @(idRol == 1 ? "Administrador" : "Cliente")
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Opciones -->
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="dropdownUsuario">
-                    <li>
-                        <a class="dropdown-item" asp-action="GestionPerfil" asp-controller="Home">
-                            <i class="bi bi-pencil-square me-2"></i>
-                            Editar información
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" asp-action="MisPedidos" asp-controller="Carrito">
-                            <i class="bi bi-bag-check me-2"></i>
-                            Mis Pedidos
-                        </a>
-                    </li>
-
-                    @if (idRol == 1)
+                <div class="navbar-nav ms-auto mx-lg-auto py-0">
+                    @if (!autenticado)
                     {
-                        <li>
-                            <a class="dropdown-item" asp-action="Index" asp-controller="AdministrarMenu">
-                                <i class="bi bi-gear-fill me-2"></i>
-                                Administrar Menú
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" asp-action="PedidosIndex" asp-controller="AdministrarMenu">
-                                <i class="bi bi-receipt me-2"></i>
-                                Administrar Pedidos
-                            </a>
-                        </li>
+                        <div class="navbar-nav ms-auto mx-lg-auto py-0">
+                            <a asp-controller="Home" asp-action="Principal"
+                               class="nav-item nav-link @(controller == "Home" && action == "Principal" ? "active" : "")">Inicio</a>
+
+                            <a asp-controller="Home" asp-action="SobreNosotros"
+                               class="nav-item nav-link @(controller == "Home" && action == "SobreNosotros" ? "active" : "")">Sobre Nosotros</a>
+
+                            <a asp-controller="Menu" asp-action="Index"
+                               class="nav-item nav-link @(controller == "Menu" && action == "Index" ? "active" : "")">Menú y Precios</a>
+
+                            <a asp-controller="Home" asp-action="NuestroEquipo"
+                               class="nav-item nav-link @(controller == "Home" && action == "NuestroEquipo" ? "active" : "")">Nuestro Equipo</a>
+
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle @(controller == "Home" && (action == "NuestroServicio" || action == "Testimonios") ? "active" : "")"
+                                   data-bs-toggle="dropdown">Mas Detalles</a>
+                                <div class="dropdown-menu m-0">
+                                    <a asp-controller="Home" asp-action="NuestroServicio"
+                                       class="dropdown-item @(controller == "Home" && action == "NuestroServicio" ? "active" : "")">Nuestro Servicio</a>
+                                    <a asp-controller="Home" asp-action="Testimonios"
+                                       class="dropdown-item @(controller == "Home" && action == "Testimonios" ? "active" : "")">Testimonios</a>
+                                </div>
+                            </div>
+
+                            <a asp-controller="Contacto" asp-action="Index"
+                               class="nav-item nav-link @(controller == "Contacto" && action == "Index" ? "active" : "")">Contáctanos</a>
+                        </div>
                     }
 
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
+                    @if (esCliente)
+                    {
+                        <div class="navbar-nav ms-auto mx-lg-auto py-0">
+                            <a asp-controller="Home" asp-action="Principal"
+                               class="nav-item nav-link @(controller == "Home" && action == "Principal" ? "active" : "")">Inicio</a>
 
-                    <li>
-                        <a class="dropdown-item text-danger" asp-action="CerrarSesion" asp-controller="Home">
-                            <i class="bi bi-box-arrow-right me-2"></i>
-                            Cerrar sesión
-                        </a>
-                    </li>
-                </ul>
+                            <a asp-controller="Home" asp-action="SobreNosotros"
+                               class="nav-item nav-link @(controller == "Home" && action == "SobreNosotros" ? "active" : "")">Sobre Nosotros</a>
 
+                            <a asp-controller="Menu" asp-action="Index"
+                               class="nav-item nav-link @(controller == "Menu" && action == "Index" ? "active" : "")">Menú y Precios</a>
+
+                            <a asp-controller="Home" asp-action="NuestroEquipo"
+                               class="nav-item nav-link @(controller == "Home" && action == "NuestroEquipo" ? "active" : "")">Nuestro Equipo</a>
+
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle @(controller == "Home" && (action == "NuestroServicio" || action == "Testimonios") ? "active" : "")"
+                                   data-bs-toggle="dropdown">Mas Detalles</a>
+                                <div class="dropdown-menu m-0">
+                                    <a asp-controller="Home" asp-action="NuestroServicio"
+                                       class="dropdown-item @(controller == "Home" && action == "NuestroServicio" ? "active" : "")">Nuestro Servicio</a>
+                                    <a asp-controller="Home" asp-action="Testimonios"
+                                       class="dropdown-item @(controller == "Home" && action == "Testimonios" ? "active" : "")">Testimonios</a>
+                                </div>
+                            </div>
+
+                            <a asp-controller="Contacto" asp-action="Index"
+                               class="nav-item nav-link @(controller == "Contacto" && action == "Index" ? "active" : "")">Contáctanos</a>
+
+                            <a asp-controller="Carrito" asp-action="MisPedidos"
+                               class="nav-item nav-link @(controller == "Carrito" && action == "MisPedidos" ? "active" : "")">Mis Pedidos</a>
+                        </div>
+                    }
+
+                    @if (esAdministrador)
+                    {
+                        <div class="navbar-nav ms-auto mx-lg-auto py-0">
+                            <a asp-controller="AdministrarMenu" asp-action="Index"
+                               class="nav-item nav-link @(controller == "AdministrarMenu" && action == "Index" ? "active" : "")">
+                                <i class="bi bi-gear-fill me-2"></i>Administrar Menú
+                            </a>
+
+                            <a asp-controller="AdministrarMenu" asp-action="PedidosIndex"
+                               class="nav-item nav-link @(controller == "AdministrarMenu" && action == "PedidosIndex" ? "active" : "")">
+                                <i class="bi bi-receipt me-2"></i>Administrar Pedidos
+                            </a>
+                        </div>
+                    }
+                </div>
             </div>
 
+            @if (autenticado)
+            {
+                <!-- Opciones de usuario -->
+                <div class="dropdown ms-4 py-3 py-lg-0 me-5">
+
+                    <a href="#"
+                       class="d-flex align-items-center text-decoration-none dropdown-toggle"
+                       id="dropdownUsuario"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+
+                        <!-- Avatar -->
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
+                             style="width: 42px; height: 42px; font-family:'Oswald',sans-serif; font-weight:600;">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+
+                        <!-- Nombre y correo -->
+                        <div class="d-none d-lg-block text-start">
+                            <div style="font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:1px; color:#EFF1ED;">
+                                @nombre @primerApellido @segundoApellido
+                            </div>
+                            <div class="text-muted" style="font-size: 0.78rem; color:#EFF1ED;">
+                                @email
+                            </div>
+                            <div class="text-muted" style="font-size: 0.7rem; color:#FFD700;">
+                                Rol: @(idRol == 1 ? "Administrador" : "Cliente")
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Opciones -->
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="dropdownUsuario">
+                        <li>
+                            <a class="dropdown-item" asp-action="GestionPerfil" asp-controller="Home">
+                                <i class="bi bi-pencil-square me-2"></i>
+                                Editar información
+                            </a>
+                        </li>
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item text-danger" asp-action="CerrarSesion" asp-controller="Home">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Cerrar sesión
+                            </a>
+                        </li>
+                    </ul>
+
+                </div>
+            }
+            else
+            {
+
+                <div class="d-flex align-items-center ms-4 py-3 py-lg-0 me-5">
+                    <a asp-action="IniciarSesion" asp-controller="Home" class="btn btn-outline-light btn-sm me-2 px-3" style="font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:1px;">
+                        <i class="bi bi-person me-1"></i>Iniciar Sesión
+                    </a>
+                    <a asp-action="RegistrarUsuario" asp-controller="Home" class="btn btn-primary btn-sm px-3" style="font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:1px;">
+                        <i class="bi bi-person-plus me-1"></i>Registrarse
+                    </a>
+                </div>
+            }
             <!-- Opciones de usuario FIN-->
 
         </div>
