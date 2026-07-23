@@ -49,7 +49,10 @@ namespace PJ_GRUPODOS.Controllers
                 HttpContext.Session.SetString("SegundoApellido", usuario!.SegundoApellido ?? string.Empty);
                 HttpContext.Session.SetString("Email", usuario!.Email);
                 HttpContext.Session.SetInt32("IdRol", usuario!.IdRol);
-
+                if (usuario!.IdRol == 1)
+                {
+                    return RedirectToAction("Index", "AdministrarMenu");
+                }
                 return RedirectToAction("Principal", "Home");
             }
             else if (response.StatusCode == HttpStatusCode.NotFound)
