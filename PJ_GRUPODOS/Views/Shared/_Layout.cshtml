@@ -40,6 +40,7 @@
 
 <body>
     @{
+
         bool autenticado = Context.Session.GetInt32("Autenticado") == 1;
         var nombre = Context.Session.GetString("Nombre") ?? "Usuario";
         var primerApellido = Context.Session.GetString("PrimerApellido") ?? "";
@@ -49,6 +50,10 @@
         var idRol = Context.Session.GetInt32("IdRol") ?? 0;
         bool esAdministrador = idRol == 1;
         bool esCliente = idRol == 2;
+
+        var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+        var action = ViewContext.RouteData.Values["action"]?.ToString();
+
 
     }
 
@@ -97,54 +102,79 @@
                     @if (!autenticado)
                     {
                         <div class="navbar-nav ms-auto mx-lg-auto py-0">
-                            <a asp-action="Principal" asp-controller="Home" class="nav-item nav-link active">Inicio</a>
-                            <a asp-action="SobreNosotros" asp-controller="Home" class="nav-item nav-link">Sobre Nosotros</a>
-                            <a asp-action="Index" asp-controller="Menu" class="nav-item nav-link">Menú y Precios</a>
-                            <a asp-action="NuestroEquipo" asp-controller="Home" class="nav-item nav-link">Nuestro Equipo</a>
+                            <a asp-controller="Home" asp-action="Principal"
+                               class="nav-item nav-link @(controller == "Home" && action == "Principal" ? "active" : "")">Inicio</a>
+
+                            <a asp-controller="Home" asp-action="SobreNosotros"
+                               class="nav-item nav-link @(controller == "Home" && action == "SobreNosotros" ? "active" : "")">Sobre Nosotros</a>
+
+                            <a asp-controller="Menu" asp-action="Index"
+                               class="nav-item nav-link @(controller == "Menu" && action == "Index" ? "active" : "")">Menú y Precios</a>
+
+                            <a asp-controller="Home" asp-action="NuestroEquipo"
+                               class="nav-item nav-link @(controller == "Home" && action == "NuestroEquipo" ? "active" : "")">Nuestro Equipo</a>
+
                             <div class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Mas Detalles</a>
+                                <a href="#" class="nav-link dropdown-toggle @(controller == "Home" && (action == "NuestroServicio" || action == "Testimonios") ? "active" : "")"
+                                   data-bs-toggle="dropdown">Mas Detalles</a>
                                 <div class="dropdown-menu m-0">
-                                    <a asp-action="NuestroServicio" asp-controller="Home" class="dropdown-item">Nuestro Servicio</a>
-                                    <a asp-action="Testimonios" asp-controller="Home" class="dropdown-item">Testimonios</a>
+                                    <a asp-controller="Home" asp-action="NuestroServicio"
+                                       class="dropdown-item @(controller == "Home" && action == "NuestroServicio" ? "active" : "")">Nuestro Servicio</a>
+                                    <a asp-controller="Home" asp-action="Testimonios"
+                                       class="dropdown-item @(controller == "Home" && action == "Testimonios" ? "active" : "")">Testimonios</a>
                                 </div>
                             </div>
-                            <a asp-action="Index" asp-controller="Contacto" class="nav-item nav-link">Contáctanos</a>
-                        </div>
 
+                            <a asp-controller="Contacto" asp-action="Index"
+                               class="nav-item nav-link @(controller == "Contacto" && action == "Index" ? "active" : "")">Contáctanos</a>
+                        </div>
                     }
 
                     @if (esCliente)
                     {
                         <div class="navbar-nav ms-auto mx-lg-auto py-0">
-                            <a asp-action="Principal" asp-controller="Home" class="nav-item nav-link active">Inicio</a>
-                            <a asp-action="SobreNosotros" asp-controller="Home" class="nav-item nav-link">Sobre Nosotros</a>
-                            <a asp-action="Index" asp-controller="Menu" class="nav-item nav-link">Menú y Precios</a>
-                            <a asp-action="NuestroEquipo" asp-controller="Home" class="nav-item nav-link">Nuestro Equipo</a>
+                            <a asp-controller="Home" asp-action="Principal"
+                               class="nav-item nav-link @(controller == "Home" && action == "Principal" ? "active" : "")">Inicio</a>
+
+                            <a asp-controller="Home" asp-action="SobreNosotros"
+                               class="nav-item nav-link @(controller == "Home" && action == "SobreNosotros" ? "active" : "")">Sobre Nosotros</a>
+
+                            <a asp-controller="Menu" asp-action="Index"
+                               class="nav-item nav-link @(controller == "Menu" && action == "Index" ? "active" : "")">Menú y Precios</a>
+
+                            <a asp-controller="Home" asp-action="NuestroEquipo"
+                               class="nav-item nav-link @(controller == "Home" && action == "NuestroEquipo" ? "active" : "")">Nuestro Equipo</a>
+
                             <div class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Mas Detalles</a>
+                                <a href="#" class="nav-link dropdown-toggle @(controller == "Home" && (action == "NuestroServicio" || action == "Testimonios") ? "active" : "")"
+                                   data-bs-toggle="dropdown">Mas Detalles</a>
                                 <div class="dropdown-menu m-0">
-                                    <a asp-action="NuestroServicio" asp-controller="Home" class="dropdown-item">Nuestro Servicio</a>
-                                    <a asp-action="Testimonios" asp-controller="Home" class="dropdown-item">Testimonios</a>
+                                    <a asp-controller="Home" asp-action="NuestroServicio"
+                                       class="dropdown-item @(controller == "Home" && action == "NuestroServicio" ? "active" : "")">Nuestro Servicio</a>
+                                    <a asp-controller="Home" asp-action="Testimonios"
+                                       class="dropdown-item @(controller == "Home" && action == "Testimonios" ? "active" : "")">Testimonios</a>
                                 </div>
                             </div>
-                            <a asp-action="Index" asp-controller="Contacto" class="nav-item nav-link">Contáctanos</a>
-                            <a asp-action="MisPedidos" asp-controller="Carrito" class="nav-item nav-link">
-                                Mis Pedidos
-                            </a>
+
+                            <a asp-controller="Contacto" asp-action="Index"
+                               class="nav-item nav-link @(controller == "Contacto" && action == "Index" ? "active" : "")">Contáctanos</a>
+
+                            <a asp-controller="Carrito" asp-action="MisPedidos"
+                               class="nav-item nav-link @(controller == "Carrito" && action == "MisPedidos" ? "active" : "")">Mis Pedidos</a>
                         </div>
                     }
 
                     @if (esAdministrador)
                     {
                         <div class="navbar-nav ms-auto mx-lg-auto py-0">
-                            <a class="nav-item nav-link" asp-action="Index" asp-controller="AdministrarMenu">
-                                <i class="bi bi-gear-fill me-2"></i>
-                                Administrar Menú
+                            <a asp-controller="AdministrarMenu" asp-action="Index"
+                               class="nav-item nav-link @(controller == "AdministrarMenu" && action == "Index" ? "active" : "")">
+                                <i class="bi bi-gear-fill me-2"></i>Administrar Menú
                             </a>
 
-                            <a class="nav-item nav-link" asp-action="PedidosIndex" asp-controller="AdministrarMenu">
-                                <i class="bi bi-receipt me-2"></i>
-                                Administrar Pedidos
+                            <a asp-controller="AdministrarMenu" asp-action="PedidosIndex"
+                               class="nav-item nav-link @(controller == "AdministrarMenu" && action == "PedidosIndex" ? "active" : "")">
+                                <i class="bi bi-receipt me-2"></i>Administrar Pedidos
                             </a>
                         </div>
                     }
