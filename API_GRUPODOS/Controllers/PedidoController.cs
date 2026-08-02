@@ -45,13 +45,13 @@ namespace API_GRUPODOS.Controllers
             {
                 try
                 {
-                    // 1. Validar que haya stock suficiente para TODOS los productos antes de continuar
+                    // 1. Validar que haya stock semanal suficiente para TODOS los productos antes de continuar
                     foreach (var item in model.Carrito)
                     {
                         var parametrosStock = new DynamicParameters();
-                        parametrosStock.Add("@IdProducto", item.IdProducto);
+                        parametrosStock.Add("@IdCatalogoSemanal", item.IdCatalogoSemanal);
                         var stockDisponible = context.QueryFirstOrDefault<ProductoStockModel>(
-                            "SP_ConsultarStockProducto",
+                            "SP_ConsultarStockCatalogoSemanal",
                             parametrosStock,
                             commandType: System.Data.CommandType.StoredProcedure
                         );
@@ -94,7 +94,7 @@ namespace API_GRUPODOS.Controllers
                         commandType: System.Data.CommandType.StoredProcedure
                     );
 
-                    // 4. Registrar cada línea de detalle y descontar el stock
+                    // 4. Registrar cada línea de detalle y descontar el stock semanal
                     foreach (var item in model.Carrito)
                     {
                         var parametrosDetalle = new DynamicParameters();
@@ -110,11 +110,11 @@ namespace API_GRUPODOS.Controllers
                         );
 
                         var parametrosStock = new DynamicParameters();
-                        parametrosStock.Add("@IdProducto", item.IdProducto);
+                        parametrosStock.Add("@IdCatalogoSemanal", item.IdCatalogoSemanal);
                         parametrosStock.Add("@Cantidad", item.Cantidad);
 
                         context.Execute(
-                            "SP_DescontarStock",
+                            "SP_DescontarStockSemanal",
                             parametrosStock,
                             commandType: System.Data.CommandType.StoredProcedure
                         );
@@ -240,6 +240,26 @@ namespace API_GRUPODOS.Controllers
                 return Ok(response);
 
             return NotFound("Producto no encontrado");
+        }
+
+        [HttpGet("ConsultarStockCatalogoSemanalAPI")]
+        public IActionResult ConsultarStockCatalogoSemanalAPI(int idCatalogoSemanal)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdCatalogoSemanal", idCatalogoSemanal);
+
+            var response = context.QueryFirstOrDefault<ProductoStockModel>(
+                "SP_ConsultarStockCatalogoSemanal",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (response != null)
+                return Ok(response);
+
+            return NotFound("No se encontró el item del catálogo semanal");
         }
 
         #endregion

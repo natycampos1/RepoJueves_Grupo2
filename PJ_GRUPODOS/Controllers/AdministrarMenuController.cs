@@ -16,6 +16,14 @@ namespace PJ_GRUPODOS.Controllers
             return idRol == 1;
         }
 
+        // devuelve el lunes de la semana actual, la misma fecha que usa el catalogo semanal
+        private static DateTime ObtenerLunesDeEstaSemana()
+        {
+            var hoy = DateTime.Today;
+            int diasDesdeElLunes = (7 + (hoy.DayOfWeek - DayOfWeek.Monday)) % 7;
+            return hoy.AddDays(-1 * diasDesdeElLunes);
+        }
+
         #region Categorías
 
         [HttpGet]
@@ -336,6 +344,102 @@ namespace PJ_GRUPODOS.Controllers
             }
 
             return RedirectToAction("PedidosIndex");
+        }
+
+        #endregion
+
+        #region Catálogo Semanal
+
+        [HttpGet]
+        public IActionResult CatalogoSemanalIndex()
+        {
+            if (!EsAdministrador())
+                return RedirectToAction("Principal", "Home");
+
+            using var client = _http.CreateClient();
+
+            // traigo los productos del catalogo maestro, para poder elegir cual agregar a la semana
+            var urlProductos = _config["Valores:UrlApi"] + "AdministrarMenu/ConsultarTodosLosProductosAPI";
+            var responseProductos = client.GetAsync(urlProductos).Result;
+            ViewBag.Productos = responseProductos.IsSuccessStatusCode
+                ? responseProductos.Content.ReadFromJsonAsync<List<ProductoAdminModel>>().Result ?? new()
+                : new List<ProductoAdminModel>();
+
+            // traigo lo que ya esta configurado para la semana actual
+            var fechaInicioSemana = ObtenerLunesDeEstaSemana();
+            var urlCatalogo = _config["Valores:UrlApi"] + $"AdministrarMenu/ConsultarCatalogoSemanalAdminAPI?fechaInicioSemana={fechaInicioSemana:yyyy-MM-dd}";
+            var responseCatalogo = client.GetAsync(urlCatalogo).Result;
+
+            var catalogoSemanal = responseCatalogo.IsSuccessStatusCode
+                ? responseCatalogo.Content.ReadFromJsonAsync<List<CatalogoSemanalAdminModel>>().Result ?? new()
+                : new List<CatalogoSemanalAdminModel>();
+
+            ViewBag.FechaInicioSemana = fechaInicioSemana;
+
+            return View(catalogoSemanal);
+        }
+
+        [HttpPost]
+        public IActionResult AgregarCatalogoSemanal(int idProducto, int stockDisponible, int limitePorPersona)
+        {
+            if (!EsAdministrador())
+                return RedirectToAction("Principal", "Home");
+
+            var model = new AgregarCatalogoSemanalRequestModel
+            {
+                IdProducto = idProducto,
+                FechaInicioSemana = ObtenerLunesDeEstaSemana(),
+                StockDisponible = stockDisponible,
+                LimitePorPersona = limitePorPersona
+            };
+
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + "AdministrarMenu/AgregarProductoCatalogoSemanalAPI";
+            var response = client.PostAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                TempData["MensajeCatalogoSemanal"] = "El producto se agregó al catálogo semanal correctamente";
+                TempData["TipoMensajeCatalogoSemanal"] = "success";
+            }
+            else
+            {
+                TempData["MensajeCatalogoSemanal"] = response.Content.ReadAsStringAsync().Result;
+                TempData["TipoMensajeCatalogoSemanal"] = "danger";
+            }
+
+            return RedirectToAction("CatalogoSemanalIndex");
+        }
+
+        [HttpPost]
+        public IActionResult ActualizarCatalogoSemanal(int idCatalogoSemanal, int stockDisponible, int limitePorPersona, bool activo)
+        {
+            if (!EsAdministrador())
+                return RedirectToAction("Principal", "Home");
+
+            var model = new ActualizarCatalogoSemanalRequestModel
+            {
+                StockDisponible = stockDisponible,
+                LimitePorPersona = limitePorPersona,
+                Activo = activo
+            };
+
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + $"AdministrarMenu/ActualizarCatalogoSemanalAPI?idCatalogoSemanal={idCatalogoSemanal}";
+            var response = client.PutAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                TempData["MensajeCatalogoSemanal"] = "El catálogo semanal se actualizó correctamente";
+                TempData["TipoMensajeCatalogoSemanal"] = "success";
+            }
+            else
+            {
+                TempData["MensajeCatalogoSemanal"] = response.Content.ReadAsStringAsync().Result;
+                TempData["TipoMensajeCatalogoSemanal"] = "danger";
+            }
+
+            return RedirectToAction("CatalogoSemanalIndex");
         }
 
         #endregion

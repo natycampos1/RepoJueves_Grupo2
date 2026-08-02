@@ -127,9 +127,11 @@
 
                                                         <form asp-action="Agregar" asp-controller="Carrito" method="post" class="mt-2">
                                                             <input type="hidden" name="idProducto" value="@producto.IdProducto" />
+                                                            <input type="hidden" name="idCatalogoSemanal" value="@producto.IdCatalogoSemanal" />
                                                             <input type="hidden" name="nombreProducto" value="@producto.Nombre" />
                                                             <input type="hidden" name="precio" value="@producto.Precio" />
                                                             <input type="hidden" name="imagen" value="@producto.Imagen" />
+                                                            <input type="hidden" name="limitePorPersona" value="@producto.LimitePorPersona" />
                                                             <button type="submit" class="btn btn-sm btn-primary" @(sinStock ? "disabled" : "")>
                                                                 <i class="bi bi-cart-plus me-1"></i>Agregar al Carrito
                                                             </button>

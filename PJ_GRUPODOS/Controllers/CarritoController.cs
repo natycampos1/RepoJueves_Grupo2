@@ -64,7 +64,7 @@ namespace PJ_GRUPODOS.Controllers
         #region Agregar al Carrito
 
         [HttpPost]
-        public IActionResult Agregar(int idProducto, string nombreProducto, decimal precio, string? imagen)
+        public IActionResult Agregar(int idProducto, int idCatalogoSemanal, string nombreProducto, decimal precio, string? imagen, int limitePorPersona)
         {
             var autenticado = HttpContext.Session.GetInt32("Autenticado") == 1;
             if (!autenticado)
@@ -72,14 +72,19 @@ namespace PJ_GRUPODOS.Controllers
                 return RedirectToAction("IniciarSesion", "Home");
             }
 
-            
             var carrito = ObtenerCarrito();
-
 
             var itemExistente = carrito.FirstOrDefault(i => i.IdProducto == idProducto);
 
             if (itemExistente != null)
             {
+                // valido que no se pase del limite por persona antes de sumar
+                if (itemExistente.Cantidad + 1 > limitePorPersona)
+                {
+                    TempData["MensajeCarrito"] = $"Solo puedes llevar un máximo de {limitePorPersona} unidades de '{nombreProducto}'";
+                    return RedirectToAction("Index", "Menu");
+                }
+
                 itemExistente.Cantidad++;
             }
             else
@@ -87,9 +92,11 @@ namespace PJ_GRUPODOS.Controllers
                 carrito.Add(new ItemCarritoModel
                 {
                     IdProducto = idProducto,
+                    IdCatalogoSemanal = idCatalogoSemanal,
                     NombreProducto = nombreProducto,
                     Precio = precio,
                     Cantidad = 1,
+                    LimitePorPersona = limitePorPersona,
                     Imagen = imagen
                 });
             }
@@ -100,7 +107,6 @@ namespace PJ_GRUPODOS.Controllers
 
             return RedirectToAction("Index", "Menu");
         }
-
         #endregion
 
         #region Actualizar Cantidad

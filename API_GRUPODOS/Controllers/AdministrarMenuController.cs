@@ -271,6 +271,79 @@ namespace API_GRUPODOS.Controllers
         }
 
         #endregion
+
+        #region Catálogo Semanal
+
+        [HttpGet("ConsultarCatalogoSemanalAdminAPI")]
+        public IActionResult ConsultarCatalogoSemanalAdminAPI(DateTime fechaInicioSemana)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@FechaInicioSemana", fechaInicioSemana);
+
+            var response = context.Query<CatalogoSemanalAdminModel>(
+                "SP_ConsultarCatalogoSemanalAdmin",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            ).ToList();
+
+            return Ok(response);
+        }
+
+        [HttpPost("AgregarProductoCatalogoSemanalAPI")]
+        public IActionResult AgregarProductoCatalogoSemanalAPI(AgregarCatalogoSemanalRequestModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdProducto", model.IdProducto);
+            parameters.Add("@FechaInicioSemana", model.FechaInicioSemana);
+            parameters.Add("@StockDisponible", model.StockDisponible);
+            parameters.Add("@LimitePorPersona", model.LimitePorPersona);
+
+            var response = context.Execute(
+                "SP_AgregarProductoCatalogoSemanal",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (response > 0)
+                return Ok("Producto agregado al catálogo semanal correctamente");
+
+            return BadRequest("No se pudo agregar el producto al catálogo semanal");
+        }
+
+        [HttpPut("ActualizarCatalogoSemanalAPI")]
+        public IActionResult ActualizarCatalogoSemanalAPI(int idCatalogoSemanal, ActualizarCatalogoSemanalRequestModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdCatalogoSemanal", idCatalogoSemanal);
+            parameters.Add("@StockDisponible", model.StockDisponible);
+            parameters.Add("@LimitePorPersona", model.LimitePorPersona);
+            parameters.Add("@Activo", model.Activo);
+
+            var response = context.Execute(
+                "SP_ActualizarCatalogoSemanal",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (response > 0)
+                return Ok("Catálogo semanal actualizado correctamente");
+
+            return BadRequest("No se pudo actualizar el catálogo semanal");
+        }
+
+        #endregion
     }
 
 

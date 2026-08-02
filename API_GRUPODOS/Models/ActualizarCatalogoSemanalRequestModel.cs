@@ -1,0 +1,15 @@
+﻿
+using System.ComponentModel.DataAnnotations;
+
+namespace API_GRUPODOS.Models
+{
+    public class ActualizarCatalogoSemanalRequestModel
+    {
+        [Required]
+        public int StockDisponible { get; set; }
+        [Required]
+        public int LimitePorPersona { get; set; }
+        [Required]
+        public bool Activo { get; set; }
+    }
+}

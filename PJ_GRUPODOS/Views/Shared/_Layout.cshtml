@@ -172,6 +172,11 @@
                                 <i class="bi bi-gear-fill me-2"></i>Administrar Menú
                             </a>
 
+                            <a asp-controller="AdministrarMenu" asp-action="CatalogoSemanalIndex"
+                               class="nav-item nav-link @(controller == "AdministrarMenu" && action == "CatalogoSemanalIndex" ? "active" : "")">
+                                <i class="bi bi-calendar-week me-2"></i>Catálogo Semanal
+                            </a>
+
                             <a asp-controller="AdministrarMenu" asp-action="PedidosIndex"
                                class="nav-item nav-link @(controller == "AdministrarMenu" && action == "PedidosIndex" ? "active" : "")">
                                 <i class="bi bi-receipt me-2"></i>Administrar Pedidos
