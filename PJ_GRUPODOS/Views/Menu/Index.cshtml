@@ -107,8 +107,9 @@
                                                         </small>
                                                     }
 
-                                                    @if (!autenticado) {
-                                                        
+                                                    @if (!autenticado)
+                                                    {
+
                                                         <div class="mt-2">
                                                             <input type="hidden" name="idProducto" value="@producto.IdProducto" />
                                                             <input type="hidden" name="nombreProducto" value="@producto.Nombre" />
@@ -119,11 +120,11 @@
                                                                 <i class="bi bi-cart-plus me-1"></i>Agregar al Carrito
                                                             </button>
                                                         </div>
-                                                        
+
                                                     }
                                                     else if (esCliente)
                                                     {
-                                                    
+
                                                         <form asp-action="Agregar" asp-controller="Carrito" method="post" class="mt-2">
                                                             <input type="hidden" name="idProducto" value="@producto.IdProducto" />
                                                             <input type="hidden" name="nombreProducto" value="@producto.Nombre" />
@@ -134,9 +135,9 @@
                                                             </button>
                                                         </form>
                                                     }
-                                                    
 
                                                     
+
                                                 </div>
                                             </div>
                                         </div>
@@ -163,7 +164,6 @@
     </div>
 </div>
 <!-- Products End -->
-
 <!-- Modal: Inicio de Sesión Requerido -->
 <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
