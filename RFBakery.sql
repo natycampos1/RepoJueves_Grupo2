@@ -88,7 +88,7 @@ CREATE TABLE USUARIO_TB (
     EMAIL               VARCHAR(100)    NOT NULL,
     CONTRASENA          VARCHAR(250)    NOT NULL,
     ID_ESTADO_FK        INT             NOT NULL,
-    INDICADOR_CONTRASENA_TEMP BIT       NOT NULL DEFAULT 0
+    INDICADOR_CONTRASENA_TEMP BIT       NOT NULL DEFAULT 0,
 
     CONSTRAINT PK_USUARIO PRIMARY KEY (ID_USUARIO_PK),
     CONSTRAINT UQ_USUARIO_EMAIL UNIQUE (EMAIL),
@@ -134,7 +134,7 @@ CREATE TABLE PRODUCTO_TB (
     PRECIO              DECIMAL(10,2)   NOT NULL,
     IMAGEN              VARCHAR(200)    NULL,
     ID_ESTADO_FK        INT             NOT NULL,
-    STOCK               INT NOT NULL DEFAULT 0
+    STOCK               INT NOT NULL DEFAULT 0,
 
     CONSTRAINT PK_PRODUCTO PRIMARY KEY (ID_PRODUCTO_PK),
     CONSTRAINT FK_PRODUCTO_CATEGORIA FOREIGN KEY (ID_CATEGORIA_FK)
@@ -958,6 +958,271 @@ BEGIN
     SET CONTRASENA = @NuevaContrasena,
         INDICADOR_CONTRASENA_TEMP = 0
     WHERE IDENTIFICACION_FK = @Identificacion
+
+END
+GO
+
+----seguimos 1/08/2026
+
+USE RFBakery;
+GO
+
+-- agrego las 2 columnas que pide el RF-04: puntos de esfuerzo y bandera de anticipado
+ALTER TABLE PRODUCTO_TB
+ADD PUNTOS_ESFUERZO   INT NOT NULL DEFAULT 0,
+    PEDIDO_ANTICIPADO BIT NOT NULL DEFAULT 0;
+GO
+
+-- actualizo el SP de insertar producto para que reciba los 2 valores nuevos
+ALTER PROCEDURE SP_InsertarProducto
+    @IdCategoria       INT,
+    @Nombre            VARCHAR(100),
+    @Descripcion       VARCHAR(250),
+    @Precio            DECIMAL(10,2),
+    @Imagen            VARCHAR(200),
+    @Stock             INT,
+    @PuntosEsfuerzo    INT,
+    @PedidoAnticipado  BIT
+AS
+BEGIN
+
+    INSERT INTO PRODUCTO_TB (ID_CATEGORIA_FK, NOMBRE, DESCRIPCION, PRECIO, IMAGEN, STOCK, PUNTOS_ESFUERZO, PEDIDO_ANTICIPADO, ID_ESTADO_FK)
+    VALUES (@IdCategoria, @Nombre, @Descripcion, @Precio, @Imagen, @Stock, @PuntosEsfuerzo, @PedidoAnticipado, 1)
+
+END
+GO
+
+-- actualizo el SP de editar producto para que también actualice los 2 valores nuevos
+ALTER PROCEDURE SP_ActualizarProducto
+    @IdProducto        INT,
+    @IdCategoria       INT,
+    @Nombre            VARCHAR(100),
+    @Descripcion       VARCHAR(250),
+    @Precio            DECIMAL(10,2),
+    @Imagen            VARCHAR(200),
+    @Stock             INT,
+    @PuntosEsfuerzo    INT,
+    @PedidoAnticipado  BIT
+AS
+BEGIN
+
+    UPDATE PRODUCTO_TB
+    SET ID_CATEGORIA_FK   = @IdCategoria,
+        NOMBRE            = @Nombre,
+        DESCRIPCION       = @Descripcion,
+        PRECIO            = @Precio,
+        IMAGEN            = @Imagen,
+        STOCK             = @Stock,
+        PUNTOS_ESFUERZO   = @PuntosEsfuerzo,
+        PEDIDO_ANTICIPADO = @PedidoAnticipado
+    WHERE ID_PRODUCTO_PK = @IdProducto
+
+END
+GO
+
+-- actualizo el SP de consultar producto por id para que traiga los 2 valores nuevos (se usa al editar)
+ALTER PROCEDURE SP_ConsultarProductoPorId
+    @IdProducto INT
+AS
+BEGIN
+
+    SELECT
+        ID_PRODUCTO_PK      AS IdProducto,
+        ID_CATEGORIA_FK     AS IdCategoria,
+        NOMBRE              AS Nombre,
+        DESCRIPCION         AS Descripcion,
+        PRECIO              AS Precio,
+        IMAGEN              AS Imagen,
+        STOCK               AS Stock,
+        PUNTOS_ESFUERZO     AS PuntosEsfuerzo,
+        PEDIDO_ANTICIPADO   AS PedidoAnticipado
+    FROM PRODUCTO_TB
+    WHERE ID_PRODUCTO_PK = @IdProducto
+
+END
+GO
+---
+USE RFBakery;
+GO
+
+-- tabla nueva: catalogo semanal (RF-08)
+-- aqui el admin configura, para la semana en curso, que productos del catalogo maestro
+-- van a estar disponibles, con cuanto stock y con que limite por persona
+CREATE TABLE CATALOGO_SEMANAL_TB (
+    ID_CATALOGO_SEMANAL_PK  INT             NOT NULL IDENTITY(1,1),
+    ID_PRODUCTO_FK          INT             NOT NULL,
+    FECHA_INICIO_SEMANA     DATE            NOT NULL,
+    STOCK_DISPONIBLE        INT             NOT NULL,
+    LIMITE_POR_PERSONA      INT             NOT NULL,
+    ACTIVO                  BIT             NOT NULL DEFAULT 1,
+
+    CONSTRAINT PK_CATALOGO_SEMANAL PRIMARY KEY (ID_CATALOGO_SEMANAL_PK),
+    CONSTRAINT FK_CATALOGO_SEMANAL_PRODUCTO FOREIGN KEY (ID_PRODUCTO_FK)
+        REFERENCES PRODUCTO_TB(ID_PRODUCTO_PK)
+);
+GO
+
+-- SP para que el admin agregue un producto al catalogo de la semana (RF-08)
+CREATE PROCEDURE SP_AgregarProductoCatalogoSemanal
+    @IdProducto         INT,
+    @FechaInicioSemana  DATE,
+    @StockDisponible    INT,
+    @LimitePorPersona   INT
+AS
+BEGIN
+
+    INSERT INTO CATALOGO_SEMANAL_TB (ID_PRODUCTO_FK, FECHA_INICIO_SEMANA, STOCK_DISPONIBLE, LIMITE_POR_PERSONA, ACTIVO)
+    VALUES (@IdProducto, @FechaInicioSemana, @StockDisponible, @LimitePorPersona, 1)
+
+END
+GO
+
+-- SP para editar la config semanal de un producto (stock, limite, si esta visible o no)
+CREATE PROCEDURE SP_ActualizarCatalogoSemanal
+    @IdCatalogoSemanal  INT,
+    @StockDisponible    INT,
+    @LimitePorPersona   INT,
+    @Activo             BIT
+AS
+BEGIN
+
+    UPDATE CATALOGO_SEMANAL_TB
+    SET STOCK_DISPONIBLE   = @StockDisponible,
+        LIMITE_POR_PERSONA = @LimitePorPersona,
+        ACTIVO             = @Activo
+    WHERE ID_CATALOGO_SEMANAL_PK = @IdCatalogoSemanal
+
+END
+GO
+
+-- SP para el admin: ver el catalogo completo de la semana (activos e inactivos, para poder gestionarlo)
+CREATE PROCEDURE SP_ConsultarCatalogoSemanalAdmin
+    @FechaInicioSemana  DATE
+AS
+BEGIN
+
+    SELECT
+        CS.ID_CATALOGO_SEMANAL_PK  AS IdCatalogoSemanal,
+        P.ID_PRODUCTO_PK           AS IdProducto,
+        P.NOMBRE                   AS Nombre,
+        C.DESCRIPCION              AS Categoria,
+        CS.STOCK_DISPONIBLE        AS StockDisponible,
+        CS.LIMITE_POR_PERSONA      AS LimitePorPersona,
+        CS.ACTIVO                  AS Activo
+    FROM CATALOGO_SEMANAL_TB CS
+    INNER JOIN PRODUCTO_TB P ON CS.ID_PRODUCTO_FK = P.ID_PRODUCTO_PK
+    INNER JOIN CATEGORIA_PRODUCTO_TB C ON P.ID_CATEGORIA_FK = C.ID_CATEGORIA_PK
+    WHERE CS.FECHA_INICIO_SEMANA = @FechaInicioSemana
+    ORDER BY C.DESCRIPCION, P.NOMBRE
+
+END
+GO
+
+-- SP para el cliente: solo lo que esta activo y visible del catalogo de la semana (RF-09, RF-10)
+-- @IdCategoria es opcional, si llega NULL trae todas las categorias
+CREATE PROCEDURE SP_ConsultarCatalogoSemanalCliente
+    @FechaInicioSemana  DATE,
+    @IdCategoria        INT = NULL
+AS
+BEGIN
+
+    SELECT
+        CS.ID_CATALOGO_SEMANAL_PK  AS IdCatalogoSemanal,
+        P.ID_PRODUCTO_PK           AS IdProducto,
+        P.NOMBRE                   AS Nombre,
+        P.DESCRIPCION              AS Descripcion,
+        P.IMAGEN                   AS Imagen,
+        P.PRECIO                   AS Precio,
+        P.PEDIDO_ANTICIPADO        AS PedidoAnticipado,
+        C.ID_CATEGORIA_PK          AS IdCategoria,
+        C.DESCRIPCION              AS Categoria,
+        CS.STOCK_DISPONIBLE        AS StockDisponible,
+        CS.LIMITE_POR_PERSONA      AS LimitePorPersona
+    FROM CATALOGO_SEMANAL_TB CS
+    INNER JOIN PRODUCTO_TB P ON CS.ID_PRODUCTO_FK = P.ID_PRODUCTO_PK
+    INNER JOIN CATEGORIA_PRODUCTO_TB C ON P.ID_CATEGORIA_FK = C.ID_CATEGORIA_PK
+    WHERE CS.FECHA_INICIO_SEMANA = @FechaInicioSemana
+        AND CS.ACTIVO = 1
+        AND CS.STOCK_DISPONIBLE > 0
+        AND (@IdCategoria IS NULL OR C.ID_CATEGORIA_PK = @IdCategoria)
+    ORDER BY C.DESCRIPCION, P.NOMBRE
+
+END
+GO
+
+-- SP para saber si un producto ya esta activo en el catalogo semanal vigente
+-- (lo voy a usar en el controller para bloquear editar/inactivar el producto, RF-05 y RF-06)
+CREATE PROCEDURE SP_ValidarProductoEnCatalogoSemanal
+    @IdProducto  INT
+AS
+BEGIN
+
+    SELECT COUNT(*) AS Cantidad
+    FROM CATALOGO_SEMANAL_TB
+    WHERE ID_PRODUCTO_FK = @IdProducto
+        AND ACTIVO = 1
+
+END
+GO
+
+-- SP para descontar el stock semanal cuando el cliente confirma un pedido (reemplaza el stock del producto)
+CREATE PROCEDURE SP_DescontarStockSemanal
+    @IdCatalogoSemanal  INT,
+    @Cantidad            INT
+AS
+BEGIN
+
+    UPDATE CATALOGO_SEMANAL_TB
+    SET STOCK_DISPONIBLE = STOCK_DISPONIBLE - @Cantidad
+    WHERE ID_CATALOGO_SEMANAL_PK = @IdCatalogoSemanal
+
+END
+GO
+
+EXEC SP_AgregarProductoCatalogoSemanal
+    @IdProducto = 1,
+    @FechaInicioSemana = '2026-07-27',
+    @StockDisponible = 10,
+    @LimitePorPersona = 3
+
+    ---
+    USE RFBakery;
+GO
+
+-- agrego los productos del 2 al 20 al catalogo semanal (el 1 ya lo tenias)
+-- uso un bucle para no escribir 19 EXEC a mano
+DECLARE @IdProducto INT = 2
+
+WHILE @IdProducto <= 20
+BEGIN
+
+    EXEC SP_AgregarProductoCatalogoSemanal
+        @IdProducto = @IdProducto,
+        @FechaInicioSemana = '2026-07-27',
+        @StockDisponible = 10,
+        @LimitePorPersona = 3
+
+    SET @IdProducto = @IdProducto + 1
+
+END
+GO
+
+--  deberian salir 20 filas
+SELECT * FROM CATALOGO_SEMANAL_TB
+GO
+
+USE RFBakery;
+GO
+
+-- SP para consultar el stock disponible de un item del catalogo semanal (no del producto maestro)
+CREATE PROCEDURE SP_ConsultarStockCatalogoSemanal
+    @IdCatalogoSemanal INT
+AS
+BEGIN
+
+    SELECT STOCK_DISPONIBLE AS Stock
+    FROM CATALOGO_SEMANAL_TB
+    WHERE ID_CATALOGO_SEMANAL_PK = @IdCatalogoSemanal
 
 END
 GO
