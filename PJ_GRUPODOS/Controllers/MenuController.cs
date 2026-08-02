@@ -23,8 +23,8 @@ namespace PJ_GRUPODOS.Controllers
                 ? responseCategorias.Content.ReadFromJsonAsync<List<CategoriaProductoModel>>().Result ?? new()
                 : new();
 
-            // 2. Por cada categoría, consulto sus productos
-            var productosPorCategoria = new Dictionary<int, List<ProductoModel>>();
+            // 2. Por cada categoría, consulto sus productos del catalogo semanal
+            var productosPorCategoria = new Dictionary<int, List<ProductoCatalogoModel>>();
 
             foreach (var categoria in categorias)
             {
@@ -32,7 +32,7 @@ namespace PJ_GRUPODOS.Controllers
                 var responseProductos = client.GetAsync(urlProductos).Result;
 
                 productosPorCategoria[categoria.IdCategoria] = responseProductos.IsSuccessStatusCode
-                    ? responseProductos.Content.ReadFromJsonAsync<List<ProductoModel>>().Result ?? new()
+                    ? responseProductos.Content.ReadFromJsonAsync<List<ProductoCatalogoModel>>().Result ?? new()
                     : new();
             }
 

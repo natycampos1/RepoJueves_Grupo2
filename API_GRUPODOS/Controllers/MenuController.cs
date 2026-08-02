@@ -37,11 +37,16 @@ namespace API_GRUPODOS.Controllers
         {
             using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
 
+            // calculo el lunes de esta semana, que es la fecha que usa el catalogo semanal
+            var fechaInicioSemana = ObtenerLunesDeEstaSemana();
+
             var parameters = new DynamicParameters();
+            parameters.Add("@FechaInicioSemana", fechaInicioSemana);
             parameters.Add("@IdCategoria", idCategoria);
 
-            var response = context.Query<ProductoModel>(
-                "SP_ConsultarProductosPorCategoria",
+            // ahora consulto el catalogo semanal, ya no el catalogo maestro directo
+            var response = context.Query<ProductoCatalogoModel>(
+                "SP_ConsultarCatalogoSemanalCliente",
                 parameters,
                 commandType: System.Data.CommandType.StoredProcedure
             ).ToList();
@@ -53,5 +58,13 @@ namespace API_GRUPODOS.Controllers
         }
 
         #endregion
+
+        // devuelve la fecha del lunes de la semana en la que estamos hoy
+        private static DateTime ObtenerLunesDeEstaSemana()
+        {
+            var hoy = DateTime.Today;
+            int diasDesdeElLunes = (7 + (hoy.DayOfWeek - DayOfWeek.Monday)) % 7;
+            return hoy.AddDays(-1 * diasDesdeElLunes);
+        }
     }
 }

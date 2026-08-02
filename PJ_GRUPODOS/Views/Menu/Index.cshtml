@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "_Layout";
     var categorias = ViewBag.Categorias as List<PJ_GRUPODOS.Models.CategoriaProductoModel>;
-    var productosPorCategoria = ViewBag.ProductosPorCategoria as Dictionary<int, List<PJ_GRUPODOS.Models.ProductoModel>>;
+    var productosPorCategoria = ViewBag.ProductosPorCategoria as Dictionary<int, List<PJ_GRUPODOS.Models.ProductoCatalogoModel>>;
     bool autenticado = Context.Session.GetInt32("Autenticado") == 1;
     var idRol = Context.Session.GetInt32("IdRol") ?? 0;
     bool esAdministrador = idRol == 1;
@@ -61,7 +61,7 @@
                         var categoria = categorias[i];
                         var productos = productosPorCategoria != null && productosPorCategoria.ContainsKey(categoria.IdCategoria)
                             ? productosPorCategoria[categoria.IdCategoria]
-                            : new List<PJ_GRUPODOS.Models.ProductoModel>();
+                            : new List<PJ_GRUPODOS.Models.ProductoCatalogoModel>();
 
                         <div id="tab-@categoria.IdCategoria" class="tab-pane fade show p-0 @(i == 0 ? "active" : "")">
                             <div class="row g-3">
@@ -69,7 +69,7 @@
                                 {
                                     @foreach (var producto in productos)
                                     {
-                                        bool sinStock = producto.Stock <= 0;
+                                        bool sinStock = producto.StockDisponible <= 0;
 
                                         <div class="col-lg-6">
                                             <div class="d-flex h-100">
@@ -81,22 +81,29 @@
                                                     <h5 class="text-uppercase">@producto.Nombre</h5>
                                                     <span>@producto.Descripcion</span>
 
+                                                    @if (producto.PedidoAnticipado)
+                                                    {
+                                                        <small class="text-info fw-bold mt-1">
+                                                            <i class="bi bi-clock-fill me-1"></i>Requiere pedido con anticipación
+                                                        </small>
+                                                    }
+
                                                     @if (sinStock)
                                                     {
                                                         <small class="text-danger fw-bold mt-1">
                                                             <i class="bi bi-x-circle-fill me-1"></i>Agotado
                                                         </small>
                                                     }
-                                                    else if (producto.Stock <= 5)
+                                                    else if (producto.StockDisponible <= 5)
                                                     {
                                                         <small class="text-warning fw-bold mt-1">
-                                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>¡Solo quedan @producto.Stock disponibles!
+                                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>¡Solo quedan @producto.StockDisponible disponibles!
                                                         </small>
                                                     }
                                                     else
                                                     {
                                                         <small class="text-success mt-1">
-                                                            <i class="bi bi-check-circle-fill me-1"></i>@producto.Stock disponibles
+                                                            <i class="bi bi-check-circle-fill me-1"></i>@producto.StockDisponible disponibles
                                                         </small>
                                                     }
 
