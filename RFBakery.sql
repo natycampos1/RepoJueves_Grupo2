@@ -1295,3 +1295,41 @@ WHERE ID_PRODUCTO_PK = 1
 UPDATE PRODUCTO_TB
 SET PEDIDO_ANTICIPADO = 1
 WHERE ID_PRODUCTO_PK = 2
+
+USE RFBakery;
+GO
+
+-- recorto el SP para que el cliente solo pueda cambiar nombre y telefono (RF-03)
+ALTER PROCEDURE SP_ActualizarPerfil
+    @Identificacion     VARCHAR(20),
+    @NombreCompleto     VARCHAR(100),
+    @NumTelefono        VARCHAR(20)
+AS
+BEGIN
+
+    UPDATE PERSONA_TB
+    SET NOMBRE_COMPLETO = @NombreCompleto
+    WHERE IDENTIFICACION_PK = @Identificacion;
+
+    UPDATE TELEFONO_TB
+    SET NUM_TELEFONO = @NumTelefono
+    WHERE IDENTIFICACION_FK = @Identificacion;
+
+END
+GO
+
+-- SP para saber si el usuario tiene algun pedido activo (Pendiente o En Preparacion)
+-- lo uso para bloquear la edicion de perfil mientras tenga un pedido en curso (RF-03)
+CREATE PROCEDURE SP_ValidarPedidoActivoUsuario
+    @Identificacion  VARCHAR(20)
+AS
+BEGIN
+
+    SELECT COUNT(*) AS Cantidad
+    FROM PEDIDO_TB PD
+    INNER JOIN USUARIO_TB U ON PD.ID_USUARIO_FK = U.ID_USUARIO_PK
+    WHERE U.IDENTIFICACION_FK = @Identificacion
+        AND PD.ID_ESTADO_PEDIDO_FK IN (1, 2)
+
+END
+GO

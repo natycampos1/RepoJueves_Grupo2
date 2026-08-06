@@ -139,13 +139,7 @@ namespace API_GRUPODOS.Controllers
             var parameters = new DynamicParameters();
             parameters.Add("@Identificacion", model.Identificacion);
             parameters.Add("@NombreCompleto", model.NombreCompleto);
-            parameters.Add("@PrimerApellido", model.PrimerApellido);
-            parameters.Add("@SegundoApellido", model.SegundoApellido);
-            parameters.Add("@Genero", model.Genero);
-            parameters.Add("@Direccion", model.Direccion);
-            parameters.Add("@Nacionalidad", model.Nacionalidad);
             parameters.Add("@NumTelefono", model.NumTelefono);
-            parameters.Add("@Email", model.Email);
 
             var response = context.Execute(
                 "SP_ActualizarPerfil",
@@ -157,6 +151,23 @@ namespace API_GRUPODOS.Controllers
                 return Ok("Perfil actualizado correctamente");
 
             return BadRequest("No se pudo actualizar el perfil");
+        }
+
+        [HttpGet("ValidarPedidoActivoAPI")]
+        public IActionResult ValidarPedidoActivoAPI(string identificacion)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Identificacion", identificacion);
+
+            var cantidad = context.QueryFirstOrDefault<int>(
+                "SP_ValidarPedidoActivoUsuario",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            return Ok(cantidad > 0);
         }
 
         [HttpPut("CambiarContrasenaPerfilAPI")]

@@ -1,6 +1,7 @@
 ﻿@{
     Layout = "_Layout";
     var info = ViewBag.InfoUsuario as UsuarioConsultaModel;
+    bool tienePedidoActivo = ViewBag.TienePedidoActivo ?? false;
 }
 
 <!-- Gestion Perfil Section Start -->
@@ -67,6 +68,14 @@
                             </div>
                         }
 
+                        @if (tienePedidoActivo)
+                        {
+                            <div class="alert alert-warning text-center mb-3">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                Tienes un pedido activo. No puedes editar tu perfil hasta que se complete o cancele.
+                            </div>
+                        }
+
                         <form id="PerfilForm" asp-action="ActualizarPerfil" asp-controller="Home" method="post" novalidate>
 
                             <div class="row g-3">
@@ -86,63 +95,58 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="label-auth">Nombre Completo</label>
+                                    <label class="label-auth">Nombre</label>
                                     <div class="input-wrapper">
-                                        <input type="text" name="NombreCompleto" class="form-control form-control-auth" value="@info?.NombreCompleto" />
+                                        <input type="text" name="NombreCompleto" class="form-control form-control-auth" value="@info?.NombreCompleto" disabled="@tienePedidoActivo" />
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="label-auth">Primer Apellido</label>
                                     <div class="input-wrapper">
-                                        <input type="text" name="PrimerApellido" class="form-control form-control-auth" value="@info?.PrimerApellido" />
+                                        <input type="text" class="form-control form-control-auth" value="@info?.PrimerApellido" disabled />
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="label-auth">Segundo Apellido</label>
                                     <div class="input-wrapper">
-                                        <input type="text" name="SegundoApellido" class="form-control form-control-auth" value="@info?.SegundoApellido" />
+                                        <input type="text" class="form-control form-control-auth" value="@info?.SegundoApellido" disabled />
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="label-auth">Género</label>
                                     <div class="input-wrapper">
-                                        <select name="Genero" class="form-control form-control-auth">
-                                            <option value="">-- Seleccione --</option>
-                                            <option value="Masculino" selected="@(info?.Genero == "Masculino")">Masculino</option>
-                                            <option value="Femenino" selected="@(info?.Genero == "Femenino")">Femenino</option>
-                                            <option value="Otro" selected="@(info?.Genero == "Otro")">Otro</option>
-                                        </select>
+                                        <input type="text" class="form-control form-control-auth" value="@info?.Genero" disabled />
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="label-auth">Dirección</label>
                                     <div class="input-wrapper">
-                                        <input type="text" name="Direccion" class="form-control form-control-auth" value="@info?.Direccion" />
+                                        <input type="text" class="form-control form-control-auth" value="@info?.Direccion" disabled />
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="label-auth">Nacionalidad</label>
                                     <div class="input-wrapper">
-                                        <input type="text" name="Nacionalidad" class="form-control form-control-auth" value="@info?.Nacionalidad" />
+                                        <input type="text" class="form-control form-control-auth" value="@info?.Nacionalidad" disabled />
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="label-auth">Teléfono</label>
                                     <div class="input-wrapper">
-                                        <input type="text" name="NumTelefono" class="form-control form-control-auth" value="@info?.NumTelefono" />
+                                        <input type="text" name="NumTelefono" class="form-control form-control-auth" value="@info?.NumTelefono" disabled="@tienePedidoActivo" />
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="label-auth">Correo Electrónico</label>
                                     <div class="input-wrapper">
-                                        <input type="email" name="Email" class="form-control form-control-auth" value="@info?.Email" />
+                                        <input type="email" class="form-control form-control-auth" value="@info?.Email" disabled />
                                     </div>
                                 </div>
 
@@ -154,7 +158,7 @@
                                 </div>
 
                                 <div class="col-12">
-                                    <button type="submit" class="btn btn-auth btn-auth-primary w-100 mt-2">
+                                    <button type="submit" class="btn btn-auth btn-auth-primary w-100 mt-2" disabled="@tienePedidoActivo">
                                         <i class="bi bi-check-circle me-2"></i>Guardar Cambios
                                     </button>
                                 </div>

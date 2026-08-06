@@ -16,7 +16,7 @@ namespace PJ_GRUPODOS.Controllers
         {
             return RedirectToAction("Principal", "Home");
         }
-        
+
 
         #endregion
 
@@ -256,6 +256,8 @@ namespace PJ_GRUPODOS.Controllers
                 ViewBag.InfoUsuario = new UsuarioConsultaModel();
             }
 
+            ViewBag.TienePedidoActivo = TienePedidoActivo(identificacion);
+
             return View();
         }
 
@@ -267,15 +269,28 @@ namespace PJ_GRUPODOS.Controllers
 
             using var client = _http.CreateClient();
 
+            // valido de nuevo en el servidor que no tenga pedido activo, no confio solo en el HTML deshabilitado del cliente
+            if (TienePedidoActivo(identificacion))
+            {
+                ViewBag.MensajePerfil = "No puedes editar tu perfil mientras tengas un pedido activo";
+                ViewBag.TienePedidoActivo = true;
+
+                var urlConsultaBloqueado = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
+                var responseConsultaBloqueado = client.GetAsync(urlConsultaBloqueado).Result;
+
+                ViewBag.InfoUsuario = responseConsultaBloqueado.IsSuccessStatusCode
+                    ? responseConsultaBloqueado.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
+                    : new UsuarioConsultaModel();
+
+                return View("GestionPerfil");
+            }
+
             var url = _config["Valores:UrlApi"] + "Home/ActualizarPerfilAPI";
             var response = client.PutAsJsonAsync(url, model).Result;
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 HttpContext.Session.SetString("Nombre", model.NombreCompleto);
-                HttpContext.Session.SetString("PrimerApellido", model.PrimerApellido);
-                HttpContext.Session.SetString("SegundoApellido", model.SegundoApellido ?? string.Empty);
-                HttpContext.Session.SetString("Email", model.Email);
 
                 ViewBag.MensajePerfil = "Perfil actualizado correctamente";
             }
@@ -290,6 +305,8 @@ namespace PJ_GRUPODOS.Controllers
             ViewBag.InfoUsuario = responseConsulta.IsSuccessStatusCode
                 ? responseConsulta.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
                 : new UsuarioConsultaModel();
+
+            ViewBag.TienePedidoActivo = TienePedidoActivo(identificacion);
 
             return View("GestionPerfil");
         }
@@ -327,6 +344,16 @@ namespace PJ_GRUPODOS.Controllers
             return View("GestionPerfil");
         }
 
+        // consulto si el usuario tiene un pedido en estado Pendiente o En Preparacion (RF-03)
+        private bool TienePedidoActivo(string identificacion)
+        {
+            using var client = _http.CreateClient();
+            var url = _config["Valores:UrlApi"] + $"Home/ValidarPedidoActivoAPI?identificacion={identificacion}";
+            var response = client.GetAsync(url).Result;
+
+            return response.IsSuccessStatusCode && response.Content.ReadFromJsonAsync<bool>().Result;
+        }
+
         #endregion
     }
-    }
+}
