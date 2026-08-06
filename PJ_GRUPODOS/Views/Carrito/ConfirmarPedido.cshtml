@@ -3,6 +3,8 @@
     var carrito = ViewBag.Carrito as List<PJ_GRUPODOS.Models.ItemCarritoModel>;
     var tiposEntrega = ViewBag.TiposEntrega as List<PJ_GRUPODOS.Models.TipoEntregaModel>;
     decimal total = ViewBag.Total;
+    bool esPedidoGrande = ViewBag.EsPedidoGrande;
+    bool tieneProductoAnticipado = ViewBag.TieneProductoAnticipado;
 }
 
 <div class="container py-5">
@@ -14,6 +16,21 @@
         <div class="alert alert-danger">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             @ViewBag.MensajeError
+        </div>
+    }
+
+    @if (esPedidoGrande)
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            @if (tieneProductoAnticipado)
+            {
+                <span>Tu pedido incluye productos que requieren preparación anticipada. La fecha de entrega debe ser al menos 48 horas después.</span>
+            }
+            else
+            {
+                <span>Por el volumen de tu pedido, la fecha de entrega requiere al menos 48 horas de anticipación.</span>
+            }
         </div>
     }
 
@@ -49,7 +66,7 @@
         <div class="col-lg-5">
             <div class="card p-4">
                 <h5 class="mb-3">Datos de Entrega</h5>
-                <form asp-action="ConfirmarPedido" asp-controller="Carrito" method="post" id="ConfirmarPedidoForm">
+                <form asp-action="ConfirmarPedido" asp-controller="Carrito" method="post" id="ConfirmarPedidoForm" data-pedido-grande="@esPedidoGrande.ToString().ToLower()">
 
                     <div class="mb-3">
                         <label class="form-label">Tipo de Entrega</label>
@@ -68,6 +85,17 @@
                     <div class="mb-3 d-none" id="direccionGroup">
                         <label class="form-label">Dirección de Entrega</label>
                         <textarea name="DireccionEntrega" id="direccionEntrega" class="form-control" rows="3" placeholder="Escribe tu dirección completa"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Fecha de Entrega</label>
+                        <input type="date" name="FechaEntrega" id="fechaEntrega" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Hora de Entrega</label>
+                        <input type="time" name="HoraEntrega" id="horaEntrega" class="form-control" required />
+                        <small class="text-muted" id="horaAyuda"></small>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">

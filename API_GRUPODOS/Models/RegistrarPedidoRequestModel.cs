@@ -18,6 +18,9 @@ namespace API_GRUPODOS.Models
         public string? DireccionEntrega { get; set; }
 
         [Required]
+        public DateTime FechaEntregaProgramada { get; set; }
+
+        [Required]
         [MinLength(1, ErrorMessage = "El carrito no puede estar vacío")]
         public List<ItemCarritoModel> Carrito { get; set; } = new();
     }

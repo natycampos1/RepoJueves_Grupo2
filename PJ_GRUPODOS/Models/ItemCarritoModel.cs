@@ -8,6 +8,9 @@
         public decimal Precio { get; set; }
         public int Cantidad { get; set; }
         public int LimitePorPersona { get; set; }
+        public int PuntosEsfuerzo { get; set; }
+
+        public bool PedidoAnticipado { get; set; }
         public string? Imagen { get; set; }
     }
 }

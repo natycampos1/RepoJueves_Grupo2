@@ -11,6 +11,9 @@ namespace PJ_GRUPODOS.Controllers
     {
         private const string ClaveSesionCarrito = "Carrito";
 
+        // un pedido con menos de 100 puntos es Pequeño, 100 o mas es Grande (RF-13)
+        private const int LimitePuntosPedidoGrande = 100;
+
         #region Utilidades internas del carrito
 
         private List<ItemCarritoModel> ObtenerCarrito()
@@ -29,6 +32,44 @@ namespace PJ_GRUPODOS.Controllers
             HttpContext.Session.SetString(ClaveSesionCarrito, json);
         }
 
+        // calculo los puntos totales y clasifico el pedido (RF-12/RF-13)
+        private (int puntosTotales, bool esPedidoGrande, bool tieneProductoAnticipado) ClasificarPedido(List<ItemCarritoModel> carrito)
+        {
+            int puntosTotales = carrito.Sum(i => i.PuntosEsfuerzo * i.Cantidad);
+            bool tieneProductoAnticipado = carrito.Any(i => i.PedidoAnticipado);
+            bool esPedidoGrande = puntosTotales >= LimitePuntosPedidoGrande || tieneProductoAnticipado;
+
+            return (puntosTotales, esPedidoGrande, tieneProductoAnticipado);
+        }
+
+        // valido la fecha y hora de entrega elegidas contra las reglas del calendario (RF-14)
+        private string? ValidarFechaEntrega(DateTime fecha, TimeSpan hora, bool esPedidoGrande)
+        {
+            var fechaHoraElegida = fecha.Date + hora;
+
+            if (fechaHoraElegida <= DateTime.Now)
+                return "La fecha y hora de entrega deben ser posteriores al momento actual";
+
+            if (esPedidoGrande)
+            {
+                if (fechaHoraElegida < DateTime.Now.AddHours(48))
+                    return "Los pedidos grandes o con productos anticipados requieren al menos 48 horas de anticipación";
+
+                if (fecha.DayOfWeek == DayOfWeek.Sunday)
+                    return "No se puede entregar los domingos";
+            }
+            else
+            {
+                if (fecha.DayOfWeek == DayOfWeek.Saturday || fecha.DayOfWeek == DayOfWeek.Sunday)
+                    return "Los pedidos pequeños solo se pueden entregar de lunes a viernes";
+
+                if (hora < new TimeSpan(8, 0, 0) || hora > new TimeSpan(17, 0, 0))
+                    return "El horario de entrega debe ser entre las 8:00 a.m. y las 5:00 p.m.";
+            }
+
+            return null;
+        }
+
         #endregion
 
         #region Ver Carrito
@@ -39,7 +80,6 @@ namespace PJ_GRUPODOS.Controllers
             var carrito = ObtenerCarrito();
             ViewBag.Total = carrito.Sum(i => i.Precio * i.Cantidad);
 
-            // ahora consulto el stock por IdCatalogoSemanal, no por IdProducto
             var stockDisponible = new Dictionary<int, int>();
 
             using var client = _http.CreateClient();
@@ -65,7 +105,7 @@ namespace PJ_GRUPODOS.Controllers
         #region Agregar al Carrito
 
         [HttpPost]
-        public IActionResult Agregar(int idProducto, int idCatalogoSemanal, string nombreProducto, decimal precio, string? imagen, int limitePorPersona)
+        public IActionResult Agregar(int idProducto, int idCatalogoSemanal, string nombreProducto, decimal precio, string? imagen, int limitePorPersona, int puntosEsfuerzo, bool pedidoAnticipado)
         {
             var autenticado = HttpContext.Session.GetInt32("Autenticado") == 1;
             if (!autenticado)
@@ -79,7 +119,6 @@ namespace PJ_GRUPODOS.Controllers
 
             if (itemExistente != null)
             {
-                // valido que no se pase del limite por persona antes de sumar
                 if (itemExistente.Cantidad + 1 > limitePorPersona)
                 {
                     TempData["MensajeCarrito"] = $"Solo puedes llevar un máximo de {limitePorPersona} unidades de '{nombreProducto}'";
@@ -98,6 +137,8 @@ namespace PJ_GRUPODOS.Controllers
                     Precio = precio,
                     Cantidad = 1,
                     LimitePorPersona = limitePorPersona,
+                    PuntosEsfuerzo = puntosEsfuerzo,
+                    PedidoAnticipado = pedidoAnticipado,
                     Imagen = imagen
                 });
             }
@@ -177,8 +218,13 @@ namespace PJ_GRUPODOS.Controllers
                 ? response.Content.ReadFromJsonAsync<List<TipoEntregaModel>>().Result ?? new()
                 : new List<TipoEntregaModel>();
 
+            var (puntosTotales, esPedidoGrande, tieneProductoAnticipado) = ClasificarPedido(carrito);
+
             ViewBag.Carrito = carrito;
             ViewBag.Total = carrito.Sum(i => i.Precio * i.Cantidad);
+            ViewBag.PuntosTotales = puntosTotales;
+            ViewBag.EsPedidoGrande = esPedidoGrande;
+            ViewBag.TieneProductoAnticipado = tieneProductoAnticipado;
 
             return View();
         }
@@ -191,6 +237,40 @@ namespace PJ_GRUPODOS.Controllers
             if (!carrito.Any())
                 return RedirectToAction("Index");
 
+            var (puntosTotales, esPedidoGrande, tieneProductoAnticipado) = ClasificarPedido(carrito);
+
+            string? errorFecha = null;
+
+            if (!TimeSpan.TryParse(model.HoraEntrega, out var horaEntrega))
+            {
+                errorFecha = "La hora de entrega no es válida";
+            }
+            else
+            {
+                errorFecha = ValidarFechaEntrega(model.FechaEntrega, horaEntrega, esPedidoGrande);
+            }
+
+            if (errorFecha != null)
+            {
+                using var clientRecarga = _http.CreateClient();
+                var urlTiposRecarga = _config["Valores:UrlApi"] + "Pedido/ConsultarTiposEntregaAPI";
+                var responseTiposRecarga = clientRecarga.GetAsync(urlTiposRecarga).Result;
+
+                ViewBag.TiposEntrega = responseTiposRecarga.IsSuccessStatusCode
+                    ? responseTiposRecarga.Content.ReadFromJsonAsync<List<TipoEntregaModel>>().Result ?? new()
+                    : new List<TipoEntregaModel>();
+
+                ViewBag.MensajeError = errorFecha;
+                ViewBag.Carrito = carrito;
+                ViewBag.Total = carrito.Sum(i => i.Precio * i.Cantidad);
+                ViewBag.EsPedidoGrande = esPedidoGrande;
+                ViewBag.TieneProductoAnticipado = tieneProductoAnticipado;
+
+                return View();
+            }
+
+            var fechaEntregaProgramada = model.FechaEntrega.Date + horaEntrega;
+
             int idUsuario = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
             string email = HttpContext.Session.GetString("Email") ?? string.Empty;
             string nombre = HttpContext.Session.GetString("Nombre") ?? string.Empty;
@@ -202,7 +282,7 @@ namespace PJ_GRUPODOS.Controllers
                 NombreCliente = nombre,
                 IdTipoEntrega = model.IdTipoEntrega,
                 DireccionEntrega = model.DireccionEntrega,
-                // mando el IdCatalogoSemanal de cada item, la API lo necesita para descontar el stock semanal
+                FechaEntregaProgramada = fechaEntregaProgramada,
                 Carrito = carrito.Select(i => new { i.IdProducto, i.IdCatalogoSemanal, i.Cantidad }).ToList()
             };
 
@@ -229,6 +309,8 @@ namespace PJ_GRUPODOS.Controllers
 
             ViewBag.Carrito = carrito;
             ViewBag.Total = carrito.Sum(i => i.Precio * i.Cantidad);
+            ViewBag.EsPedidoGrande = esPedidoGrande;
+            ViewBag.TieneProductoAnticipado = tieneProductoAnticipado;
 
             return View();
         }

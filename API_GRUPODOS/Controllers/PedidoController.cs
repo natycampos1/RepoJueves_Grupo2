@@ -87,6 +87,7 @@ namespace API_GRUPODOS.Controllers
                     parametrosPedido.Add("@IdTipoEntrega", model.IdTipoEntrega);
                     parametrosPedido.Add("@DireccionEntrega", model.DireccionEntrega);
                     parametrosPedido.Add("@Total", total);
+                    parametrosPedido.Add("@FechaEntregaProgramada", model.FechaEntregaProgramada);
 
                     var idPedido = context.QuerySingle<int>(
                         "SP_RegistrarPedido",

@@ -1226,3 +1226,72 @@ BEGIN
 
 END
 GO
+
+----06/08
+
+USE RFBakery;
+GO
+
+ALTER PROCEDURE SP_ConsultarCatalogoSemanalCliente
+    @FechaInicioSemana  DATE,
+    @IdCategoria        INT = NULL
+AS
+BEGIN
+
+    SELECT
+        CS.ID_CATALOGO_SEMANAL_PK  AS IdCatalogoSemanal,
+        P.ID_PRODUCTO_PK           AS IdProducto,
+        P.NOMBRE                   AS Nombre,
+        P.DESCRIPCION              AS Descripcion,
+        P.IMAGEN                   AS Imagen,
+        P.PRECIO                   AS Precio,
+        P.PEDIDO_ANTICIPADO        AS PedidoAnticipado,
+        P.PUNTOS_ESFUERZO          AS PuntosEsfuerzo,
+        C.ID_CATEGORIA_PK          AS IdCategoria,
+        C.DESCRIPCION              AS Categoria,
+        CS.STOCK_DISPONIBLE        AS StockDisponible,
+        CS.LIMITE_POR_PERSONA      AS LimitePorPersona
+    FROM CATALOGO_SEMANAL_TB CS
+    INNER JOIN PRODUCTO_TB P ON CS.ID_PRODUCTO_FK = P.ID_PRODUCTO_PK
+    INNER JOIN CATEGORIA_PRODUCTO_TB C ON P.ID_CATEGORIA_FK = C.ID_CATEGORIA_PK
+    WHERE CS.FECHA_INICIO_SEMANA = @FechaInicioSemana
+        AND CS.ACTIVO = 1
+        AND CS.STOCK_DISPONIBLE > 0
+        AND (@IdCategoria IS NULL OR C.ID_CATEGORIA_PK = @IdCategoria)
+    ORDER BY C.DESCRIPCION, P.NOMBRE
+
+END
+GO
+
+-- agrego la columna para guardar cuando el cliente quiere recoger/recibir el pedido
+ALTER TABLE PEDIDO_TB
+ADD FECHA_ENTREGA_PROGRAMADA DATETIME NULL;
+GO
+
+-- actualizo el SP para que reciba y guarde esa fecha
+ALTER PROCEDURE SP_RegistrarPedido
+    @IdUsuario                  INT,
+    @IdTipoEntrega               INT,
+    @DireccionEntrega            VARCHAR(250) = NULL,
+    @Total                       DECIMAL(10,2),
+    @FechaEntregaProgramada      DATETIME
+AS
+BEGIN
+
+    INSERT INTO PEDIDO_TB (ID_USUARIO_FK, FECHA_PEDIDO, ID_TIPO_ENTREGA_FK, DIRECCION_ENTREGA, ID_ESTADO_PEDIDO_FK, TOTAL, FECHA_ENTREGA_PROGRAMADA)
+    VALUES (@IdUsuario, GETDATE(), @IdTipoEntrega, @DireccionEntrega, 1, @Total, @FechaEntregaProgramada)
+
+    SELECT SCOPE_IDENTITY() AS IdPedido
+
+END
+GO
+--prueba
+-- le pongo 150 puntos a un producto para forzar que sea "pedido grande" al pedir 1 unidad
+UPDATE PRODUCTO_TB
+SET PUNTOS_ESFUERZO = 150
+WHERE ID_PRODUCTO_PK = 1
+
+-- le activo la bandera de anticipado a otro producto distinto, para probar ese caso por separado
+UPDATE PRODUCTO_TB
+SET PEDIDO_ANTICIPADO = 1
+WHERE ID_PRODUCTO_PK = 2

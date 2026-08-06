@@ -132,6 +132,7 @@
                                                             <input type="hidden" name="precio" value="@producto.Precio" />
                                                             <input type="hidden" name="imagen" value="@producto.Imagen" />
                                                             <input type="hidden" name="limitePorPersona" value="@producto.LimitePorPersona" />
+                                                             <input type="hidden" name="pedidoAnticipado" value="@producto.PedidoAnticipado" /> <input type="hidden" name="puntosEsfuerzo" value="@producto.PuntosEsfuerzo" />
                                                             <button type="submit" class="btn btn-sm btn-primary" @(sinStock ? "disabled" : "")>
                                                                 <i class="bi bi-cart-plus me-1"></i>Agregar al Carrito
                                                             </button>

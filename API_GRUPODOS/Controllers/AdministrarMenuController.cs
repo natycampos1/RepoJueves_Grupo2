@@ -176,6 +176,8 @@ namespace API_GRUPODOS.Controllers
             parameters.Add("@Precio", model.Precio);
             parameters.Add("@Imagen", model.Imagen);
             parameters.Add("@Stock", model.Stock);
+            parameters.Add("@PuntosEsfuerzo", model.PuntosEsfuerzo);
+            parameters.Add("@PedidoAnticipado", model.PedidoAnticipado);
 
             var response = context.Execute(
                 "SP_InsertarProducto",
@@ -205,6 +207,8 @@ namespace API_GRUPODOS.Controllers
             parameters.Add("@Precio", model.Precio);
             parameters.Add("@Imagen", model.Imagen);
             parameters.Add("@Stock", model.Stock);
+            parameters.Add("@PuntosEsfuerzo", model.PuntosEsfuerzo);
+            parameters.Add("@PedidoAnticipado", model.PedidoAnticipado);
 
             var response = context.Execute(
                 "SP_ActualizarProducto",

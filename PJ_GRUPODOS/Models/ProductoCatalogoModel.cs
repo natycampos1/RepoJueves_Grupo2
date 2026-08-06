@@ -1,4 +1,4 @@
-﻿// PJ_GRUPODOS/Models/ProductoCatalogoModel.cs
+﻿
 namespace PJ_GRUPODOS.Models
 {
     public class ProductoCatalogoModel
@@ -10,6 +10,8 @@ namespace PJ_GRUPODOS.Models
         public string? Imagen { get; set; }
         public decimal Precio { get; set; }
         public bool PedidoAnticipado { get; set; }
+
+        public int PuntosEsfuerzo { get; set; }
         public int IdCategoria { get; set; }
         public string Categoria { get; set; } = string.Empty;
         public int StockDisponible { get; set; }
