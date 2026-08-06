@@ -33,8 +33,8 @@
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        int stock = stockDisponible != null && stockDisponible.ContainsKey(item.IdProducto)
-                            ? stockDisponible[item.IdProducto]
+                        int stock = stockDisponible != null && stockDisponible.ContainsKey(item.IdCatalogoSemanal)
+                            ? stockDisponible[item.IdCatalogoSemanal]
                             : 0;
                         bool superaStock = item.Cantidad > stock;
 

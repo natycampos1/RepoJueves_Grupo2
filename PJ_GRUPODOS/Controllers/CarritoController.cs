@@ -39,18 +39,19 @@ namespace PJ_GRUPODOS.Controllers
             var carrito = ObtenerCarrito();
             ViewBag.Total = carrito.Sum(i => i.Precio * i.Cantidad);
 
+            // ahora consulto el stock por IdCatalogoSemanal, no por IdProducto
             var stockDisponible = new Dictionary<int, int>();
 
             using var client = _http.CreateClient();
             foreach (var item in carrito)
             {
-                var url = _config["Valores:UrlApi"] + $"Pedido/ConsultarStockProductoAPI?idProducto={item.IdProducto}";
+                var url = _config["Valores:UrlApi"] + $"Pedido/ConsultarStockCatalogoSemanalAPI?idCatalogoSemanal={item.IdCatalogoSemanal}";
                 var response = client.GetAsync(url).Result;
 
                 if (response.IsSuccessStatusCode)
                 {
                     var stock = response.Content.ReadFromJsonAsync<ProductoStockModel>().Result;
-                    stockDisponible[item.IdProducto] = stock?.Stock ?? 0;
+                    stockDisponible[item.IdCatalogoSemanal] = stock?.Stock ?? 0;
                 }
             }
 
@@ -120,9 +121,17 @@ namespace PJ_GRUPODOS.Controllers
             if (item != null)
             {
                 if (cantidad <= 0)
+                {
                     carrito.Remove(item);
+                }
+                else if (cantidad > item.LimitePorPersona)
+                {
+                    TempData["MensajeCarrito"] = $"Solo puedes llevar un máximo de {item.LimitePorPersona} unidades de '{item.NombreProducto}'";
+                }
                 else
+                {
                     item.Cantidad = cantidad;
+                }
             }
 
             GuardarCarrito(carrito);
@@ -193,7 +202,8 @@ namespace PJ_GRUPODOS.Controllers
                 NombreCliente = nombre,
                 IdTipoEntrega = model.IdTipoEntrega,
                 DireccionEntrega = model.DireccionEntrega,
-                Carrito = carrito.Select(i => new { i.IdProducto, i.Cantidad }).ToList()
+                // mando el IdCatalogoSemanal de cada item, la API lo necesita para descontar el stock semanal
+                Carrito = carrito.Select(i => new { i.IdProducto, i.IdCatalogoSemanal, i.Cantidad }).ToList()
             };
 
             using var client = _http.CreateClient();
