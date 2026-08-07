@@ -24,6 +24,33 @@ namespace PJ_GRUPODOS.Controllers
             return hoy.AddDays(-1 * diasDesdeElLunes);
         }
 
+        // guarda la imagen del producto en wwwroot/images y devuelve el nombre generado
+        // si no llega archivo devuelve null (para no obligar a subir imagen siempre)
+        private static string? GuardarImagenProducto(IFormFile? imagen)
+        {
+            if (imagen == null || imagen.Length == 0)
+                return null;
+
+            var extension = Path.GetExtension(imagen.FileName).ToLower();
+            var extensionesPermitidas = new[] { ".png", ".jpg", ".jpeg" };
+
+            if (!extensionesPermitidas.Contains(extension))
+                throw new InvalidOperationException("Solo se permiten imágenes .png, .jpg o .jpeg");
+
+            if (imagen.Length > 2 * 1024 * 1024)
+                throw new InvalidOperationException("La imagen no puede superar 2 MB");
+
+            var nombreArchivo = $"producto_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
+            var carpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+            Directory.CreateDirectory(carpeta);
+            var ruta = Path.Combine(carpeta, nombreArchivo);
+
+            using var stream = new FileStream(ruta, FileMode.Create);
+            imagen.CopyTo(stream);
+
+            return nombreArchivo;
+        }
+
         #region Categorías
 
         [HttpGet]
@@ -180,10 +207,21 @@ namespace PJ_GRUPODOS.Controllers
         }
 
         [HttpPost]
-        public IActionResult InsertarProducto(ProductoRequestModel model)
+        public IActionResult InsertarProducto(ProductoRequestModel model, IFormFile? ImagenArchivo)
         {
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
+
+            try
+            {
+                model.Imagen = GuardarImagenProducto(ImagenArchivo);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["MensajeProducto"] = ex.Message;
+                TempData["TipoMensajeProducto"] = "danger";
+                return RedirectToAction("ProductosIndex");
+            }
 
             using var client = _http.CreateClient();
             var url = _config["Valores:UrlApi"] + "AdministrarMenu/InsertarProductoAPI";
@@ -231,10 +269,23 @@ namespace PJ_GRUPODOS.Controllers
         }
 
         [HttpPost]
-        public IActionResult EditarProducto(int idProducto, ProductoRequestModel model)
+        public IActionResult EditarProducto(int idProducto, ProductoRequestModel model, IFormFile? ImagenArchivo, string? ImagenActual)
         {
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
+
+            try
+            {
+                // si no sube imagen nueva, conservo la que ya tenia
+                var nombreImagen = GuardarImagenProducto(ImagenArchivo);
+                model.Imagen = nombreImagen ?? ImagenActual;
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["MensajeProducto"] = ex.Message;
+                TempData["TipoMensajeProducto"] = "danger";
+                return RedirectToAction("EditarProducto", new { idProducto });
+            }
 
             using var client = _http.CreateClient();
             var url = _config["Valores:UrlApi"] + $"AdministrarMenu/ActualizarProductoAPI?idProducto={idProducto}";
@@ -358,14 +409,12 @@ namespace PJ_GRUPODOS.Controllers
 
             using var client = _http.CreateClient();
 
-            // traigo los productos del catalogo maestro, para poder elegir cual agregar a la semana
             var urlProductos = _config["Valores:UrlApi"] + "AdministrarMenu/ConsultarTodosLosProductosAPI";
             var responseProductos = client.GetAsync(urlProductos).Result;
             ViewBag.Productos = responseProductos.IsSuccessStatusCode
                 ? responseProductos.Content.ReadFromJsonAsync<List<ProductoAdminModel>>().Result ?? new()
                 : new List<ProductoAdminModel>();
 
-            // traigo lo que ya esta configurado para la semana actual
             var fechaInicioSemana = ObtenerLunesDeEstaSemana();
             var urlCatalogo = _config["Valores:UrlApi"] + $"AdministrarMenu/ConsultarCatalogoSemanalAdminAPI?fechaInicioSemana={fechaInicioSemana:yyyy-MM-dd}";
             var responseCatalogo = client.GetAsync(urlCatalogo).Result;

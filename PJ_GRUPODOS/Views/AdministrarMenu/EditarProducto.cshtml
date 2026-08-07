@@ -17,7 +17,9 @@
     <div class="row justify-content-center">
         <div class="col-lg-6">
             <div class="card p-4">
-                <form asp-action="EditarProducto" asp-controller="AdministrarMenu" asp-route-idProducto="@idProducto" method="post">
+                <form id="EditarProductoForm" asp-action="EditarProducto" asp-controller="AdministrarMenu" asp-route-idProducto="@idProducto" method="post" enctype="multipart/form-data">
+
+                    <input type="hidden" name="ImagenActual" value="@Model.Imagen" />
 
                     <div class="mb-3">
                         <label class="form-label">Categoría</label>
@@ -48,8 +50,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Imagen <span class="text-muted" style="font-size:12px;">(nombre del archivo en /images)</span></label>
-                        <input type="text" name="Imagen" class="form-control" value="@Model.Imagen" />
+                        @if (!string.IsNullOrEmpty(Model.Imagen))
+                        {
+                            <label class="form-label d-block">Imagen actual</label>
+                            <img src="~/images/@Model.Imagen" alt="@Model.Nombre" style="width:100px;height:100px;object-fit:cover;" class="mb-2 rounded border" />
+                        }
+                        <label class="form-label d-block">Cambiar Imagen <span class="text-muted" style="font-size:12px;">(.png, .jpg o .jpeg, máx. 2MB, opcional)</span></label>
+                        <input type="file" name="ImagenArchivo" id="ImagenArchivo" accept=".png,.jpg,.jpeg" class="form-control" />
                     </div>
 
                     <div class="mb-3">
@@ -75,3 +82,5 @@
         </div>
     </div>
 </div>
+
+<script src="~/js/crearEditarProducto.js" asp-append-version="true"></script>
