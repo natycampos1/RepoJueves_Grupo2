@@ -1,6 +1,7 @@
 ﻿using API_GRUPODOS.Models;
 using API_GRUPODOS.Services;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Transactions;
@@ -8,6 +9,7 @@ using System.Transactions;
 
 namespace API_GRUPODOS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PedidoController(IConfiguration _config, IUtilesService _utiles) : ControllerBase

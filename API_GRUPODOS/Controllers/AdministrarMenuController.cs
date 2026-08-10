@@ -1,10 +1,12 @@
 ﻿using API_GRUPODOS.Models;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
 namespace API_GRUPODOS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AdministrarMenuController(IConfiguration _config) : ControllerBase
@@ -349,6 +351,4 @@ namespace API_GRUPODOS.Controllers
 
         #endregion
     }
-
-
 }

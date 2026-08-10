@@ -1,18 +1,21 @@
 ﻿using API_GRUPODOS.Models;
 using API_GRUPODOS.Services;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
 namespace API_GRUPODOS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HomeController(IConfiguration _config, IUtilesService _utiles) : ControllerBase
     {
 
         #region Registro
+        [AllowAnonymous]
         [HttpGet("ConsultarTiposDeIdentificacionAPI")]
         public IActionResult ConsultarTiposDeIdentificacionAPI()
         {
@@ -28,6 +31,7 @@ namespace API_GRUPODOS.Controllers
             return BadRequest("No se ha registrado su información correctamente, valide el que ya tenga esa identificacion registrada");
         }
 
+        [AllowAnonymous]
         [HttpPost("RegistrarUsuarioAPI")]
         public IActionResult RegistrarUsuarioAPI(RegistroUsuarioRequestModel model)
         {
@@ -67,6 +71,7 @@ namespace API_GRUPODOS.Controllers
 
         #region Inicio de sesión
 
+        [AllowAnonymous]
         [HttpPost("IniciarSesionAPI")]
         public IActionResult IniciarSesionAPI(InicioSesionUsuarioRequestModel model)
         {
@@ -101,6 +106,7 @@ namespace API_GRUPODOS.Controllers
             infoUsuario.NumTelefono = usuario.NumTelefono;
             infoUsuario.Email = usuario.Email;
             infoUsuario.IdRol = usuario.IdRol;
+            infoUsuario.Token = _utiles.GenerarToken(usuario.IdUsuario, usuario.IdRol, usuario.NombreCompleto);
 
             return Ok(infoUsuario);
         }
@@ -200,6 +206,7 @@ namespace API_GRUPODOS.Controllers
 
         #region Recuperar Acceso
 
+        [AllowAnonymous]
         [HttpPost("RecuperarAccesoAPI")]
         public async Task<IActionResult> RecuperarAccesoAPI(RecuperarAccesoRequestModel model)
         {

@@ -1,6 +1,7 @@
 using PJ_GRUPODOS.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Net.Http.Headers;
 
 
 namespace PJ_GRUPODOS.Controllers
@@ -50,6 +51,7 @@ namespace PJ_GRUPODOS.Controllers
                 HttpContext.Session.SetString("SegundoApellido", usuario!.SegundoApellido ?? string.Empty);
                 HttpContext.Session.SetString("Email", usuario!.Email);
                 HttpContext.Session.SetInt32("IdRol", usuario!.IdRol);
+                HttpContext.Session.SetString("Token", usuario!.Token);
                 if (usuario!.IdRol == 1)
                 {
                     return RedirectToAction("Index", "AdministrarMenu");
@@ -218,8 +220,13 @@ namespace PJ_GRUPODOS.Controllers
         public IActionResult DetallePedido(int idPedido)
         {
             using var client = _http.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+
             var url = _config["Valores:UrlApi"] + $"Pedido/ConsultarDetallePedidoAPI?idPedido={idPedido}";
             var response = client.GetAsync(url).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             var detalle = response.IsSuccessStatusCode
                 ? response.Content.ReadFromJsonAsync<List<DetallePedidoModel>>().Result ?? new()
@@ -239,10 +246,14 @@ namespace PJ_GRUPODOS.Controllers
             string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
 
             using var client = _http.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
 
             var url = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
 
             var response = client.GetAsync(url).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.IsSuccessStatusCode)
             {
@@ -268,6 +279,7 @@ namespace PJ_GRUPODOS.Controllers
             model.Identificacion = identificacion;
 
             using var client = _http.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
 
             // valido de nuevo en el servidor que no tenga pedido activo, no confio solo en el HTML deshabilitado del cliente
             if (TienePedidoActivo(identificacion))
@@ -287,6 +299,9 @@ namespace PJ_GRUPODOS.Controllers
 
             var url = _config["Valores:UrlApi"] + "Home/ActualizarPerfilAPI";
             var response = client.PutAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -317,6 +332,9 @@ namespace PJ_GRUPODOS.Controllers
             string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
             model.Identificacion = identificacion;
 
+            using var clientConsulta = _http.CreateClient();
+            clientConsulta.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+
             if (!ModelState.IsValid)
             {
                 ViewBag.MensajeSeguridad = "Las contraseñas no coinciden o no cumplen los requisitos";
@@ -324,16 +342,19 @@ namespace PJ_GRUPODOS.Controllers
             else
             {
                 using var client = _http.CreateClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
 
                 var url = _config["Valores:UrlApi"] + "Home/CambiarContrasenaPerfilAPI";
                 var response = client.PutAsJsonAsync(url, model).Result;
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    return RedirectToAction("CerrarSesion", "Home");
 
                 ViewBag.MensajeSeguridad = response.StatusCode == HttpStatusCode.OK
                     ? "Contraseña actualizada correctamente"
                     : response.Content.ReadAsStringAsync().Result;
             }
 
-            using var clientConsulta = _http.CreateClient();
             var urlConsulta = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
             var responseConsulta = clientConsulta.GetAsync(urlConsulta).Result;
 
@@ -348,6 +369,8 @@ namespace PJ_GRUPODOS.Controllers
         private bool TienePedidoActivo(string identificacion)
         {
             using var client = _http.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+
             var url = _config["Valores:UrlApi"] + $"Home/ValidarPedidoActivoAPI?identificacion={identificacion}";
             var response = client.GetAsync(url).Result;
 

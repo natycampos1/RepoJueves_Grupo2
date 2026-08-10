@@ -1,6 +1,7 @@
 ﻿using PJ_GRUPODOS.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace PJ_GRUPODOS.Controllers
@@ -30,6 +31,14 @@ namespace PJ_GRUPODOS.Controllers
         {
             var json = JsonSerializer.Serialize(carrito);
             HttpContext.Session.SetString(ClaveSesionCarrito, json);
+        }
+
+        // armo un HttpClient con el token de sesion ya puesto, para no repetir esto en cada metodo
+        private HttpClient CrearClienteAutenticado()
+        {
+            var client = _http.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+            return client;
         }
 
         // calculo los puntos totales y clasifico el pedido (RF-12/RF-13)
@@ -82,11 +91,14 @@ namespace PJ_GRUPODOS.Controllers
 
             var stockDisponible = new Dictionary<int, int>();
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             foreach (var item in carrito)
             {
                 var url = _config["Valores:UrlApi"] + $"Pedido/ConsultarStockCatalogoSemanalAPI?idCatalogoSemanal={item.IdCatalogoSemanal}";
                 var response = client.GetAsync(url).Result;
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    return RedirectToAction("CerrarSesion", "Home");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -210,9 +222,12 @@ namespace PJ_GRUPODOS.Controllers
             if (!carrito.Any())
                 return RedirectToAction("Index");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + "Pedido/ConsultarTiposEntregaAPI";
             var response = client.GetAsync(url).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             ViewBag.TiposEntrega = response.IsSuccessStatusCode
                 ? response.Content.ReadFromJsonAsync<List<TipoEntregaModel>>().Result ?? new()
@@ -252,9 +267,12 @@ namespace PJ_GRUPODOS.Controllers
 
             if (errorFecha != null)
             {
-                using var clientRecarga = _http.CreateClient();
+                using var clientRecarga = CrearClienteAutenticado();
                 var urlTiposRecarga = _config["Valores:UrlApi"] + "Pedido/ConsultarTiposEntregaAPI";
                 var responseTiposRecarga = clientRecarga.GetAsync(urlTiposRecarga).Result;
+
+                if (responseTiposRecarga.StatusCode == HttpStatusCode.Unauthorized)
+                    return RedirectToAction("CerrarSesion", "Home");
 
                 ViewBag.TiposEntrega = responseTiposRecarga.IsSuccessStatusCode
                     ? responseTiposRecarga.Content.ReadFromJsonAsync<List<TipoEntregaModel>>().Result ?? new()
@@ -286,9 +304,12 @@ namespace PJ_GRUPODOS.Controllers
                 Carrito = carrito.Select(i => new { i.IdProducto, i.IdCatalogoSemanal, i.Cantidad }).ToList()
             };
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + "Pedido/RegistrarPedidoAPI";
             var response = client.PostAsJsonAsync(url, pedidoRequest).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -299,7 +320,7 @@ namespace PJ_GRUPODOS.Controllers
 
             ViewBag.MensajeError = response.Content.ReadAsStringAsync().Result;
 
-            using var clientTipos = _http.CreateClient();
+            using var clientTipos = CrearClienteAutenticado();
             var urlTipos = _config["Valores:UrlApi"] + "Pedido/ConsultarTiposEntregaAPI";
             var responseTipos = clientTipos.GetAsync(urlTipos).Result;
 
@@ -324,9 +345,12 @@ namespace PJ_GRUPODOS.Controllers
         {
             int idUsuario = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + $"Pedido/ConsultarPedidosPorUsuarioAPI?idUsuario={idUsuario}";
             var response = client.GetAsync(url).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             var pedidos = response.IsSuccessStatusCode
                 ? response.Content.ReadFromJsonAsync<List<PedidoModel>>().Result ?? new()
@@ -338,9 +362,12 @@ namespace PJ_GRUPODOS.Controllers
         [HttpGet]
         public IActionResult DetallePedido(int idPedido)
         {
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + $"Pedido/ConsultarDetallePedidoAPI?idPedido={idPedido}";
             var response = client.GetAsync(url).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             var detalle = response.IsSuccessStatusCode
                 ? response.Content.ReadFromJsonAsync<List<DetallePedidoModel>>().Result ?? new()

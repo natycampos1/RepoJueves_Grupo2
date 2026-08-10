@@ -1,6 +1,7 @@
 using PJ_GRUPODOS.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Net.Http.Headers;
 
 namespace PJ_GRUPODOS.Controllers
 {
@@ -22,6 +23,14 @@ namespace PJ_GRUPODOS.Controllers
             var hoy = DateTime.Today;
             int diasDesdeElLunes = (7 + (hoy.DayOfWeek - DayOfWeek.Monday)) % 7;
             return hoy.AddDays(-1 * diasDesdeElLunes);
+        }
+
+        // armo un HttpClient con el token de sesion ya puesto, para no repetir esto en cada metodo
+        private HttpClient CrearClienteAutenticado()
+        {
+            var client = _http.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+            return client;
         }
 
         // guarda la imagen del producto en wwwroot/images y devuelve el nombre generado
@@ -59,10 +68,13 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
 
             var url = _config["Valores:UrlApi"] + "AdministrarMenu/ConsultarCategoriasAPI";
             var response = client.GetAsync(url).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             ViewBag.Categorias = response.IsSuccessStatusCode
                 ? response.Content.ReadFromJsonAsync<List<CategoriaProductoModel>>().Result ?? new()
@@ -84,9 +96,12 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + "AdministrarMenu/InsertarCategoriaAPI";
             var response = client.PostAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -108,9 +123,12 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + $"AdministrarMenu/ActualizarCategoriaAPI?idCategoria={idCategoria}";
             var response = client.PutAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -132,9 +150,12 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + $"AdministrarMenu/DesactivarCategoriaAPI?idCategoria={idCategoria}";
             var response = client.DeleteAsync(url).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -155,9 +176,12 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + $"AdministrarMenu/ReactivarCategoriaAPI?idCategoria={idCategoria}";
             var response = client.PutAsync(url, null).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -183,10 +207,14 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
 
             var urlCategorias = _config["Valores:UrlApi"] + "AdministrarMenu/ConsultarCategoriasAPI";
             var responseCategorias = client.GetAsync(urlCategorias).Result;
+
+            if (responseCategorias.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
+
             ViewBag.Categorias = responseCategorias.IsSuccessStatusCode
                 ? responseCategorias.Content.ReadFromJsonAsync<List<CategoriaProductoModel>>().Result ?? new()
                 : new List<CategoriaProductoModel>();
@@ -223,9 +251,12 @@ namespace PJ_GRUPODOS.Controllers
                 return RedirectToAction("ProductosIndex");
             }
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + "AdministrarMenu/InsertarProductoAPI";
             var response = client.PostAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -247,10 +278,14 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
 
             var urlCategorias = _config["Valores:UrlApi"] + "AdministrarMenu/ConsultarCategoriasAPI";
             var responseCategorias = client.GetAsync(urlCategorias).Result;
+
+            if (responseCategorias.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
+
             ViewBag.Categorias = responseCategorias.IsSuccessStatusCode
                 ? responseCategorias.Content.ReadFromJsonAsync<List<CategoriaProductoModel>>().Result ?? new()
                 : new List<CategoriaProductoModel>();
@@ -287,9 +322,12 @@ namespace PJ_GRUPODOS.Controllers
                 return RedirectToAction("EditarProducto", new { idProducto });
             }
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + $"AdministrarMenu/ActualizarProductoAPI?idProducto={idProducto}";
             var response = client.PutAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -311,9 +349,12 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + $"AdministrarMenu/DesactivarProductoAPI?idProducto={idProducto}";
             var response = client.DeleteAsync(url).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -335,9 +376,12 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + $"AdministrarMenu/ReactivarProductoAPI?idProducto={idProducto}";
             var response = client.PutAsync(url, null).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -362,9 +406,12 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + "Pedido/ConsultarTodosLosPedidosAPI";
             var response = client.GetAsync(url).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             var pedidos = response.IsSuccessStatusCode
                 ? response.Content.ReadFromJsonAsync<List<PedidoAdminModel>>().Result ?? new()
@@ -379,11 +426,14 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + $"Pedido/ActualizarEstadoPedidoAPI?idPedido={idPedido}&idEstadoPedido={idEstadoPedido}";
             var response = client.PutAsync(url, null).Result;
 
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
+
+            if (response.StatusCode == HttpStatusCode.OK)
             {
                 TempData["MensajePedidos"] = "Estado del pedido actualizado correctamente";
                 TempData["TipoMensajePedidos"] = "success";
@@ -407,10 +457,14 @@ namespace PJ_GRUPODOS.Controllers
             if (!EsAdministrador())
                 return RedirectToAction("Principal", "Home");
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
 
             var urlProductos = _config["Valores:UrlApi"] + "AdministrarMenu/ConsultarTodosLosProductosAPI";
             var responseProductos = client.GetAsync(urlProductos).Result;
+
+            if (responseProductos.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
+
             ViewBag.Productos = responseProductos.IsSuccessStatusCode
                 ? responseProductos.Content.ReadFromJsonAsync<List<ProductoAdminModel>>().Result ?? new()
                 : new List<ProductoAdminModel>();
@@ -442,9 +496,12 @@ namespace PJ_GRUPODOS.Controllers
                 LimitePorPersona = limitePorPersona
             };
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + "AdministrarMenu/AgregarProductoCatalogoSemanalAPI";
             var response = client.PostAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -473,9 +530,12 @@ namespace PJ_GRUPODOS.Controllers
                 Activo = activo
             };
 
-            using var client = _http.CreateClient();
+            using var client = CrearClienteAutenticado();
             var url = _config["Valores:UrlApi"] + $"AdministrarMenu/ActualizarCatalogoSemanalAPI?idCatalogoSemanal={idCatalogoSemanal}";
             var response = client.PutAsJsonAsync(url, model).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {

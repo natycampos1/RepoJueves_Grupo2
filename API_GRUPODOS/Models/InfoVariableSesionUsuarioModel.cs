@@ -28,5 +28,7 @@ namespace API_GRUPODOS.Models
         public string Email { get; set; } = string.Empty;
 
         public int IdRol { get; set; }
+
+        public string Token { get; set; } = string.Empty;
     }
 }
