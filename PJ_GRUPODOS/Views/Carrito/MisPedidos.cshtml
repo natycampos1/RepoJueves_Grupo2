@@ -1,6 +1,17 @@
 ﻿@model List<PJ_GRUPODOS.Models.PedidoModel>
 @{
     Layout = "_Layout";
+
+    // asigno una clase de color de Bootstrap segun el texto del estado
+    string ClaseEstado(string estado) => estado switch
+    {
+        "Pendiente" => "bg-warning text-dark",
+        "En Preparación" => "bg-primary",
+        "Listo" => "bg-info text-dark",
+        "Entregado" => "bg-success",
+        "Cancelado" => "bg-danger",
+        _ => "bg-secondary"
+    };
 }
 
 <div class="container py-5">
@@ -37,7 +48,7 @@
                             <td>@pedido.FechaPedido.ToString("dd/MM/yyyy HH:mm")</td>
                             <td>@pedido.TipoEntrega</td>
                             <td>
-                                <span class="badge bg-secondary">@pedido.EstadoPedido</span>
+                                <span class="badge @ClaseEstado(pedido.EstadoPedido)">@pedido.EstadoPedido</span>
                             </td>
                             <td>₡@pedido.Total.ToString("N0")</td>
                             <td class="text-center">
