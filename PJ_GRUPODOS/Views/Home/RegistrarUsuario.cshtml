@@ -153,9 +153,13 @@
                                             <div class="input-wrapper">
                                                 <select asp-for="Genero" class="form-control form-control-auth">
                                                     <option value="">-- Seleccione --</option>
-                                                    <option value="Masculino">Masculino</option>
-                                                    <option value="Femenino">Femenino</option>
-                                                    <option value="Otro">Otro</option>
+                                                    @if (ViewBag.Generos != null)
+                                                    {
+                                                        @foreach (var genero in (List<GeneroModel>)ViewBag.Generos)
+                                                        {
+                                                            <option value="@genero.Descripcion">@genero.Descripcion</option>
+                                                        }
+                                                    }
                                                 </select>
                                             </div>
                                             <span asp-validation-for="Genero" class="text-danger" style="font-size:12px;"></span>

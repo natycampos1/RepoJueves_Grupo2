@@ -32,6 +32,20 @@ namespace API_GRUPODOS.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("ConsultarGenerosAPI")]
+        public IActionResult ConsultarGenerosAPI()
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var response = context.Query<GeneroModel>(
+                "SP_ConsultarGeneros",
+                commandType: System.Data.CommandType.StoredProcedure
+            ).ToList();
+
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
         [HttpPost("RegistrarUsuarioAPI")]
         public IActionResult RegistrarUsuarioAPI(RegistroUsuarioRequestModel model)
         {

@@ -1333,3 +1333,151 @@ BEGIN
 
 END
 GO
+---11/08
+USE RFBakery;
+GO
+
+-- tabla catalogo de generos, para que el dropdown ya no este quemado
+CREATE TABLE GENERO_TB (
+    ID_GENERO_PK    INT             NOT NULL IDENTITY(1,1),
+    DESCRIPCION     VARCHAR(30)     NOT NULL,
+
+    CONSTRAINT PK_GENERO PRIMARY KEY (ID_GENERO_PK),
+    CONSTRAINT UQ_GENERO_DESCRIPCION UNIQUE (DESCRIPCION)
+);
+GO
+
+INSERT INTO GENERO_TB (DESCRIPCION) VALUES ('Masculino');
+INSERT INTO GENERO_TB (DESCRIPCION) VALUES ('Femenino');
+INSERT INTO GENERO_TB (DESCRIPCION) VALUES ('Otro');
+GO
+
+-- SP para consultar los generos disponibles y llenar el dropdown
+CREATE PROCEDURE SP_ConsultarGeneros
+AS
+BEGIN
+
+    SELECT
+        ID_GENERO_PK    AS IdGenero,
+        DESCRIPCION     AS Descripcion
+    FROM GENERO_TB
+    ORDER BY ID_GENERO_PK
+
+END
+GO
+-----procediientos para el chat
+USE RFBakery;
+GO
+
+-- tabla de mensajes del chat, uno por pedido
+CREATE TABLE MENSAJE_TB (
+    ID_MENSAJE_PK       INT             NOT NULL IDENTITY(1,1),
+    MENSAJE             VARCHAR(MAX)    NOT NULL,
+    FECHA_HORA          DATETIME        NOT NULL,
+    ID_USUARIO_FK       INT             NOT NULL,
+    ID_PEDIDO_FK        INT             NOT NULL,
+
+    CONSTRAINT PK_MENSAJE PRIMARY KEY (ID_MENSAJE_PK),
+    CONSTRAINT FK_MENSAJE_USUARIO FOREIGN KEY (ID_USUARIO_FK)
+        REFERENCES USUARIO_TB(ID_USUARIO_PK),
+    CONSTRAINT FK_MENSAJE_PEDIDO FOREIGN KEY (ID_PEDIDO_FK)
+        REFERENCES PEDIDO_TB(ID_PEDIDO_PK)
+);
+GO
+
+-- SP para traer el historial de mensajes de un pedido
+CREATE PROCEDURE SP_ConsultarMensajesPedido
+    @IdPedido  INT
+AS
+BEGIN
+
+    SELECT  M.ID_MENSAJE_PK      AS IdMensaje,
+            M.MENSAJE            AS Mensaje,
+            M.FECHA_HORA         AS FechaHora,
+            M.ID_USUARIO_FK      AS IdUsuario,
+            P.NOMBRE_COMPLETO    AS NombreUsuario
+    FROM    MENSAJE_TB M
+    INNER JOIN USUARIO_TB U ON M.ID_USUARIO_FK = U.ID_USUARIO_PK
+    INNER JOIN PERSONA_TB P ON U.IDENTIFICACION_FK = P.IDENTIFICACION_PK
+    WHERE   M.ID_PEDIDO_FK = @IdPedido
+    ORDER BY M.FECHA_HORA
+
+END
+GO
+
+-- SP para insertar un mensaje nuevo
+CREATE PROCEDURE SP_RegistrarMensaje
+    @IdUsuario  INT,
+    @IdPedido   INT,
+    @Mensaje    VARCHAR(MAX)
+AS
+BEGIN
+
+    INSERT INTO MENSAJE_TB (MENSAJE, FECHA_HORA, ID_USUARIO_FK, ID_PEDIDO_FK)
+    VALUES (@Mensaje, GETDATE(), @IdUsuario, @IdPedido)
+
+    SELECT SCOPE_IDENTITY() AS IdMensaje
+
+END
+GO
+
+-- SP para validar acceso a la sala del chat de un pedido
+-- Cliente: solo si el pedido es suyo. Admin: siempre tiene acceso (cualquier admin puede ver cualquier pedido)
+CREATE PROCEDURE SP_ValidarAccesoChatPedido
+    @IdPedido     INT,
+    @IdUsuario    INT,
+    @IdRol        INT
+AS
+BEGIN
+
+    IF @IdRol = 1
+    BEGIN
+        -- administrador: acceso a cualquier pedido
+        SELECT 1 AS TieneAcceso
+    END
+    ELSE
+    BEGIN
+        -- cliente: solo si el pedido es suyo
+        SELECT COUNT(1) AS TieneAcceso
+        FROM PEDIDO_TB
+        WHERE ID_PEDIDO_PK = @IdPedido
+            AND ID_USUARIO_FK = @IdUsuario
+    END
+
+END
+GO
+
+-- SP para listar los pedidos que aparecen en la lista de conversaciones del chat
+-- Cliente: sus propios pedidos. Admin: todos los pedidos (cualquier admin ve todo)
+CREATE PROCEDURE SP_ConsultarPedidosChat
+    @IdUsuario  INT,
+    @IdRol      INT
+AS
+BEGIN
+
+    IF @IdRol = 1
+    BEGIN
+        -- administrador: todos los pedidos, mostrando el nombre del cliente
+        SELECT  PD.ID_PEDIDO_PK      AS IdPedido,
+                P.NOMBRE_COMPLETO    AS NombreInterlocutor,
+                EP.DESCRIPCION       AS EstadoPedido
+        FROM    PEDIDO_TB PD
+        INNER JOIN USUARIO_TB U ON PD.ID_USUARIO_FK = U.ID_USUARIO_PK
+        INNER JOIN PERSONA_TB P ON U.IDENTIFICACION_FK = P.IDENTIFICACION_PK
+        INNER JOIN ESTADO_PEDIDO_TB EP ON PD.ID_ESTADO_PEDIDO_FK = EP.ID_ESTADO_PEDIDO_PK
+        ORDER BY PD.FECHA_PEDIDO DESC
+    END
+    ELSE
+    BEGIN
+        -- cliente: solo sus propios pedidos, mostrando "RF Bakery" como interlocutor fijo
+        SELECT  PD.ID_PEDIDO_PK      AS IdPedido,
+                'RF Bakery'          AS NombreInterlocutor,
+                EP.DESCRIPCION       AS EstadoPedido
+        FROM    PEDIDO_TB PD
+        INNER JOIN ESTADO_PEDIDO_TB EP ON PD.ID_ESTADO_PEDIDO_FK = EP.ID_ESTADO_PEDIDO_PK
+        WHERE   PD.ID_USUARIO_FK = @IdUsuario
+        ORDER BY PD.FECHA_PEDIDO DESC
+    END
+
+END
+GO

@@ -1,0 +1,140 @@
+﻿@model List<PJ_GRUPODOS.Models.PedidoChatModel>
+@{
+    Layout = "_Layout";
+    var urlHub = ViewBag.UrlHub as string ?? "";
+}
+
+<div class="container-fluid py-4">
+    <div class="row g-0 border rounded" style="height: calc(100vh - 220px); min-height: 500px;">
+
+        <!-- Panel izquierdo: lista de pedidos -->
+        <div class="col-12 col-md-4 col-lg-3 border-end d-flex flex-column">
+            <div class="p-3 border-bottom">
+                <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Conversaciones</h5>
+            </div>
+            <div class="overflow-auto flex-grow-1" id="listaPedidos">
+                @if (Model == null || !Model.Any())
+                {
+                    <p class="text-muted text-center mt-4 px-3">No tienes pedidos con conversación disponible.</p>
+                }
+                @if (Model != null)
+                {
+                    @foreach (var p in Model)
+                    {
+                        <div class="pedido-item p-3 border-bottom"
+                             data-idpedido="@p.IdPedido"
+                             data-interlocutor="@p.NombreInterlocutor">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold">Pedido #@p.IdPedido</span>
+                                <span class="badge bg-secondary">@p.EstadoPedido</span>
+                            </div>
+                            <small class="text-muted">@p.NombreInterlocutor</small>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Panel derecho: ventana de chat -->
+        <div class="col-12 col-md-8 col-lg-9 d-flex flex-column h-100">
+
+            <div class="p-3 border-bottom d-flex align-items-center" id="chatHeader" style="display:none!important;">
+                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3"
+                     style="width:38px;height:38px;min-width:38px;">
+                    <i class="bi bi-person-fill text-white"></i>
+                </div>
+                <div>
+                    <div class="fw-semibold" id="chatNombreInterlocutor">—</div>
+                    <small class="text-success" id="chatEstadoConexion">Conectando…</small>
+                </div>
+            </div>
+
+            <div class="flex-grow-1 overflow-auto p-3 bg-light" id="areaMensajes">
+                <p class="text-muted text-center mt-5" id="chatPlaceholder">
+                    Selecciona una conversación para comenzar.
+                </p>
+            </div>
+
+            <div class="p-3 border-top" id="cajaEnvio">
+                <div class="input-group">
+                    <input type="text" id="inputMensaje" class="form-control" disabled
+                           placeholder="Selecciona una conversación…" autocomplete="off" maxlength="2000">
+                    <button class="btn btn-primary" id="btnEnviar" disabled>
+                        <i class="bi bi-arrow-up"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .pedido-item {
+        cursor: pointer;
+        transition: background-color .15s;
+    }
+
+        .pedido-item:hover,
+        .pedido-item.active {
+            background-color: #fff3e6;
+        }
+
+    .chat-burbuja {
+        max-width: 70%;
+        padding: .5rem .75rem;
+        border-radius: 1rem;
+        font-size: .9rem;
+        word-break: break-word;
+    }
+
+    .burbuja-propia {
+        background-color: #f7941d;
+        color: #fff;
+        border-bottom-right-radius: .25rem;
+    }
+
+    .burbuja-ajena {
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-bottom-left-radius: .25rem;
+    }
+
+    .chat-nombre {
+        font-size: .75rem;
+        font-weight: 600;
+        margin-bottom: .2rem;
+        opacity: .75;
+    }
+
+    .chat-hora {
+        font-size: .7rem;
+        text-align: right;
+        margin-top: .2rem;
+        opacity: .65;
+    }
+
+    .chat-nuevo {
+        animation: fadeSlide .2s ease-out;
+    }
+
+    @@keyframes fadeSlide {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+<script>
+    const jwtToken = '@Html.Raw(Context.Session.GetString("Token"))';
+    const idUsuarioActual = @ViewBag.IdUsuario;
+    const urlHub = '@Html.Raw(urlHub)';
+</script>
+<script src="~/js/chat.js" asp-append-version="true"></script>

@@ -266,5 +266,47 @@ namespace API_GRUPODOS.Controllers
         }
 
         #endregion
+        #region Chat
+
+        [HttpGet("ConsultarPedidosChatAPI")]
+        public IActionResult ConsultarPedidosChatAPI()
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdUsuario", _utiles.ObtenerConsecutivoToken());
+            parameters.Add("@IdRol", _utiles.ObtenerIdRolToken());
+
+            var response = context.Query<PedidoChatModel>("SP_ConsultarPedidosChat", parameters,
+                commandType: System.Data.CommandType.StoredProcedure);
+
+            return Ok(response);
+        }
+
+        [HttpGet("ConsultarMensajesAPI")]
+        public IActionResult ConsultarMensajesAPI(int idPedido)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parametrosAcceso = new DynamicParameters();
+            parametrosAcceso.Add("@IdPedido", idPedido);
+            parametrosAcceso.Add("@IdUsuario", _utiles.ObtenerConsecutivoToken());
+            parametrosAcceso.Add("@IdRol", _utiles.ObtenerIdRolToken());
+
+            var tieneAcceso = context.QueryFirstOrDefault<int?>("SP_ValidarAccesoChatPedido", parametrosAcceso,
+                commandType: System.Data.CommandType.StoredProcedure);
+
+            if (tieneAcceso is null or 0)
+                return Forbid();
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdPedido", idPedido);
+            var response = context.Query<MensajeResponseModel>("SP_ConsultarMensajesPedido", parameters,
+                commandType: System.Data.CommandType.StoredProcedure);
+
+            return Ok(response);
+        }
+
+        #endregion
     }
 }

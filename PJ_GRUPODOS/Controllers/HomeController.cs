@@ -87,6 +87,7 @@ namespace PJ_GRUPODOS.Controllers
         public IActionResult RegistrarUsuario()
         {
             ConsultarTiposDeIdentificacion();
+            ConsultarGeneros();
             return View();
         }
 
@@ -96,6 +97,7 @@ namespace PJ_GRUPODOS.Controllers
             if (!ModelState.IsValid)
             {
                 ConsultarTiposDeIdentificacion();
+                ConsultarGeneros();
                 return View(model);
             }
 
@@ -115,6 +117,7 @@ namespace PJ_GRUPODOS.Controllers
             else if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 ConsultarTiposDeIdentificacion();
+                ConsultarGeneros();
                 ViewBag.Mensaje = response.Content.ReadAsStringAsync().Result;
                 return View();
             }
@@ -140,6 +143,26 @@ namespace PJ_GRUPODOS.Controllers
             else
             {
                 ViewBag.TiposDeIdentificacion = new List<TipoIdentificacionModel>();
+            }
+        }
+
+        private void ConsultarGeneros()
+        {
+            using var client = _http.CreateClient();
+
+            var url = _config["Valores:UrlApi"] + "Home/ConsultarGenerosAPI";
+
+            var response = client.GetAsync(url).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                ViewBag.Generos = response.Content
+                    .ReadFromJsonAsync<List<GeneroModel>>()
+                    .Result;
+            }
+            else
+            {
+                ViewBag.Generos = new List<GeneroModel>();
             }
         }
 
@@ -268,6 +291,7 @@ namespace PJ_GRUPODOS.Controllers
             }
 
             ViewBag.TienePedidoActivo = TienePedidoActivo(identificacion);
+            ConsultarGeneros();
 
             return View();
         }
@@ -286,6 +310,7 @@ namespace PJ_GRUPODOS.Controllers
             {
                 ViewBag.MensajePerfil = "No puedes editar tu perfil mientras tengas un pedido activo";
                 ViewBag.TienePedidoActivo = true;
+                ConsultarGeneros();
 
                 var urlConsultaBloqueado = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
                 var responseConsultaBloqueado = client.GetAsync(urlConsultaBloqueado).Result;
@@ -322,6 +347,7 @@ namespace PJ_GRUPODOS.Controllers
                 : new UsuarioConsultaModel();
 
             ViewBag.TienePedidoActivo = TienePedidoActivo(identificacion);
+            ConsultarGeneros();
 
             return View("GestionPerfil");
         }
@@ -361,6 +387,8 @@ namespace PJ_GRUPODOS.Controllers
             ViewBag.InfoUsuario = responseConsulta.IsSuccessStatusCode
                 ? responseConsulta.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
                 : new UsuarioConsultaModel();
+
+            ConsultarGeneros();
 
             return View("GestionPerfil");
         }
