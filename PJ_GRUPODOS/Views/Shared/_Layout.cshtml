@@ -30,6 +30,9 @@
     <!-- Template Stylesheet -->
     <link href="~/css/style.css" rel="stylesheet" asp-append-version="true">
 
+    <!-- DataTables Stylesheet -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.css" asp-append-version="true">
+
     <!-- Para renderizar algun otro css especifico de las vistas hijas -->
     @await RenderSectionAsync("Styles", required: false)
 
@@ -351,8 +354,14 @@
     <script src="~/lib/counterup/counterup.min.js" asp-append-version="true"></script>
     <script src="~/lib/owlcarousel/owl.carousel.min.js" asp-append-version="true"></script>
 
+    <!-- DataTables Javascript -->
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.js" asp-append-version="true"></script>
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.js" asp-append-version="true"></script>
+
     <!-- Template Javascript -->
     <script src="~/js/main.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 
 </html>
