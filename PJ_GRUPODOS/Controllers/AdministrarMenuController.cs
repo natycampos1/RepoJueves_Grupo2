@@ -417,6 +417,13 @@ namespace PJ_GRUPODOS.Controllers
                 ? response.Content.ReadFromJsonAsync<List<PedidoAdminModel>>().Result ?? new()
                 : new List<PedidoAdminModel>();
 
+            var urlEstados = _config["Valores:UrlApi"] + "Pedido/ConsultarEstadosPedidoAPI";
+            var responseEstados = client.GetAsync(urlEstados).Result;
+
+            ViewBag.EstadosPedido = responseEstados.IsSuccessStatusCode
+                ? responseEstados.Content.ReadFromJsonAsync<List<EstadoPedidoModel>>().Result ?? new()
+                : new List<EstadoPedidoModel>();
+
             return View(pedidos);
         }
 

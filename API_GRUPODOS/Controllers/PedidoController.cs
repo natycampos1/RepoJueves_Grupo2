@@ -32,6 +32,20 @@ namespace API_GRUPODOS.Controllers
 
         #endregion
 
+        #region Estados
+        [HttpGet("ConsultarEstadosPedidoAPI")]
+        public IActionResult ConsultarEstadosPedidoAPI()
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var response = context.Query<EstadoPedidoModel>(
+                "SP_ConsultarEstadosPedido",
+                commandType: System.Data.CommandType.StoredProcedure
+            ).ToList();
+
+            return Ok(response);
+        }
+        #endregion
         #region Registrar Pedido
 
         [HttpPost("RegistrarPedidoAPI")]
