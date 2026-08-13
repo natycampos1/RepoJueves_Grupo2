@@ -1481,3 +1481,20 @@ BEGIN
 
 END
 GO
+----13/08
+USE RFBakery;
+GO
+
+-- SP para consultar los estados de pedido disponibles, para llenar el dropdown del admin
+CREATE PROCEDURE SP_ConsultarEstadosPedido
+AS
+BEGIN
+
+    SELECT
+        ID_ESTADO_PEDIDO_PK    AS IdEstadoPedido,
+        DESCRIPCION            AS Descripcion
+    FROM ESTADO_PEDIDO_TB
+    ORDER BY ID_ESTADO_PEDIDO_PK
+
+END
+GO
