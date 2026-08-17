@@ -92,7 +92,7 @@
         <div class="col-lg-8">
             <div class="card p-4">
                 <h5 class="mb-3">Productos Existentes</h5>
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle" id="tblProductos">
                     <thead>
                         <tr>
                             <th>Categoría</th>
@@ -146,7 +146,7 @@
     {
         <div class="card p-4 mt-4">
             <h5 class="mb-3 text-muted">Productos Inactivos</h5>
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle" id="tblProductosInactivos">
                 <thead>
                     <tr>
                         <th>Categoría</th>
@@ -181,3 +181,27 @@
 </div>
 
 <script src="~/js/crearEditarProducto.js" asp-append-version="true"></script>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+        new DataTable('#tblProductos', {
+        responsive: true,
+        pageLength: 10,
+        order: [],
+        language: {
+        url: 'https://cdn.datatables.net/plug-ins/2.3.4/i18n/es-ES.json'
+        }
+        });
+
+        new DataTable('#tblProductosInactivos', {
+        responsive: true,
+        pageLength: 10,
+        order: [],
+        language: {
+        url: 'https://cdn.datatables.net/plug-ins/2.3.4/i18n/es-ES.json'
+        }
+        });
+        });
+    </script>
+}

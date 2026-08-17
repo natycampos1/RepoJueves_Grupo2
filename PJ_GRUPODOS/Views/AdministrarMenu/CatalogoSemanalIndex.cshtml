@@ -65,7 +65,7 @@
         <div class="col-lg-8">
             <div class="card p-4">
                 <h5 class="mb-3">Configurado para esta Semana</h5>
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle" id="tblCatalogoSemanal">
                     <thead>
                         <tr>
                             <th>Categoría</th>
@@ -81,30 +81,23 @@
                         {
                             @foreach (var item in catalogoSemanal)
                             {
-                                var formId = "form-catalogo-" + item.IdCatalogoSemanal;
-
-                                <!-- formulario vacio, separado de la fila, para no romper la estructura de la tabla -->
-                                <form id="@formId" asp-action="ActualizarCatalogoSemanal" asp-controller="AdministrarMenu" method="post">
-                                    <input type="hidden" name="idCatalogoSemanal" value="@item.IdCatalogoSemanal" />
-                                </form>
-
-                                <tr>
+                                <tr data-idcatalogosemanal="@item.IdCatalogoSemanal">
                                     <td>@item.Categoria</td>
                                     <td>@item.Nombre</td>
                                     <td>
-                                        <input type="number" name="stockDisponible" form="@formId" value="@item.StockDisponible" class="form-control form-control-sm" style="width:80px;" min="0" required />
+                                        <input type="number" class="form-control form-control-sm input-stock" style="width:80px;" value="@item.StockDisponible" min="0" required />
                                     </td>
                                     <td>
-                                        <input type="number" name="limitePorPersona" form="@formId" value="@item.LimitePorPersona" class="form-control form-control-sm" style="width:70px;" min="1" required />
+                                        <input type="number" class="form-control form-control-sm input-limite" style="width:70px;" value="@item.LimitePorPersona" min="1" required />
                                     </td>
                                     <td>
-                                        <select name="activo" form="@formId" class="form-select form-select-sm" style="width:100px;">
+                                        <select class="form-select form-select-sm select-activo" style="width:100px;">
                                             <option value="true" selected="@(item.Activo)">Sí</option>
                                             <option value="false" selected="@(!item.Activo)">No</option>
                                         </select>
                                     </td>
                                     <td class="text-center">
-                                        <button type="submit" form="@formId" class="btn btn-sm btn-primary">
+                                        <button type="button" class="btn btn-sm btn-primary btn-guardar-catalogo">
                                             <i class="bi bi-check-circle me-1"></i>Guardar
                                         </button>
                                     </td>
@@ -124,3 +117,49 @@
 
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            new DataTable('#tblCatalogoSemanal', {
+                responsive: true,
+                pageLength: 10,
+                order: [],
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/2.3.4/i18n/es-ES.json'
+                }
+            });
+
+            // uso delegacion de eventos porque DataTables redibuja las filas al buscar/paginar
+            $('#tblCatalogoSemanal').on('click', '.btn-guardar-catalogo', function () {
+                var fila = $(this).closest('tr');
+
+                var idCatalogoSemanal = fila.data('idcatalogosemanal');
+                var stockDisponible = fila.find('.input-stock').val();
+                var limitePorPersona = fila.find('.input-limite').val();
+                var activo = fila.find('.select-activo').val();
+
+                // armo el formulario dinamicamente en el momento del clic, con los valores actuales de la fila
+                var form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/AdministrarMenu/ActualizarCatalogoSemanal';
+
+                function agregarCampo(nombre, valor) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = nombre;
+                    input.value = valor;
+                    form.appendChild(input);
+                }
+
+                agregarCampo('idCatalogoSemanal', idCatalogoSemanal);
+                agregarCampo('stockDisponible', stockDisponible);
+                agregarCampo('limitePorPersona', limitePorPersona);
+                agregarCampo('activo', activo);
+
+                document.body.appendChild(form);
+                form.submit();
+            });
+        });
+    </script>
+}
