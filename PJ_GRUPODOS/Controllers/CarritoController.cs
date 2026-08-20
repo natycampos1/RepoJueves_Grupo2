@@ -376,6 +376,16 @@ namespace PJ_GRUPODOS.Controllers
             return View(detalle);
         }
 
+        [HttpPost]
+        public IActionResult CancelarPedido(int idPedido)
+        {
+            using var client = CrearClienteAutenticado();
+            var url = _config["Valores:UrlApi"] + $"Pedido/CancelarPedidoClienteAPI?idPedido={idPedido}";
+            var response = client.DeleteAsync(url).Result;
+
+            return Json(response.Content.ReadAsStringAsync().Result);
+        }
+
         #endregion
     }
 }

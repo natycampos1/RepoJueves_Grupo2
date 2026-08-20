@@ -2,7 +2,7 @@
 @{
     Layout = "_Layout";
 
-    // asigno una clase de color de Bootstrap segun el texto del estado
+    
     string ClaseEstado(string estado) => estado switch
     {
         "Pendiente" => "bg-warning text-dark",
@@ -37,7 +37,7 @@
                         <th>Tipo de Entrega</th>
                         <th>Estado</th>
                         <th>Total</th>
-                        <th class="text-center">Detalle</th>
+                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,9 +52,16 @@
                             </td>
                             <td>₡@pedido.Total.ToString("N0")</td>
                             <td class="text-center">
-                                <a asp-action="DetallePedido" asp-controller="Carrito" asp-route-idPedido="@pedido.IdPedido" class="btn btn-sm btn-outline-primary">
+                                <a asp-action="DetallePedido" asp-controller="Carrito" asp-route-idPedido="@pedido.IdPedido" class="btn btn-sm btn-outline-primary me-1">
                                     <i class="bi bi-eye"></i>
                                 </a>
+                                @if (pedido.EstadoPedido == "En Preparación")
+                                {
+                                    <a class="btn btn-sm btn-outline-danger btn-cancelar-pedido"
+                                       data-idpedido="@pedido.IdPedido">
+                                        <i class="bi bi-x-circle"></i>
+                                    </a>
+                                }
                             </td>
                         </tr>
                     }
@@ -74,5 +81,6 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" asp-append-version="true"></script>
     <script src="~/js/misPedidos.js" asp-append-version="true"></script>
 }

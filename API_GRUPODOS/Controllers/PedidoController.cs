@@ -234,6 +234,29 @@ namespace API_GRUPODOS.Controllers
                 return Ok("Estado del pedido actualizado correctamente");
 
             return BadRequest("No se pudo actualizar el estado del pedido");
+
+
+        }
+
+        [HttpDelete("CancelarPedidoClienteAPI")]
+        public IActionResult CancelarPedidoClienteAPI(int idPedido)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdPedido", idPedido);
+            parameters.Add("@IdUsuario", _utiles.ObtenerConsecutivoToken());
+
+            var filasAfectadas = context.QuerySingle<int>(
+                "SP_CancelarPedidoCliente",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (filasAfectadas > 0)
+                return Ok("El pedido se canceló correctamente");
+
+            return BadRequest("No se pudo cancelar el pedido. Verifica que sea tuyo y que esté en estado 'En Preparación'");
         }
 
         #endregion
