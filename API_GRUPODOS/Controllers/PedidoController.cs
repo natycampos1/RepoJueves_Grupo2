@@ -1,6 +1,7 @@
 ﻿using API_GRUPODOS.Models;
 using API_GRUPODOS.Services;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Transactions;
@@ -8,6 +9,7 @@ using System.Transactions;
 
 namespace API_GRUPODOS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PedidoController(IConfiguration _config, IUtilesService _utiles) : ControllerBase
@@ -30,6 +32,20 @@ namespace API_GRUPODOS.Controllers
 
         #endregion
 
+        #region Estados
+        [HttpGet("ConsultarEstadosPedidoAPI")]
+        public IActionResult ConsultarEstadosPedidoAPI()
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var response = context.Query<EstadoPedidoModel>(
+                "SP_ConsultarEstadosPedido",
+                commandType: System.Data.CommandType.StoredProcedure
+            ).ToList();
+
+            return Ok(response);
+        }
+        #endregion
         #region Registrar Pedido
 
         [HttpPost("RegistrarPedidoAPI")]
@@ -45,13 +61,13 @@ namespace API_GRUPODOS.Controllers
             {
                 try
                 {
-                    // 1. Validar que haya stock suficiente para TODOS los productos antes de continuar
+                    // 1. Validar que haya stock semanal suficiente para TODOS los productos antes de continuar
                     foreach (var item in model.Carrito)
                     {
                         var parametrosStock = new DynamicParameters();
-                        parametrosStock.Add("@IdProducto", item.IdProducto);
+                        parametrosStock.Add("@IdCatalogoSemanal", item.IdCatalogoSemanal);
                         var stockDisponible = context.QueryFirstOrDefault<ProductoStockModel>(
-                            "SP_ConsultarStockProducto",
+                            "SP_ConsultarStockCatalogoSemanal",
                             parametrosStock,
                             commandType: System.Data.CommandType.StoredProcedure
                         );
@@ -87,6 +103,7 @@ namespace API_GRUPODOS.Controllers
                     parametrosPedido.Add("@IdTipoEntrega", model.IdTipoEntrega);
                     parametrosPedido.Add("@DireccionEntrega", model.DireccionEntrega);
                     parametrosPedido.Add("@Total", total);
+                    parametrosPedido.Add("@FechaEntregaProgramada", model.FechaEntregaProgramada);
 
                     var idPedido = context.QuerySingle<int>(
                         "SP_RegistrarPedido",
@@ -94,7 +111,7 @@ namespace API_GRUPODOS.Controllers
                         commandType: System.Data.CommandType.StoredProcedure
                     );
 
-                    // 4. Registrar cada línea de detalle y descontar el stock
+                    // 4. Registrar cada línea de detalle y descontar el stock semanal
                     foreach (var item in model.Carrito)
                     {
                         var parametrosDetalle = new DynamicParameters();
@@ -110,11 +127,11 @@ namespace API_GRUPODOS.Controllers
                         );
 
                         var parametrosStock = new DynamicParameters();
-                        parametrosStock.Add("@IdProducto", item.IdProducto);
+                        parametrosStock.Add("@IdCatalogoSemanal", item.IdCatalogoSemanal);
                         parametrosStock.Add("@Cantidad", item.Cantidad);
 
                         context.Execute(
-                            "SP_DescontarStock",
+                            "SP_DescontarStockSemanal",
                             parametrosStock,
                             commandType: System.Data.CommandType.StoredProcedure
                         );
@@ -217,6 +234,29 @@ namespace API_GRUPODOS.Controllers
                 return Ok("Estado del pedido actualizado correctamente");
 
             return BadRequest("No se pudo actualizar el estado del pedido");
+
+
+        }
+
+        [HttpDelete("CancelarPedidoClienteAPI")]
+        public IActionResult CancelarPedidoClienteAPI(int idPedido)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdPedido", idPedido);
+            parameters.Add("@IdUsuario", _utiles.ObtenerConsecutivoToken());
+
+            var filasAfectadas = context.QuerySingle<int>(
+                "SP_CancelarPedidoCliente",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (filasAfectadas > 0)
+                return Ok("El pedido se canceló correctamente");
+
+            return BadRequest("No se pudo cancelar el pedido. Verifica que sea tuyo y que esté en estado 'En Preparación'");
         }
 
         #endregion
@@ -240,6 +280,68 @@ namespace API_GRUPODOS.Controllers
                 return Ok(response);
 
             return NotFound("Producto no encontrado");
+        }
+
+        [HttpGet("ConsultarStockCatalogoSemanalAPI")]
+        public IActionResult ConsultarStockCatalogoSemanalAPI(int idCatalogoSemanal)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdCatalogoSemanal", idCatalogoSemanal);
+
+            var response = context.QueryFirstOrDefault<ProductoStockModel>(
+                "SP_ConsultarStockCatalogoSemanal",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (response != null)
+                return Ok(response);
+
+            return NotFound("No se encontró el item del catálogo semanal");
+        }
+
+        #endregion
+        #region Chat
+
+        [HttpGet("ConsultarPedidosChatAPI")]
+        public IActionResult ConsultarPedidosChatAPI()
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdUsuario", _utiles.ObtenerConsecutivoToken());
+            parameters.Add("@IdRol", _utiles.ObtenerIdRolToken());
+
+            var response = context.Query<PedidoChatModel>("SP_ConsultarPedidosChat", parameters,
+                commandType: System.Data.CommandType.StoredProcedure);
+
+            return Ok(response);
+        }
+
+        [HttpGet("ConsultarMensajesAPI")]
+        public IActionResult ConsultarMensajesAPI(int idPedido)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parametrosAcceso = new DynamicParameters();
+            parametrosAcceso.Add("@IdPedido", idPedido);
+            parametrosAcceso.Add("@IdUsuario", _utiles.ObtenerConsecutivoToken());
+            parametrosAcceso.Add("@IdRol", _utiles.ObtenerIdRolToken());
+
+            var tieneAcceso = context.QueryFirstOrDefault<int?>("SP_ValidarAccesoChatPedido", parametrosAcceso,
+                commandType: System.Data.CommandType.StoredProcedure);
+
+            if (tieneAcceso is null or 0)
+                return Forbid();
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdPedido", idPedido);
+            var response = context.Query<MensajeResponseModel>("SP_ConsultarMensajesPedido", parameters,
+                commandType: System.Data.CommandType.StoredProcedure);
+
+            return Ok(response);
         }
 
         #endregion

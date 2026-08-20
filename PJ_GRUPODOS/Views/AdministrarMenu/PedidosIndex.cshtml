@@ -2,6 +2,7 @@
 @{
     Layout = "_Layout";
     var tipoMensaje = TempData["TipoMensajePedidos"] as string ?? "info";
+    var estadosPedido = ViewBag.EstadosPedido as List<PJ_GRUPODOS.Models.EstadoPedidoModel>;
 }
 
 <div class="container py-5">
@@ -23,7 +24,7 @@
     }
 
     <div class="card p-4">
-        <table class="table table-hover align-middle">
+        <table class="table table-hover align-middle" id="tblPedidos">
             <thead>
                 <tr>
                     <th>Pedido #</th>
@@ -50,11 +51,13 @@
                                 <form asp-action="ActualizarEstadoPedido" asp-controller="AdministrarMenu" method="post" class="d-flex gap-2">
                                     <input type="hidden" name="idPedido" value="@pedido.IdPedido" />
                                     <select name="idEstadoPedido" class="form-select form-select-sm">
-                                        <option value="1" selected="@(pedido.EstadoPedido == "Pendiente")">Pendiente</option>
-                                        <option value="2" selected="@(pedido.EstadoPedido == "En Preparación")">En Preparación</option>
-                                        <option value="3" selected="@(pedido.EstadoPedido == "Listo")">Listo</option>
-                                        <option value="4" selected="@(pedido.EstadoPedido == "Entregado")">Entregado</option>
-                                        <option value="5" selected="@(pedido.EstadoPedido == "Cancelado")">Cancelado</option>
+                                        @if (estadosPedido != null)
+                                        {
+                                            @foreach (var estado in estadosPedido)
+                                            {
+                                                <option value="@estado.IdEstadoPedido" selected="@(pedido.EstadoPedido == estado.Descripcion)">@estado.Descripcion</option>
+                                            }
+                                        }
                                     </select>
                                     <button type="submit" class="btn btn-sm btn-primary">
                                         <i class="bi bi-save"></i>
@@ -88,3 +91,7 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/pedidosAdmin.js" asp-append-version="true"></script>
+}

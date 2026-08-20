@@ -45,7 +45,7 @@
         <div class="col-lg-8">
             <div class="card p-4">
                 <h5 class="mb-3">Categorías Existentes</h5>
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle" id="tblCategorias">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -97,7 +97,7 @@
     {
         <div class="card p-4 mt-4">
             <h5 class="mb-3 text-muted">Categorías Inactivas</h5>
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle" id="tblCategoriasInactivas">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -126,3 +126,27 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            new DataTable('#tblCategorias', {
+                responsive: true,
+                pageLength: 10,
+                order: [],
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/2.3.4/i18n/es-ES.json'
+                }
+            });
+
+            new DataTable('#tblCategoriasInactivas', {
+                responsive: true,
+                pageLength: 10,
+                order: [],
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/2.3.4/i18n/es-ES.json'
+                }
+            });
+        });
+    </script>
+}

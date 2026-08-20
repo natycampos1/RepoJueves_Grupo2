@@ -30,6 +30,9 @@
     <!-- Template Stylesheet -->
     <link href="~/css/style.css" rel="stylesheet" asp-append-version="true">
 
+    <!-- DataTables Stylesheet -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.css" asp-append-version="true">
+
     <!-- Para renderizar algun otro css especifico de las vistas hijas -->
     @await RenderSectionAsync("Styles", required: false)
 
@@ -161,6 +164,11 @@
 
                             <a asp-controller="Carrito" asp-action="MisPedidos"
                                class="nav-item nav-link @(controller == "Carrito" && action == "MisPedidos" ? "active" : "")">Mis Pedidos</a>
+
+                            <a asp-controller="Chat" asp-action="Index"
+                               class="nav-item nav-link @(controller == "Chat" && action == "Index" ? "active" : "")">
+                                <i class="bi bi-chat-dots me-1"></i>Chat
+                            </a>
                         </div>
                     }
 
@@ -172,9 +180,19 @@
                                 <i class="bi bi-gear-fill me-2"></i>Administrar Menú
                             </a>
 
+                            <a asp-controller="AdministrarMenu" asp-action="CatalogoSemanalIndex"
+                               class="nav-item nav-link @(controller == "AdministrarMenu" && action == "CatalogoSemanalIndex" ? "active" : "")">
+                                <i class="bi bi-calendar-week me-2"></i>Catálogo Semanal
+                            </a>
+
                             <a asp-controller="AdministrarMenu" asp-action="PedidosIndex"
                                class="nav-item nav-link @(controller == "AdministrarMenu" && action == "PedidosIndex" ? "active" : "")">
                                 <i class="bi bi-receipt me-2"></i>Administrar Pedidos
+                            </a>
+
+                            <a asp-controller="Chat" asp-action="Index"
+                               class="nav-item nav-link @(controller == "Chat" && action == "Index" ? "active" : "")">
+                                <i class="bi bi-chat-dots me-2"></i>Chat
                             </a>
                         </div>
                     }
@@ -336,8 +354,14 @@
     <script src="~/lib/counterup/counterup.min.js" asp-append-version="true"></script>
     <script src="~/lib/owlcarousel/owl.carousel.min.js" asp-append-version="true"></script>
 
+    <!-- DataTables Javascript -->
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.js" asp-append-version="true"></script>
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.js" asp-append-version="true"></script>
+
     <!-- Template Javascript -->
     <script src="~/js/main.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 
 </html>

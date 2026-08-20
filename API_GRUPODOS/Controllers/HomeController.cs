@@ -1,18 +1,21 @@
 ﻿using API_GRUPODOS.Models;
 using API_GRUPODOS.Services;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
 namespace API_GRUPODOS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HomeController(IConfiguration _config, IUtilesService _utiles) : ControllerBase
     {
 
         #region Registro
+        [AllowAnonymous]
         [HttpGet("ConsultarTiposDeIdentificacionAPI")]
         public IActionResult ConsultarTiposDeIdentificacionAPI()
         {
@@ -28,6 +31,21 @@ namespace API_GRUPODOS.Controllers
             return BadRequest("No se ha registrado su información correctamente, valide el que ya tenga esa identificacion registrada");
         }
 
+        [AllowAnonymous]
+        [HttpGet("ConsultarGenerosAPI")]
+        public IActionResult ConsultarGenerosAPI()
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var response = context.Query<GeneroModel>(
+                "SP_ConsultarGeneros",
+                commandType: System.Data.CommandType.StoredProcedure
+            ).ToList();
+
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
         [HttpPost("RegistrarUsuarioAPI")]
         public IActionResult RegistrarUsuarioAPI(RegistroUsuarioRequestModel model)
         {
@@ -67,6 +85,7 @@ namespace API_GRUPODOS.Controllers
 
         #region Inicio de sesión
 
+        [AllowAnonymous]
         [HttpPost("IniciarSesionAPI")]
         public IActionResult IniciarSesionAPI(InicioSesionUsuarioRequestModel model)
         {
@@ -101,6 +120,7 @@ namespace API_GRUPODOS.Controllers
             infoUsuario.NumTelefono = usuario.NumTelefono;
             infoUsuario.Email = usuario.Email;
             infoUsuario.IdRol = usuario.IdRol;
+            infoUsuario.Token = _utiles.GenerarToken(usuario.IdUsuario, usuario.IdRol, usuario.NombreCompleto);
 
             return Ok(infoUsuario);
         }
@@ -139,13 +159,7 @@ namespace API_GRUPODOS.Controllers
             var parameters = new DynamicParameters();
             parameters.Add("@Identificacion", model.Identificacion);
             parameters.Add("@NombreCompleto", model.NombreCompleto);
-            parameters.Add("@PrimerApellido", model.PrimerApellido);
-            parameters.Add("@SegundoApellido", model.SegundoApellido);
-            parameters.Add("@Genero", model.Genero);
-            parameters.Add("@Direccion", model.Direccion);
-            parameters.Add("@Nacionalidad", model.Nacionalidad);
             parameters.Add("@NumTelefono", model.NumTelefono);
-            parameters.Add("@Email", model.Email);
 
             var response = context.Execute(
                 "SP_ActualizarPerfil",
@@ -157,6 +171,23 @@ namespace API_GRUPODOS.Controllers
                 return Ok("Perfil actualizado correctamente");
 
             return BadRequest("No se pudo actualizar el perfil");
+        }
+
+        [HttpGet("ValidarPedidoActivoAPI")]
+        public IActionResult ValidarPedidoActivoAPI(string identificacion)
+        {
+            using var context = new SqlConnection(_config["ConnectionStrings:DefaultConnection"]);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Identificacion", identificacion);
+
+            var cantidad = context.QueryFirstOrDefault<int>(
+                "SP_ValidarPedidoActivoUsuario",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            return Ok(cantidad > 0);
         }
 
         [HttpPut("CambiarContrasenaPerfilAPI")]
@@ -189,6 +220,7 @@ namespace API_GRUPODOS.Controllers
 
         #region Recuperar Acceso
 
+        [AllowAnonymous]
         [HttpPost("RecuperarAccesoAPI")]
         public async Task<IActionResult> RecuperarAccesoAPI(RecuperarAccesoRequestModel model)
         {

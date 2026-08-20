@@ -1,6 +1,7 @@
 using PJ_GRUPODOS.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Net.Http.Headers;
 
 
 namespace PJ_GRUPODOS.Controllers
@@ -16,7 +17,7 @@ namespace PJ_GRUPODOS.Controllers
         {
             return RedirectToAction("Principal", "Home");
         }
-        
+
 
         #endregion
 
@@ -50,6 +51,7 @@ namespace PJ_GRUPODOS.Controllers
                 HttpContext.Session.SetString("SegundoApellido", usuario!.SegundoApellido ?? string.Empty);
                 HttpContext.Session.SetString("Email", usuario!.Email);
                 HttpContext.Session.SetInt32("IdRol", usuario!.IdRol);
+                HttpContext.Session.SetString("Token", usuario!.Token);
                 if (usuario!.IdRol == 1)
                 {
                     return RedirectToAction("Index", "AdministrarMenu");
@@ -85,6 +87,7 @@ namespace PJ_GRUPODOS.Controllers
         public IActionResult RegistrarUsuario()
         {
             ConsultarTiposDeIdentificacion();
+            ConsultarGeneros();
             return View();
         }
 
@@ -94,6 +97,7 @@ namespace PJ_GRUPODOS.Controllers
             if (!ModelState.IsValid)
             {
                 ConsultarTiposDeIdentificacion();
+                ConsultarGeneros();
                 return View(model);
             }
 
@@ -113,6 +117,7 @@ namespace PJ_GRUPODOS.Controllers
             else if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 ConsultarTiposDeIdentificacion();
+                ConsultarGeneros();
                 ViewBag.Mensaje = response.Content.ReadAsStringAsync().Result;
                 return View();
             }
@@ -138,6 +143,26 @@ namespace PJ_GRUPODOS.Controllers
             else
             {
                 ViewBag.TiposDeIdentificacion = new List<TipoIdentificacionModel>();
+            }
+        }
+
+        private void ConsultarGeneros()
+        {
+            using var client = _http.CreateClient();
+
+            var url = _config["Valores:UrlApi"] + "Home/ConsultarGenerosAPI";
+
+            var response = client.GetAsync(url).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                ViewBag.Generos = response.Content
+                    .ReadFromJsonAsync<List<GeneroModel>>()
+                    .Result;
+            }
+            else
+            {
+                ViewBag.Generos = new List<GeneroModel>();
             }
         }
 
@@ -218,8 +243,13 @@ namespace PJ_GRUPODOS.Controllers
         public IActionResult DetallePedido(int idPedido)
         {
             using var client = _http.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+
             var url = _config["Valores:UrlApi"] + $"Pedido/ConsultarDetallePedidoAPI?idPedido={idPedido}";
             var response = client.GetAsync(url).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             var detalle = response.IsSuccessStatusCode
                 ? response.Content.ReadFromJsonAsync<List<DetallePedidoModel>>().Result ?? new()
@@ -239,10 +269,14 @@ namespace PJ_GRUPODOS.Controllers
             string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
 
             using var client = _http.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
 
             var url = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
 
             var response = client.GetAsync(url).Result;
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
 
             if (response.IsSuccessStatusCode)
             {
@@ -256,6 +290,9 @@ namespace PJ_GRUPODOS.Controllers
                 ViewBag.InfoUsuario = new UsuarioConsultaModel();
             }
 
+            ViewBag.TienePedidoActivo = TienePedidoActivo(identificacion);
+            ConsultarGeneros();
+
             return View();
         }
 
@@ -266,16 +303,34 @@ namespace PJ_GRUPODOS.Controllers
             model.Identificacion = identificacion;
 
             using var client = _http.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+
+            // valido de nuevo en el servidor que no tenga pedido activo, no confio solo en el HTML deshabilitado del cliente
+            if (TienePedidoActivo(identificacion))
+            {
+                ViewBag.MensajePerfil = "No puedes editar tu perfil mientras tengas un pedido activo";
+                ViewBag.TienePedidoActivo = true;
+                ConsultarGeneros();
+
+                var urlConsultaBloqueado = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
+                var responseConsultaBloqueado = client.GetAsync(urlConsultaBloqueado).Result;
+
+                ViewBag.InfoUsuario = responseConsultaBloqueado.IsSuccessStatusCode
+                    ? responseConsultaBloqueado.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
+                    : new UsuarioConsultaModel();
+
+                return View("GestionPerfil");
+            }
 
             var url = _config["Valores:UrlApi"] + "Home/ActualizarPerfilAPI";
             var response = client.PutAsJsonAsync(url, model).Result;
 
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("CerrarSesion", "Home");
+
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 HttpContext.Session.SetString("Nombre", model.NombreCompleto);
-                HttpContext.Session.SetString("PrimerApellido", model.PrimerApellido);
-                HttpContext.Session.SetString("SegundoApellido", model.SegundoApellido ?? string.Empty);
-                HttpContext.Session.SetString("Email", model.Email);
 
                 ViewBag.MensajePerfil = "Perfil actualizado correctamente";
             }
@@ -291,6 +346,9 @@ namespace PJ_GRUPODOS.Controllers
                 ? responseConsulta.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
                 : new UsuarioConsultaModel();
 
+            ViewBag.TienePedidoActivo = TienePedidoActivo(identificacion);
+            ConsultarGeneros();
+
             return View("GestionPerfil");
         }
 
@@ -300,6 +358,9 @@ namespace PJ_GRUPODOS.Controllers
             string identificacion = HttpContext.Session.GetString("Identificacion") ?? string.Empty;
             model.Identificacion = identificacion;
 
+            using var clientConsulta = _http.CreateClient();
+            clientConsulta.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+
             if (!ModelState.IsValid)
             {
                 ViewBag.MensajeSeguridad = "Las contraseñas no coinciden o no cumplen los requisitos";
@@ -307,16 +368,19 @@ namespace PJ_GRUPODOS.Controllers
             else
             {
                 using var client = _http.CreateClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
 
                 var url = _config["Valores:UrlApi"] + "Home/CambiarContrasenaPerfilAPI";
                 var response = client.PutAsJsonAsync(url, model).Result;
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    return RedirectToAction("CerrarSesion", "Home");
 
                 ViewBag.MensajeSeguridad = response.StatusCode == HttpStatusCode.OK
                     ? "Contraseña actualizada correctamente"
                     : response.Content.ReadAsStringAsync().Result;
             }
 
-            using var clientConsulta = _http.CreateClient();
             var urlConsulta = _config["Valores:UrlApi"] + $"Home/ConsultarInformacionUsuarioAPI?identificacion={identificacion}";
             var responseConsulta = clientConsulta.GetAsync(urlConsulta).Result;
 
@@ -324,9 +388,23 @@ namespace PJ_GRUPODOS.Controllers
                 ? responseConsulta.Content.ReadFromJsonAsync<UsuarioConsultaModel>().Result
                 : new UsuarioConsultaModel();
 
+            ConsultarGeneros();
+
             return View("GestionPerfil");
+        }
+
+        // consulto si el usuario tiene un pedido en estado Pendiente o En Preparacion (RF-03)
+        private bool TienePedidoActivo(string identificacion)
+        {
+            using var client = _http.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("Token"));
+
+            var url = _config["Valores:UrlApi"] + $"Home/ValidarPedidoActivoAPI?identificacion={identificacion}";
+            var response = client.GetAsync(url).Result;
+
+            return response.IsSuccessStatusCode && response.Content.ReadFromJsonAsync<bool>().Result;
         }
 
         #endregion
     }
-    }
+}

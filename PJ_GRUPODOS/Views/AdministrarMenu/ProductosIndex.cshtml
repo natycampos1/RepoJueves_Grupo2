@@ -30,7 +30,7 @@
         <div class="col-lg-4">
             <div class="card p-4">
                 <h5 class="mb-3">Nuevo Producto</h5>
-                <form asp-action="InsertarProducto" asp-controller="AdministrarMenu" method="post">
+                <form id="NuevoProductoForm" asp-action="InsertarProducto" asp-controller="AdministrarMenu" method="post" enctype="multipart/form-data">
 
                     <div class="mb-3">
                         <label class="form-label">Categoría</label>
@@ -62,13 +62,23 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Imagen <span class="text-muted" style="font-size:12px;">(nombre del archivo en /images)</span></label>
-                        <input type="text" name="Imagen" class="form-control" placeholder="Ej: cake-4.jpg" />
+                        <label class="form-label">Imagen <span class="text-muted" style="font-size:12px;">(.png, .jpg o .jpeg, máx. 2MB)</span></label>
+                        <input type="file" name="ImagenArchivo" id="ImagenArchivo" accept=".png,.jpg,.jpeg" class="form-control" />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Stock Inicial</label>
                         <input type="number" name="Stock" class="form-control" placeholder="10" min="0" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Puntos de Esfuerzo <span class="text-muted" style="font-size:12px;">(carga de trabajo de producción)</span></label>
+                        <input type="number" name="PuntosEsfuerzo" class="form-control" placeholder="20" min="0" required />
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="PedidoAnticipado" value="true" class="form-check-input" id="checkAnticipado" />
+                        <label class="form-check-label" for="checkAnticipado">Requiere pedido con anticipación (mínimo 2 días)</label>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">
@@ -82,7 +92,7 @@
         <div class="col-lg-8">
             <div class="card p-4">
                 <h5 class="mb-3">Productos Existentes</h5>
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle" id="tblProductos">
                     <thead>
                         <tr>
                             <th>Categoría</th>
@@ -136,7 +146,7 @@
     {
         <div class="card p-4 mt-4">
             <h5 class="mb-3 text-muted">Productos Inactivos</h5>
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle" id="tblProductosInactivos">
                 <thead>
                     <tr>
                         <th>Categoría</th>
@@ -169,3 +179,29 @@
         </div>
     }
 </div>
+
+<script src="~/js/crearEditarProducto.js" asp-append-version="true"></script>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+        new DataTable('#tblProductos', {
+        responsive: true,
+        pageLength: 10,
+        order: [],
+        language: {
+        url: 'https://cdn.datatables.net/plug-ins/2.3.4/i18n/es-ES.json'
+        }
+        });
+
+        new DataTable('#tblProductosInactivos', {
+        responsive: true,
+        pageLength: 10,
+        order: [],
+        language: {
+        url: 'https://cdn.datatables.net/plug-ins/2.3.4/i18n/es-ES.json'
+        }
+        });
+        });
+    </script>
+}

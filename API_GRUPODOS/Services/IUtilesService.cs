@@ -4,5 +4,10 @@
     {
         string GenerarContrasena();
         Task EnviarCorreoAsync(string destinatario, string asunto, string cuerpoHtml);
+
+        string GenerarToken(int idUsuario, int idRol, string nombre);
+        int ObtenerConsecutivoToken();
+        int ObtenerIdRolToken();
+        string ObtenerNombreToken();
     }
 }

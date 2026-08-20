@@ -24,5 +24,11 @@ namespace API_GRUPODOS.Models
         [Required(ErrorMessage = "El stock es obligatorio")]
         [Range(0, 999999, ErrorMessage = "El stock no puede ser negativo")]
         public int Stock { get; set; }
+
+        [Required(ErrorMessage = "Los puntos de esfuerzo son obligatorios")]
+        [Range(0, 999, ErrorMessage = "Los puntos de esfuerzo no pueden ser negativos")]
+        public int PuntosEsfuerzo { get; set; }
+
+        public bool PedidoAnticipado { get; set; }
     }
 }
