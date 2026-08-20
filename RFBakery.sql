@@ -47,6 +47,8 @@ GO
 -- =============================================
 -- TABLAS PRINCIPALES
 -- =============================================
+
+
 CREATE TABLE PERSONA_TB (
     IDENTIFICACION_PK           VARCHAR(20)     NOT NULL,
     ID_TIPO_IDENTIFICACION_FK   INT             NOT NULL,
@@ -1498,3 +1500,27 @@ BEGIN
 
 END
 GO
+
+---19/8
+USE RFBakery;
+GO
+
+-- SP para que el cliente cancele su propio pedido (RF-18)
+-- solo permite cancelar si el pedido es suyo Y esta en estado "En Preparacion" (2)
+CREATE PROCEDURE SP_CancelarPedidoCliente
+    @IdPedido   INT,
+    @IdUsuario  INT
+AS
+BEGIN
+
+    UPDATE PEDIDO_TB
+    SET ID_ESTADO_PEDIDO_FK = 5  -- Cancelado
+    WHERE ID_PEDIDO_PK = @IdPedido
+        AND ID_USUARIO_FK = @IdUsuario
+        AND ID_ESTADO_PEDIDO_FK = 2  -- solo si esta En Preparacion
+
+    SELECT @@ROWCOUNT AS FilasAfectadas
+
+END
+GO
+
